@@ -33,5 +33,5 @@ COPY . .
 
 EXPOSE 8000
 
-# Executa o projeto (substituir 'meuprojeto' pelo nome da  pasta do Django)
-CMD ["gunicorn", "meuprojeto.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Executa o projeto 
+CMD ["gunicorn", "api.wsgi:application", "--bind", "0.0.0.0:8000"]
