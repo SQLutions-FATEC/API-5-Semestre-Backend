@@ -1,0 +1,37 @@
+# ==========================================
+# BUILD
+# ==========================================
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+# Cria o ambiente virtual na pasta /opt/venv
+RUN python -m venv /opt/venv
+
+# Ativa o venv (garante que os próximos comandos pip usem ele)
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copia e instala as dependências puramente no venv
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# ==========================================
+# EXECUÇÃO
+# ==========================================
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Copia a pasta do ambiente virtual do passo anterior
+COPY --from=builder /opt/venv /opt/venv
+
+# Ativa o venv na imagem final
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copia o código da sua aplicação
+COPY . .
+
+EXPOSE 8000
+
+# Executa o projeto (substituir 'meuprojeto' pelo nome da  pasta do Django)
+CMD ["gunicorn", "meuprojeto.wsgi:application", "--bind", "0.0.0.0:8000"]
