@@ -2,11 +2,14 @@ services:
   # -------------------- Backend --------------------
   backend:
     build:
-      context: ../api-django
-      dockerfile: ./backend/Dockerfile
+      context: ../django
+      dockerfile: ../deploy/backend/Dockerfile
     container_name: django-app
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DB_NAME=${POSTGRES_DB}
       - DB_USER=${POSTGRES_USER}
@@ -16,19 +19,21 @@ services:
     depends_on:
       custom-postgres:
         condition: service_healthy
+    volumes:
+      - ../django:/app
 
   # -------------------- Frontend --------------------
-  frontend:
-    build:
-      context: ../app-nextjs
-      dockerfile: ./frontend/Dockerfile
-    container_name: nextjs-app
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-    depends_on:
-      - backend
+  #frontend:
+  #  build:
+  #    context: ../app-nextjs
+  #    dockerfile: ./frontend/Dockerfile
+  #  container_name: nextjs-app
+  #  ports:
+  #    - "3000:3000"
+  #  environment:
+  #    - NEXT_PUBLIC_API_URL=http://localhost:8000
+  #  depends_on:
+  #    - backend
 
   # -------------------- Database --------------------
   custom-postgres:
@@ -52,3 +57,5 @@ services:
 
 volumes:
   pgdata:
+
+
