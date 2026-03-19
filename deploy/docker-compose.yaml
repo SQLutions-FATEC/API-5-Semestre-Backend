@@ -23,17 +23,21 @@ services:
       - ../django:/app
 
   # -------------------- Frontend --------------------
-  #frontend:
-  #  build:
-  #    context: ../app-nextjs
-  #    dockerfile: ./frontend/Dockerfile
-  #  container_name: nextjs-app
-  #  ports:
-  #    - "3000:3000"
-  #  environment:
-  #    - NEXT_PUBLIC_API_URL=http://localhost:8000
-  #  depends_on:
-  #    - backend
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Usa a variável do .env ou assume 'main' como padrão
+        - FRONTEND_BRANCH=${FRONTEND_BRANCH:-main}
+        # Substitua pela URL real do repositório de frontend do 5º semestre
+        - REPO_URL=https://github.com/SQLutions-FATEC/API-5-Semestre-Frontend
+    container_name: nextjs-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - backend
 
   # -------------------- Database --------------------
   custom-postgres:
