@@ -1,40 +1,21 @@
-# ==========================================
-# Instalação de dependências
-# ==========================================
-FROM node:20-alpine AS deps
+FROM node:20-alpine
+
+# Instala o git para podermos clonar o repositório externo
+RUN apk add --no-cache git
+
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci
+# Recebe os argumentos passados pelo docker-compose
+ARG REPO_URL
+ARG FRONTEND_BRANCH=main
 
-# ==========================================
-# Build
-# ==========================================
-FROM node:20-alpine AS builder
-WORKDIR /app
+# Clona o repositório na branch especificada
+RUN git clone -b ${FRONTEND_BRANCH} ${REPO_URL} .
 
-# Copia as dependências instaladas no estágio 1
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Faz o build do Next.js
-RUN npm run build
-
-# ==========================================
-# Execução
-# ==========================================
-FROM node:20-alpine AS runner
-WORKDIR /app
-
-# Define ambiente como produção
-ENV NODE_ENV production
-
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Instala as dependências (permissivo)
+RUN npm install
 
 EXPOSE 3000
 
-# Executa o servidor nativo do Next.js
-CMD ["npm", "run", "start"]
+# Executa o servidor de desenvolvimento (Vai funcionar para Next.js, Vite, Create React App, etc.)
+CMD ["npm", "run", "dev"]
