@@ -49,11 +49,11 @@ Para visualizar os dados de forma gráfica, use o DBeaver:
 3. Preencha com os dados abaixo e clique em **Test Connection**:
 
    - **Host:** `localhost`
-   - **Port:** `5433` (ou `5432` se alterou no docker-compose)
+   - **Port:** `5432` (ou `5433` se alterou no docker-compose)
    - **Database:** `api_db`
    - **Username:** `api_user`
    - **Password:** `senha_padrao`
 
 4. Clique em **Finish** para salvar
-5. Expanda a conexão no painel esquerdo e navegue até **Databases > api_db > Schemas > public > Tables**
+5. Expanda a conexão no painel esquerdo e navegue até **Databases > api_db > Schemas > schema_api > Tables**
 6. Dê duplo clique em qualquer tabela para visualizar os dados inseridos
