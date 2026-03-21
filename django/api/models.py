@@ -35,7 +35,7 @@ class DimPrograma(models.Model):
 class DimProjeto(models.Model):
     codigo_projeto = CharField()
     nome_projeto = CharField()
-    programa_id = ForeignKey(DimPrograma, on_delete=CASCADE)
+    programa = ForeignKey(DimPrograma, on_delete=CASCADE)
     responsavel = CharField()
     custo_hora = DecimalField(max_digits=10, decimal_places=2)
     data_inicio = ForeignKey(DimData, on_delete=CASCADE, related_name='projeto_data_inicio')
@@ -56,7 +56,7 @@ class DimProjeto(models.Model):
 
 class DimTarefa(models.Model):
     codigo_tarefa = CharField(max_length=6)
-    projeto_id = ForeignKey(DimProjeto, on_delete=CASCADE)
+    projeto = ForeignKey(DimProjeto, on_delete=CASCADE)
     titulo = CharField()
     titulo = CharField()
     responsavel = CharField()
@@ -112,8 +112,8 @@ class DimFornecedor(models.Model):
 #
 class DimSolicitacao(models.Model):
     numero_solicitacao = CharField(max_length=6)
-    projeto_id = ForeignKey(DimProjeto, on_delete=CASCADE)
-    material_id = ForeignKey(DimMaterial, on_delete=CASCADE)
+    projeto = ForeignKey(DimProjeto, on_delete=CASCADE)
+    material = ForeignKey(DimMaterial, on_delete=CASCADE)
     quantidade = IntegerField()
     data_solicitacao = ForeignKey(DimData, on_delete=CASCADE)
     prioridade = CharField()
@@ -133,7 +133,7 @@ class DimSolicitacao(models.Model):
 class FatoTarefa(models.Model):
     usuario = CharField()
     horas_trabalhadas = FloatField()
-    tarefa_id = ForeignKey(DimTarefa, on_delete=CASCADE)
+    tarefa = ForeignKey(DimTarefa, on_delete=CASCADE)
     data = ForeignKey(DimData, on_delete=CASCADE)
 # '''CREATE TABLE fato_tarefa (
 #     id INT PRIMARY KEY,
@@ -145,8 +145,8 @@ class FatoTarefa(models.Model):
 #
 class FatoEmpenho(models.Model):
     quantidade_empenhada = IntegerField()
-    projeto_id = ForeignKey(DimProjeto, on_delete=CASCADE)
-    material_id = ForeignKey(DimMaterial, on_delete=CASCADE)
+    projeto = ForeignKey(DimProjeto, on_delete=CASCADE)
+    material = ForeignKey(DimMaterial, on_delete=CASCADE)
     data_empenho = ForeignKey(DimData, on_delete=CASCADE)
 # '''CREATE TABLE fato_empenho (
 #     id VARCHAR(50) PRIMARY KEY,
@@ -160,8 +160,8 @@ class FatoCompra(models.Model):
     numero_pedido = CharField(unique=True)
     valor_total = DecimalField(max_digits=10, decimal_places=2)
     status = CharField()
-    solicitacao_id = ForeignKey(DimSolicitacao, on_delete=CASCADE)
-    fornecedor_id = ForeignKey(DimFornecedor, on_delete=CASCADE)
+    solicitacao = ForeignKey(DimSolicitacao, on_delete=CASCADE)
+    fornecedor = ForeignKey(DimFornecedor, on_delete=CASCADE)
     data_pedido = ForeignKey(DimData, on_delete=CASCADE, related_name='compra_data_pedido')
     data_previsao_entrega = ForeignKey(DimData, on_delete=CASCADE, related_name='compra_data_previsao_entrega')
 # '''CREATE TABLE fato_compra (
