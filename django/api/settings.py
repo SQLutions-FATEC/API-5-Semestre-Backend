@@ -84,9 +84,9 @@ DATABASES = {
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'senha_padrao'),
         'HOST': os.environ.get('DB_HOST', 'custom-postgres'),
         'PORT': os.environ.get('DB_PORT', '5432'),
-        'OPTIONS': {
-            'options': '-c search_path=schema_api,public'
-        },
+        # 'OPTIONS': {
+        #     'options': '-c search_path=schema_api,public'
+        # },
     }
 }
 
