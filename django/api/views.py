@@ -30,7 +30,8 @@ def projeto_dashboard_api(request, codigo_projeto):
                 "nome": projeto.nome_projeto,
                 "status": projeto.status,
                 "data_inicio": data_inicio_str,
-                "data_fim_prevista": data_fim_str
+                "data_fim_prevista": data_fim_str,
+                "responsavel": projeto.responsavel
                 },
             "financeiro": {
                 "total_horas_trabalhadas": round(total_horas, 2),
