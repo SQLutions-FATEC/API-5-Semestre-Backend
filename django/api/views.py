@@ -1,9 +1,11 @@
+from django.views.decorators.http import require_GET
 from decimal import Decimal
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
 from api.models import DimProjeto, FatoTarefa, FatoCompra
 
+@require_GET
 def projeto_dashboard_api(request, codigo_projeto):
     # Fetch project and its related dimensions (program and dates)
     projeto = get_object_or_404(
