@@ -55,6 +55,7 @@ jobs:
           POSTGRES_DB: api_db
           POSTGRES_USER: api_user
           POSTGRES_PASSWORD: senha_padrao
+          DJANGO_SECRET_KEY: 'test-secret-key-for-github-actions'
         run: |
           cd django 
           coverage run manage.py test
