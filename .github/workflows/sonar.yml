@@ -60,6 +60,8 @@ jobs:
           cd django 
           coverage run manage.py test
           coverage xml -o coverage.xml
+          # weird hack to make sonar find the test coverage file
+          sed -i 's/filename="/filename="django\//g' coverage.xml
 
       # --- 4. RUN SONARCLOUD ---
       - name: SonarCloud Scan
