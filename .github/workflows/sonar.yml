@@ -2,7 +2,7 @@ name: SonarCloud Analysis
 
 on:
   push:
-    branches: [ "main", "develop-1", "develop-2", "develop-3" ] 
+    branches: [ "main", "develop-1", "develop-2", "develop-3" ]
   pull_request:
     types: [opened, synchronize, reopened]
   schedule:
@@ -12,7 +12,8 @@ jobs:
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
-
+    
+    # 1. Cria um banco de dados temporário no GitHub para os testes rodarem
     services:
       postgres:
         image: postgres:15
@@ -44,12 +45,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Adjust the path below if your requirements are not in the 'django' folder
+          # Installs standard Django deps, plus coverage and ETL deps (pandas)
           pip install -r django/requirements.txt
-          pip install coverage
+          pip install coverage pandas
 
       # --- 3. RUN TESTS & GENERATE XML ---
-      - name: Run tests and generate coverage
+      - name: Run tests and generate coverage report
         env:
           DB_HOST: localhost
           POSTGRES_DB: api_db
@@ -57,10 +58,14 @@ jobs:
           POSTGRES_PASSWORD: senha_padrao
           DJANGO_SECRET_KEY: 'test-secret-key-for-github-actions'
         run: |
-          cd django 
-          coverage run manage.py test
+          cd django
+          # Testa os dois apps (api e etl) e gera o report combinado
+          coverage run --source='api,etl' manage.py test
+          coverage report -m
           coverage xml -o coverage.xml
-          # weird hack to make sonar find the test coverage file
+          
+          # Ajusta os caminhos no XML para o Sonar entender
+          sed -i "s|<source>.*</source>|<source>$GITHUB_WORKSPACE</source>|g" coverage.xml
           sed -i 's/filename="/filename="django\//g' coverage.xml
 
       # --- 4. RUN SONARCLOUD ---
