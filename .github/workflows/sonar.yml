@@ -53,7 +53,11 @@ jobs:
         run: |
           cd django
           coverage run --source='etl' manage.py test etl
+          coverage report -m
           coverage xml
+          #ajusta os caminhos no XML para o Sonar entender
+          sed -i "s|<source>.*</source>|<source>$GITHUB_WORKSPACE</source>|g" coverage.xml
+          sed -i 's/filename="/filename="django\//g' coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
