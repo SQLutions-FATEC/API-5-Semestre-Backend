@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from typing import Optional
 from etl.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -15,7 +16,7 @@ class BaseExtractor:
         - csv_file: nome do arquivo CSV de origem (ex: 'programas.csv')
     """
 
-    csv_file: str = None
+    csv_file: Optional[str] = None
 
     def extract(self) -> pd.DataFrame:
         caminho = os.path.join(CSV_BASE_PATH, self.csv_file)

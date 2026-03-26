@@ -30,7 +30,8 @@ from etl.utils.logger import get_logger
 
 logger = get_logger("etl.command")
 
-#ordem importa: dimensões antes dos fatos, e dependências antes dos dependentes
+SEPARATOR = "=============================="
+
 PIPELINE = [
     #(Extractor, loader_fn, Model_DW, nome_legivel)
     (ProgramasExtractor,        load_programas,    DimPrograma,    "DimPrograma"),
@@ -49,34 +50,35 @@ class Command(BaseCommand):
     help = "Executa o processo de extração do ETL: lê CSVs e carrega no DW"
 
     def handle(self, *args, **kwargs):
-        logger.info("==============================")
+        logger.info(SEPARATOR)
         logger.info("PROCESSO DE EXTRAÇÃO ETL INICIADO")
-        logger.info("==============================")
+        logger.info(SEPARATOR)
 
         erros = []
 
-        for ExtractorClass, loader_fn, ModelDW, nome in PIPELINE:
+        for extractor_class, loader_fn, model_dw, nome in PIPELINE:
             try:
                 #extração
-                extractor = ExtractorClass()
+                extractor = extractor_class()
                 df = extractor.extract()
 
                 #carregamento no DW
                 loader_fn(df)
 
                 #validação de integridade
-                total_dw = ModelDW.objects.count()
+                total_dw = model_dw.objects.count()
                 validate(nome, len(df), total_dw)
 
             except Exception as e:
                 logger.error(f"[{nome}] Falha: {e}")
                 erros.append(nome)
 
-        logger.info("==============================")
+        logger.info(SEPARATOR)
         if erros:
             logger.error(f"EXTRAÇÃO ETL FINALIZADA COM ERROS: {erros}")
             self.stdout.write(self.style.ERROR(f"Extração finalizada com erros: {erros}"))
         else:
             logger.info("EXTRAÇÃO ETL FINALIZADA COM SUCESSO")
             self.stdout.write(self.style.SUCCESS("Extração finalizada com sucesso."))
-        logger.info("==============================")
+        logger.info(SEPARATOR)
+        
