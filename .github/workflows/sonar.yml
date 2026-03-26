@@ -52,7 +52,7 @@ jobs:
           DB_HOST: localhost
         run: |
           cd django
-          coverage run manage.py test etl
+          coverage run --source='etl' manage.py test etl
           coverage xml
 
       - name: SonarCloud Scan
