@@ -14,7 +14,7 @@ from etl.extractors.extractors import (
     PedidosCompraExtractor,
     EmpenhoMateriaisExtractor,
 )
-from etl.stage.loader import (
+from etl.loaders.loader import (
     load_programas,
     load_projetos,
     load_tarefas,
@@ -81,4 +81,3 @@ class Command(BaseCommand):
             logger.info("EXTRAÇÃO ETL FINALIZADA COM SUCESSO")
             self.stdout.write(self.style.SUCCESS("Extração finalizada com sucesso."))
         logger.info(SEPARATOR)
-        
