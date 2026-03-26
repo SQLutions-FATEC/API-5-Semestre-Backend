@@ -3,17 +3,17 @@ from etl.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def validate(extractor_name: str, source_count: int, stage_count: int):
+def validate(entidade: str, total_csv: int, total_dw: int):
     """
-    Valida se a quantidade de registros extraídos da origem
-    corresponde à quantidade carregada na tabela de stage.
+    Valida se a quantidade de registros extraídos do CSV
+    corresponde à quantidade carregada na tabela do DW.
     """
-    if source_count != stage_count:
+    if total_csv != total_dw:
         msg = (
-            f"[{extractor_name}] FALHA DE INTEGRIDADE: "
-            f"origem={source_count} registros | stage={stage_count} registros"
+            f"[{entidade}] FALHA DE INTEGRIDADE: "
+            f"csv={total_csv} registros | dw={total_dw} registros"
         )
         logger.error(msg)
         raise ValueError(msg)
 
-    logger.info(f"[{extractor_name}] Integridade OK — {stage_count} registros conferem.")
+    logger.info(f"[{entidade}] Integridade OK — {total_dw} registros conferem.")

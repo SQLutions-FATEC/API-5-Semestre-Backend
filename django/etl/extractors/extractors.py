@@ -1,45 +1,45 @@
-from apps.etl.extractors.base import BaseExtractor
+from etl.extractors.base import BaseExtractor
 
 
-class ProgramasEmpresaExtractor(BaseExtractor):
-    source_table = "programasempresa"
+class ProgramasExtractor(BaseExtractor):
+    csv_file = 'programas.csv'
 
 
-class ProjetosProgramasExtractor(BaseExtractor):
-    source_table = "projetosprogramas"
+class ProjetosExtractor(BaseExtractor):
+    csv_file = 'projetos.csv'
 
 
 class TarefasProjetoExtractor(BaseExtractor):
-    source_table = "tarefasprojeto"
+    csv_file = 'tarefas_projeto.csv'
 
 
 class TempoTarefasExtractor(BaseExtractor):
-    source_table = "tempotarefas"
+    csv_file = 'tempo_tarefas.csv'
 
 
-class MateriaisEngenhariaExtractor(BaseExtractor):
-    source_table = "materiaisengenharia"
+class MateriaisExtractor(BaseExtractor):
+    csv_file = 'materiais.csv'
 
 
 class FornecedoresExtractor(BaseExtractor):
-    source_table = "fornecedor"
+    csv_file = 'fornecedores.csv'
 
 
 class SolicitacoesCompraExtractor(BaseExtractor):
-    source_table = "solicitacoescompra"
+    csv_file = 'solicitacoes_compra.csv'
 
 
 class PedidosCompraExtractor(BaseExtractor):
-    source_table = "pedidoscompra"
+    csv_file = 'pedidos_compra.csv'
 
 
 class EmpenhoMateriaisExtractor(BaseExtractor):
-    source_table = "empenhomateriais"
+    csv_file = 'empenho_materiais.csv'
 
 
 class ComprasProjetoExtractor(BaseExtractor):
-    source_table = "comprasprojeto"
+    csv_file = 'compras_projeto.csv'
 
 
 class EstoqueMateriaisExtractor(BaseExtractor):
-    source_table = "estoquemateriaisproj"
+    csv_file = 'estoque_materiais_projeto.csv'

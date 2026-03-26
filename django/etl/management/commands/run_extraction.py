@@ -1,64 +1,81 @@
 from django.core.management.base import BaseCommand
-
-from etl.extractors.extractors import(
-    ProgramasEmpresaExtractor,
-    ProjetosProgramasExtractor,
+from api.models import (
+    DimPrograma, DimProjeto, DimTarefa, DimMaterial,
+    DimFornecedor, DimSolicitacao, FatoTarefa, FatoEmpenho, FatoCompra
+)
+from etl.extractors.extractors import (
+    ProgramasExtractor,
+    ProjetosExtractor,
     TarefasProjetoExtractor,
     TempoTarefasExtractor,
-    MateriaisEngenhariaExtractor,
+    MateriaisExtractor,
     FornecedoresExtractor,
     SolicitacoesCompraExtractor,
     PedidosCompraExtractor,
     EmpenhoMateriaisExtractor,
-    ComprasProjetoExtractor,
-    EstoqueMateriaisExtractor,
 )
-from etl.stage.loader import load_to_stage
+from etl.stage.loader import (
+    load_programas,
+    load_projetos,
+    load_tarefas,
+    load_materiais,
+    load_fornecedores,
+    load_solicitacoes,
+    load_fato_tarefa,
+    load_fato_empenho,
+    load_fato_compra,
+)
 from etl.validators.integrity import validate
 from etl.utils.logger import get_logger
 
 logger = get_logger("etl.command")
 
-EXTRACTORS = [
-    ProgramasEmpresaExtractor,
-    ProjetosProgramasExtractor,
-    TarefasProjetoExtractor,
-    TempoTarefasExtractor,
-    MateriaisEngenhariaExtractor,
-    FornecedoresExtractor,
-    SolicitacoesCompraExtractor,
-    PedidosCompraExtractor,
-    EmpenhoMateriaisExtractor,
-    ComprasProjetoExtractor,
-    EstoqueMateriaisExtractor,
+#ordem importa: dimensões antes dos fatos, e dependências antes dos dependentes
+PIPELINE = [
+    #(Extractor, loader_fn, Model_DW, nome_legivel)
+    (ProgramasExtractor,        load_programas,    DimPrograma,    "DimPrograma"),
+    (ProjetosExtractor,         load_projetos,     DimProjeto,     "DimProjeto"),
+    (TarefasProjetoExtractor,   load_tarefas,      DimTarefa,      "DimTarefa"),
+    (MateriaisExtractor,        load_materiais,    DimMaterial,    "DimMaterial"),
+    (FornecedoresExtractor,     load_fornecedores, DimFornecedor,  "DimFornecedor"),
+    (SolicitacoesCompraExtractor, load_solicitacoes, DimSolicitacao, "DimSolicitacao"),
+    (TempoTarefasExtractor,     load_fato_tarefa,  FatoTarefa,     "FatoTarefa"),
+    (EmpenhoMateriaisExtractor, load_fato_empenho, FatoEmpenho,    "FatoEmpenho"),
+    (PedidosCompraExtractor,    load_fato_compra,  FatoCompra,     "FatoCompra"),
 ]
 
 
 class Command(BaseCommand):
-    help = "Executa o processo de extração do ETL para todas as tabelas operacionais"
+    help = "Executa o processo de extração do ETL: lê CSVs e carrega no DW"
 
     def handle(self, *args, **kwargs):
         logger.info("==============================")
         logger.info("PROCESSO DE EXTRAÇÃO ETL INICIADO")
         logger.info("==============================")
 
-        errors = []
+        erros = []
 
-        for ExtractorClass in EXTRACTORS:
-            name = ExtractorClass.__name__
+        for ExtractorClass, loader_fn, ModelDW, nome in PIPELINE:
             try:
+                #extração
                 extractor = ExtractorClass()
-                data = extractor.extract()
-                stage_count = load_to_stage(name, data)
-                validate(name, len(data), stage_count)
+                df = extractor.extract()
+
+                #carregamento no DW
+                loader_fn(df)
+
+                #validação de integridade
+                total_dw = ModelDW.objects.count()
+                validate(nome, len(df), total_dw)
+
             except Exception as e:
-                logger.error(f"[{name}] Falha: {e}")
-                errors.append(name)
+                logger.error(f"[{nome}] Falha: {e}")
+                erros.append(nome)
 
         logger.info("==============================")
-        if errors:
-            logger.error(f"EXTRAÇÃO ETL FINALIZADA COM ERROS: {errors}")
-            self.stdout.write(self.style.ERROR(f"Extração finalizada com erros: {errors}"))
+        if erros:
+            logger.error(f"EXTRAÇÃO ETL FINALIZADA COM ERROS: {erros}")
+            self.stdout.write(self.style.ERROR(f"Extração finalizada com erros: {erros}"))
         else:
             logger.info("EXTRAÇÃO ETL FINALIZADA COM SUCESSO")
             self.stdout.write(self.style.SUCCESS("Extração finalizada com sucesso."))
