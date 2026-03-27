@@ -152,3 +152,26 @@ class ComprasProjetoViewTest(TestCase):
             solicitacao=self.solicitacao, fornecedor=self.fornecedor,
             data_pedido=self.data_emissao, data_previsao_entrega=self.data_previsao_2
         )
+
+    def test_compras_success_with_data(self):
+        """Covers the math logic when Fato tables have related data"""
+        response = self.client.get(f'/api/projetos/{self.projeto_com_dados.codigo_projeto}/compras/')
+        self.assertEqual(response.status_code, 200)
+        
+        data = response.json()
+        
+        # Math verification: 
+        # PED01: 2024-01-11 - 2024-01-01 = 10 days
+        # PED02: 2024-01-21 - 2024-01-01 = 20 days
+        # Average = (10 + 20) / 2 = 15.0 days
+        self.assertEqual(data['tempo_medio_entrega_dias'], 15.0)
+        self.assertEqual(len(data['pedidos']), 2)
+        
+        # Fetching PED01 to check columns
+        pedido_1 = next(p for p in data['pedidos'] if p['numero'] == 'PED01')
+        self.assertEqual(pedido_1['fornecedor'], "Forn Teste")
+        self.assertEqual(pedido_1['centro_custo'], "Proj 1")
+        self.assertEqual(pedido_1['status'], "Entregue")
+        self.assertEqual(pedido_1['dias_previstos_entrega'], 10)
+
+    
