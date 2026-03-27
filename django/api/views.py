@@ -74,3 +74,18 @@ def compras_projeto_api(request, codigo_projeto):
         data_emissao = date(dt_pedido.ano, dt_pedido.mes, dt_pedido.dia)
         data_previsao = date(dt_previsao.ano, dt_previsao.mes, dt_previsao.dia)
 
+        dias_previstos = (data_previsao - data_emissao).days
+
+        soma_dias_entrega += dias_previstos
+        quantidade_pedidos += 1
+
+        lista_compras.append({
+            "numero": compra.numero_pedido,
+            "emissao": data_emissao.strftime("%Y-%m-%d"),
+            "previsao": data_previsao.strftime("%Y-%m-%d"),
+            "fornecedor": compra.fornecedor.razao_social,
+            "centro_custo": compra.solicitacao.projeto.nome_projeto,
+            "status": compra.status,
+            "dias_previstos_entrega": dias_previstos
+        })
+
