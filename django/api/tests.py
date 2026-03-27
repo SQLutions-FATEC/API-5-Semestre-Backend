@@ -94,13 +94,6 @@ class ProjetoDashboardViewTest(TestCase):
         response = self.client.post(f'/api/projetos/{self.projeto_com_dados.codigo_projeto}/')
         self.assertEqual(response.status_code, 405) # 405 Method Not Allowed
 
-from decimal import Decimal
-from django.test import TestCase, Client
-from api.models import (
-    DimData, DimPrograma, DimProjeto, 
-    DimMaterial, DimSolicitacao, FatoCompra, DimFornecedor
-)
-
 class ComprasProjetoViewTest(TestCase):
     def setUp(self):
         self.client = Client()
