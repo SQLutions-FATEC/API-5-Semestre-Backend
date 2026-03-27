@@ -190,4 +190,9 @@ class ComprasProjetoViewTest(TestCase):
         self.assertEqual(data['tempo_medio_entrega_dias'], 0.0)
         self.assertEqual(data['pedidos'], []) # Must return an empty list
 
+    def test_compras_not_found(self):
+        """Covers the get_object_or_404 failure branch"""
+        response = self.client.get('/api/projetos/CODIGO-INVALIDO/compras/')
+        self.assertEqual(response.status_code, 404)
+
     
