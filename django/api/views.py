@@ -55,7 +55,7 @@ def compras_projeto_api(request, codigo_projeto):
     projeto = get_object_or_404(DimProjeto, codigo_projeto = codigo_projeto)
 
     compras = FatoCompra.objects.filter(
-        solicitacao__projet=projeto
+        solicitacao__projeto=projeto
     ).select_related(
         'fornecedor',
         'data_pedido',
