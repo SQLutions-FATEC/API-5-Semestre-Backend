@@ -63,3 +63,14 @@ def compras_projeto_api(request, codigo_projeto):
         'solicitacao__projeto'
     )
 
+    lista_compras = []
+    soma_dias_entrega = 0
+    quantidade_pedidos = 0
+
+    for compra in compras:
+        dt_pedido = compra.data_pedido
+        dt_previsao = compra.data_previsao_entrega
+
+        data_emissao = date(dt_pedido.ano, dt_pedido.mes, dt_pedido.dia)
+        data_previsao = date(dt_previsao.ano, dt_previsao.mes, dt_previsao.dia)
+
