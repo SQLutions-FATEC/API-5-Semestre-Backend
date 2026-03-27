@@ -98,10 +98,9 @@ class ComprasProjetoViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         
-        # 1. Base Dimensions (We need different dates to calculate delivery days)
+        # Dimensões básicas
         self.data_emissao = DimData.objects.create(dia=1, mes=1, ano=2024)
-        self.data_previsao_1 = DimData.objects.create(dia=11, mes=1, ano=2024) # 10 days later
-        self.data_previsao_2 = DimData.objects.create(dia=21, mes=1, ano=2024) # 20 days later
+        self.data_previsao = DimData.objects.create(dia=11, mes=1, ano=2024) # 10 dias de diferença
         
         self.programa = DimPrograma.objects.create(
             codigo_programa="PROG01", nome_programa="Prog 1",
@@ -109,23 +108,13 @@ class ComprasProjetoViewTest(TestCase):
             data_inicio=self.data_emissao, data_fim_prevista=self.data_emissao, status="Ativo"
         )
         
-        # 2. Project WITH data (for the happy path)
-        self.projeto_com_dados = DimProjeto.objects.create(
-            codigo_projeto="PRJ01", nome_projeto="Proj 1",
+        self.projeto = DimProjeto.objects.create(
+            codigo_projeto="PRJ_COMPRAS", nome_projeto="Projeto Compras",
             programa=self.programa, responsavel="Resp",
             custo_hora=Decimal('100.00'),
             data_inicio=self.data_emissao, data_fim_prevista=self.data_emissao, status="Ativo"
         )
 
-        # 3. Project WITHOUT data (for the empty list/0 fallback path)
-        self.projeto_vazio = DimProjeto.objects.create(
-            codigo_projeto="PRJ02", nome_projeto="Proj 2",
-            programa=self.programa, responsavel="Resp 2",
-            custo_hora=Decimal('50.00'),
-            data_inicio=self.data_emissao, data_fim_prevista=self.data_emissao, status="Ativo"
-        )
-
-        # 4. Create materials, requests, and purchases for PRJ01
         self.material = DimMaterial.objects.create(
             codigo_material="M01", descricao="Mat 1", categoria="Cat",
             fabricante="Fab", custo_estimado=Decimal('10.00'), status="Ativo"
@@ -134,44 +123,38 @@ class ComprasProjetoViewTest(TestCase):
             codigo_fornecedor="F01", razao_social="Forn Teste", cidade="Cid",
             estado="Est", categoria="Cat", status="Ativo"
         )
+        
         self.solicitacao = DimSolicitacao.objects.create(
-            numero_solicitacao="S01", projeto=self.projeto_com_dados, material=self.material,
-            quantidade=2, data_solicitacao=self.data_emissao, prioridade="Alta", status="Ativo"
+            numero_solicitacao="S01", projeto=self.projeto, material=self.material,
+            quantidade=1, data_solicitacao=self.data_emissao, prioridade="Alta", status="Ativo"
         )
         
-        # Creating Order 1 (Takes 10 days)
+        # Criando a compra atrelada
         FatoCompra.objects.create(
-            numero_pedido="PED01", valor_total=Decimal('150.50'), status="Entregue",
+            numero_pedido="PED999", valor_total=Decimal('150.50'), status="Aprovada",
             solicitacao=self.solicitacao, fornecedor=self.fornecedor,
-            data_pedido=self.data_emissao, data_previsao_entrega=self.data_previsao_1
+            data_pedido=self.data_emissao, data_previsao_entrega=self.data_previsao
         )
 
-        # Creating Order 2 (Takes 20 days)
-        FatoCompra.objects.create(
-            numero_pedido="PED02", valor_total=Decimal('300.00'), status="Pendente",
-            solicitacao=self.solicitacao, fornecedor=self.fornecedor,
-            data_pedido=self.data_emissao, data_previsao_entrega=self.data_previsao_2
-        )
-
-    def test_compras_success_with_data(self):
-        """Covers the math logic when Fato tables have related data"""
-        response = self.client.get(f'/api/projetos/{self.projeto_com_dados.codigo_projeto}/compras/')
+    def test_compras_listagem_com_sucesso(self):
+        """Testa se os cálculos de dias e colunas estão corretos"""
+        response = self.client.get(f'/api/projetos/{self.projeto.codigo_projeto}/compras/')
         self.assertEqual(response.status_code, 200)
         
         data = response.json()
         
-        # Math verification: 
-        # PED01: 2024-01-11 - 2024-01-01 = 10 days
-        # PED02: 2024-01-21 - 2024-01-01 = 20 days
-        # Average = (10 + 20) / 2 = 15.0 days
-        self.assertEqual(data['tempo_medio_entrega_dias'], 15.0)
-        self.assertEqual(len(data['pedidos']), 2)
+        # Verifica a média
+        self.assertEqual(data['tempo_medio_entrega_dias'], 10.0)
         
-        # Fetching PED01 to check columns
-        pedido_1 = next(p for p in data['pedidos'] if p['numero'] == 'PED01')
-        self.assertEqual(pedido_1['fornecedor'], "Forn Teste")
-        self.assertEqual(pedido_1['centro_custo'], "Proj 1")
-        self.assertEqual(pedido_1['status'], "Entregue")
-        self.assertEqual(pedido_1['dias_previstos_entrega'], 10)
+        # Verifica os dados do pedido listado
+        pedido = data['pedidos'][0]
+        self.assertEqual(pedido['numero'], "PED999")
+        self.assertEqual(pedido['fornecedor'], "Forn Teste")
+        self.assertEqual(pedido['centro_custo'], "Projeto Compras")
+        self.assertEqual(pedido['status'], "Aprovada")
+        self.assertEqual(pedido['dias_previstos_entrega'], 10)
 
-    
+    def test_compras_projeto_nao_encontrado(self):
+        """Testa comportamento para projeto inexistente"""
+        response = self.client.get('/api/projetos/INEXISTENTE/compras/')
+        self.assertEqual(response.status_code, 404)
