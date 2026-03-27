@@ -1,5 +1,6 @@
 from django.views.decorators.http import require_GET
 from decimal import Decimal
+from datetime import date
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
@@ -48,4 +49,17 @@ def projeto_dashboard_api(request, codigo_projeto):
             }
 
     return JsonResponse(data)
+
+@require_GET
+def compras_projeto_api(request, codigo_projeto):
+    projeto = get_object_or_404(DimProjeto, codigo_projeto = codigo_projeto)
+
+    compras = FatoCompra.objects.filter(
+        solicitacao__projet=projeto
+    ).select_related(
+        'fornecedor',
+        'data_pedido',
+        'data_previsao_entrega',
+        'solicitacao__projeto'
+    )
 
