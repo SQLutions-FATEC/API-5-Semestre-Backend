@@ -195,4 +195,9 @@ class ComprasProjetoViewTest(TestCase):
         response = self.client.get('/api/projetos/CODIGO-INVALIDO/compras/')
         self.assertEqual(response.status_code, 404)
 
+    def test_compras_wrong_method(self):
+        """Covers the @require_GET decorator blocking POST requests"""
+        response = self.client.post(f'/api/projetos/{self.projeto_com_dados.codigo_projeto}/compras/')
+        self.assertEqual(response.status_code, 405) # 405 Method Not Allowed
+
     
