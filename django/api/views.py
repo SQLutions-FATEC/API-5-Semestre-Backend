@@ -88,4 +88,16 @@ def compras_projeto_api(request, codigo_projeto):
             "status": compra.status,
             "dias_previstos_entrega": dias_previstos
         })
+    
+    tempo_medio = round(soma_dias_entrega / quantidade_pedidos, 2) if quantidade_pedidos > 0 else 0.0
+
+    return JsonResponse({
+        "projeto": projeto.codigo_projeto,
+        "tempo_medio_entrega_dias": tempo_medio,
+        "pedidos": lista_compras
+    })
+        
+    
+
+
 
