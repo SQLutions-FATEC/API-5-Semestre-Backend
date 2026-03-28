@@ -55,3 +55,79 @@ Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dad
     "detail": "Not found."
 }
 ```
+
+---
+
+## Rota Detalhes de Compras do Projeto
+
+Retorna a listagem de todos os pedidos de compra vinculados a um projeto específico, processando métricas de prazos de entrega e consolidando informações de fornecedores e centros de custo.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/compras/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+
+* **Dias Previstos de Entrega:** Calculado individualmente para cada pedido através da diferença entre a data de previsão e a data de emissão: (Data Previsão - Data Pedido).
+* **Tempo Médio de Entrega:** Média aritmética simples de todos os `dias_previstos_entrega` dos pedidos vinculados ao projeto.
+* **Otimização de Query:** Utiliza `Select Related` para buscar dimensões de Fornecedor, Datas e Solicitações em uma única consulta.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas (neste caso, retorna lista vazia e média 0).
+
+**Exemplo de Resposta (JSON)**:
+
+```json
+{
+    "projeto": "PRJ01",
+    "tempo_medio_entrega_dias": 15.0,
+    "pedidos": [
+        {
+            "numero": "PED01",
+            "emissao": "2024-01-01",
+            "previsao": "2024-01-11",
+            "fornecedor": "Forn Teste",
+            "centro_custo": "Proj 1",
+            "status": "Entregue",
+            "dias_previstos_entrega": 10
+        },
+        {
+            "numero": "PED02",
+            "emissao": "2024-01-01",
+            "previsao": "2024-01-21",
+            "fornecedor": "Forn Teste",
+            "centro_custo": "Proj 1",
+            "status": "Pendente",
+            "dias_previstos_entrega": 20
+        }
+    ]
+}
+
+```
+
+#### Erro: `404 Not Found`
+Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dados.
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+
+#### Erro: `405 Method Not Allowed`
+Retornado caso a requisição utilize um método diferente de GET (ex: POST, PUT, DELETE).
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Method \"POST\" not allowed."
+}
+```
