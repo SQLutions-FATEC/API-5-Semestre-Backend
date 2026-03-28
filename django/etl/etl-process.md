@@ -1,124 +1,92 @@
-# Processo ETL — Extração
 
-## Visão Geral
 
-Este documento descreve as fontes de dados, métodos de extração e decisões técnicas da etapa de extração do pipeline do Data Warehouse.
+---
 
-## Stack
+# Documentação do Processo ETL (Extração, Transformação e Carga)
 
-- Python 3.x + Django + pandas
-- PostgreSQL (via Docker)
-- Django management command: `python manage.py run_extraction`
+## 1. Visão Geral
+Este documento descreve a arquitetura e o funcionamento do pipeline de dados responsável por alimentar o Data Warehouse (DW). O sistema realiza a extração de dados de arquivos brutos (CSV), aplica transformações para limpeza e geração de indicadores de desempenho, e persiste as informações em um banco de dados PostgreSQL utilizando o Django ORM.
 
-## Fluxo de Dados
+## 2. Stack Tecnológica
+*   **Linguagem:** Python 3.12+
+*   **Manipulação de Dados:** pandas (DataFrames)
+*   **Framework de Persistência:** Django 5.x (ORM)
+*   **Banco de Dados:** PostgreSQL
+*   **Ambiente:** Docker & Docker Compose
+*   **Qualidade e Testes:** pytest, pytest-django, pytest-cov
+
+## 3. Fluxo de Dados
+O pipeline opera em três estágios principais, garantindo que o dado bruto seja refinado antes de chegar à camada analítica:
 
 ```text
-[Arquivos CSV] → [Extractors] → [Loader] → [DW: dim_* e fato_* (PostgreSQL)]
-```
-Os dados são lidos diretamente dos arquivos CSV e carregados nas tabelas do DW usando o Django ORM. Não há área de stage intermediária nesta etapa.
-
-## Fontes de Dados
-
-
-
-
-| Extractor | Arquivo CSV | Tabela DW |
-| :--- | :--- | :--- |
-| ProgramasExtractor | programas.csv | DimPrograma |
-| ProjetosExtractor | projetos.csv | DimProjeto |
-| TarefasProjetoExtractor | tarefas_projeto.csv | DimTarefa |
-| MateriaisExtractor | materiais.csv | DimMaterial |
-| FornecedoresExtractor | fornecedores.csv | DimFornecedor |
-| SolicitacoesCompraExtractor | solicitacoes_compra.csv | DimSolicitacao |
-| TempoTarefasExtractor | tempo_tarefas.csv | FatoTarefa |
-| EmpenhoMateriaisExtractor | empenho_materiais.csv | FatoEmpenho |
-| PedidosCompraExtractor | pedidos_compra.csv | FatoCompra |
-
-> **Nota:**  Os arquivos  `compras_projeto.csv`  e  `estoque_materiais_projeto.csv`  não possuem tabela correspondente no modelo DW atual. Mantidos no diretório  `etl/data/`  para referência futura.
-
-## Estratégia de Extração
-
--   **Método:**  Full Load — todos os registros são extraídos a cada execução.
-    
--   **Datas:**  Campos de data dos CSVs são convertidos automaticamente em registros  `DimData`  (dia, mês, ano) via  `get_or_create`.
-    
--   **Comportamento:**  Cada tabela DW é truncada antes do carregamento (`delete()`).
-    
--   **Ordem de execução:**  Dimensões são carregadas antes dos fatos para garantir integridade referencial.
-    
--   **Verificação de integridade:**  Após o carregamento, a contagem de registros do CSV e da tabela DW são comparadas. Qualquer divergência gera um erro.
-    
-
-## Testes Automáticos
-
-O processo de extração conta com testes de integração para garantir a integridade do pipeline (validação de leitura do CSV e persistência no banco).
-
-Para executar a suíte de testes:
-
-
-```
-# Via Docker (Recomendado)
-docker compose exec backend python manage.py test etl
-
-# Local
-python manage.py test etl
-
-
+[Arquivos CSV] ➔ [Extractors] ➔ [Transformers] ➔ [Loaders] ➔ [Data Warehouse]
 ```
 
-## Logs
+1.  **Extração:** Os arquivos são lidos da pasta `etl/data/`.
+2.  **Transformação:** Aplicação de regras de saneamento e cálculo de métricas (Lead Time e Atraso).
+3.  **Carga:** Os dados transformados são mapeados para os modelos do Django e salvos no banco.
 
--   **Localização:**  `logs/etl_YYYYMMDD.log`
-    
--   **Níveis:**  `INFO`  (sucesso),  `ERROR`  (arquivo não encontrado, erros de carga, falhas de integridade)
-    
--   **Cada extractor registra:**  início da extração, contagem de registros e confirmação de carregamento.
-    
+## 4. Regras de Negócio e Transformações
+Para garantir a padronização e a utilidade dos dados para relatórios, o pipeline aplica as seguintes lógicas:
 
-## Como Executar
+### A. Saneamento de Dados
+*   **Normalização de Texto:** Campos de texto (como status e nomes de responsáveis) são convertidos para **MAIÚSCULAS** e têm espaços em branco excedentes removidos (trim).
+*   **Truncagem de Datas:** Datas que chegam com carimbos de hora (ex: `2026-01-01 00:00:00`) são limpas para o formato `YYYY-MM-DD` antes de serem processadas pela dimensão de tempo.
 
+### B. Indicadores Calculados (Métricas)
+*   **Lead Time (Dias):** Calculado automaticamente como a diferença absoluta em dias entre a `data_inicio` e a `data_fim_prevista`.
+*   **Identificação de Atraso (`is_atrasado`):** Uma flag lógica definida como `True` se a `data_fim_prevista` for menor que a data atual e o `status` do item não for "CONCLUÍDO".
 
-```
-# Via Docker (Recomendado)
-docker compose exec backend python manage.py run_extraction
+## 5. Mapeamento de Entidades
 
-# Local
-python manage.py run_extraction
+| Componente | Origem (CSV) | Tabela Destino | Indicadores Gerados |
+| :--- | :--- | :--- | :--- |
+| **Programas** | `programas.csv` | `DimPrograma` | - |
+| **Projetos** | `projetos.csv` | `DimProjeto` | Lead Time, Flag de Atraso |
+| **Tarefas** | `tarefas_projeto.csv` | `DimTarefa` | Lead Time, Flag de Atraso |
+| **Suprimentos** | `materiais.csv` | `DimMaterial` | - |
+| **Parceiros** | `fornecedores.csv` | `DimFornecedor` | - |
+| **Processos** | `tempo_tarefas.csv` | `FatoTarefa` | Horas Trabalhadas |
+| **Financeiro** | `pedidos_compra.csv` | `FatoCompra` | Valor Total |
 
+## 6. Estrutura de Diretórios
+A organização do código reflete a separação de responsabilidades do pipeline:
 
-```
-
-## Estrutura de Arquivos
-
-Plaintext
-
-```
+```plaintext
 django/etl/
-├── data/                          ← arquivos CSV de origem atualizados
-│   ├── programas.csv
-│   ├── projetos.csv
-│   ├── tarefas_projeto.csv
-│   ├── tempo_tarefas.csv
-│   ├── materiais.csv
-│   ├── fornecedores.csv
-│   ├── solicitacoes_compra.csv
-│   ├── pedidos_compra.csv
-│   ├── empenho_materiais.csv
-│   ├── compras_projeto.csv
-│   └── estoque_materiais_projeto.csv
+├── data/                          # Arquivos CSV de origem (Source)
 ├── extractors/
-│   ├── base.py                    ← classe base com leitura de CSV usando pandas
-│   └── extractors.py              ← um extractor por arquivo CSV
-├── loaders/                       ← carrega dados direto nas tabelas DW via ORM
-│   └── loader.py                  
+│   ├── base.py                    # Classe base para leitura de CSV via pandas
+│   └── extractors.py              # Implementação dos extratores por entidade
+├── transformations/               # Camada de inteligência de negócio
+│   └── transformers.py            # Funções de cálculo de Lead Time e limpeza
+├── loaders/
+│   └── loader.py                  # Conversão de DataFrames para Django ORM
 ├── validators/
-│   └── integrity.py               ← valida contagens CSV vs DW
+│   └── integrity.py               # Validação de volumetria (CSV vs DB)
 ├── utils/
-│   └── logger.py                  ← sistema de logs
+│   └── logger.py                  # Centralização de logs do processo
 ├── tests/
-│   ├── __init__.py
-│   └── test_extraction.py         ← testes de integração do pipeline ETL
+│   ├── test_extraction.py         # Testes de integração do pipeline
+│   └── test_transformers.py       # Testes unitários das métricas e cálculos
 ├── management/commands/
-│   └── run_extraction.py          ← orquestrador principal
-└── etl-process.md                 ← documentação do processo
+│   └── run_extraction.py          # Orquestrador (Comando de execução)
+└── etl-process.md                 # Documentação técnica do processo
 ```
+
+## 7. Qualidade e Testes
+O projeto utiliza uma suíte de testes automatizados para garantir que as métricas de Lead Time e as flags de atraso sejam calculadas com precisão, atingindo alta cobertura de código para satisfazer critérios de qualidade (SonarCloud).
+
+### Executar Testes
+```bash
+docker-compose exec backend env PYTHONPATH=. python -m pytest --cov=etl etl/tests/
+```
+
+## 8. Como Executar o Processo
+Para disparar a carga completa (Full Load) do Data Warehouse:
+
+```bash
+docker-compose exec backend python manage.py run_extraction
+```
+
+---

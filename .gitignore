@@ -58,3 +58,6 @@ venv.bak/
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+# Arquivos csv
+data/*.csv
