@@ -14,7 +14,9 @@ def get_or_create_dim_data(date_str: str) -> DimData:
     Converte uma string de data em um registro DimData.
     Cria o registro se ainda não existir.
     """
-    date = datetime.strptime(str(date_str), '%Y-%m-%d').date()
+    #pega apenas 'YYYY-MM-DD' mesmo que venha com ' 00:00:00'
+    clean_date = str(date_str)[:10] 
+    date = datetime.strptime(clean_date, '%Y-%m-%d').date()
     obj, _ = DimData.objects.get_or_create(
         dia=date.day,
         mes=date.month,
@@ -53,7 +55,9 @@ def load_projetos(df: pd.DataFrame):
             custo_hora=row['custo_hora'],
             data_inicio=get_or_create_dim_data(row['data_inicio']),
             data_fim_prevista=get_or_create_dim_data(row['data_fim_prevista']),
-            status=row['status']
+            status=row['status'],
+            lead_time_dias=row.get('lead_time_dias', 0),
+            is_atrasado=row.get('is_atrasado', False)
         )
     logger.info(f"[Loader] DimProjeto carregado: {len(df)} registros.")
 
@@ -71,7 +75,9 @@ def load_tarefas(df: pd.DataFrame):
             estimativa=row['estimativa_horas'],
             data_inicio=get_or_create_dim_data(row['data_inicio']),
             data_fim_prevista=get_or_create_dim_data(row['data_fim_prevista']),
-            status=row['status']
+            status=row['status'],
+            lead_time_dias=row.get('lead_time_dias', 0),
+            is_atrasado=row.get('is_atrasado', False)
         )
     logger.info(f"[Loader] DimTarefa carregado: {len(df)} registros.")
 
