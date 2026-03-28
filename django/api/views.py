@@ -50,6 +50,7 @@ def projeto_dashboard_api(request, codigo_projeto):
 
     return JsonResponse(data)
 
+# Endpoint para listar as compras vinculadas a um projeto
 @require_GET
 def compras_projeto_api(request, codigo_projeto):
     projeto = get_object_or_404(DimProjeto, codigo_projeto = codigo_projeto)
