@@ -24,6 +24,8 @@ class DimProjeto(models.Model):
     data_inicio = ForeignKey(DimData, on_delete=CASCADE, related_name='projeto_data_inicio')
     data_fim_prevista = ForeignKey(DimData, on_delete=CASCADE, related_name='projeto_data_fim_prevista')
     status = CharField()
+    lead_time_dias = IntegerField(default=0)
+    is_atrasado = models.BooleanField(default=False)
 
 class DimTarefa(models.Model):
     codigo_tarefa = CharField(max_length=6)
@@ -35,6 +37,8 @@ class DimTarefa(models.Model):
     data_inicio = ForeignKey(DimData, on_delete=CASCADE, related_name='tarefa_data_inicio')
     data_fim_prevista = ForeignKey(DimData, on_delete=CASCADE, related_name='tarefa_data_fim_prevista')
     status = CharField()
+    lead_time_dias = IntegerField(default=0)
+    is_atrasado = models.BooleanField(default=False)
 
 class DimMaterial(models.Model):
     codigo_material = CharField()
