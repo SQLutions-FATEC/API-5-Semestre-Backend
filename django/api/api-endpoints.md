@@ -55,3 +55,60 @@ Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dad
     "detail": "Not found."
 }
 ```
+
+---
+
+## Rota Tarefas e Timesheet de Projeto
+
+Retorna as tarefas de um projeto com total de horas trabalhadas por tarefa e um objeto de evolucao temporal para alimentar grafico de horas no frontend.
+
+### **Endpoint**
+`GET /api/projetos/tarefas/<codigo_projeto>`
+
+### **Parametros de Rota (Path Parameters)**
+
+| Parametro | Tipo | Descricao | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Codigo identificador do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negocio e Calculos**
+* **Lista de Tarefas:** Retorna `codigo`, `titulo`, `responsavel`, `estimativa` e `status`.
+* **Total de Horas por Tarefa:** Campo calculado `total_horas_trabalhadas` via agregacao (`Sum`) da tabela de fatos.
+* **Evolucao Temporal:** Objeto `evolucao_horas` com chave no formato `YYYY-MM-DD` e valor com soma de horas do dia.
+
+### **Resposta de Sucesso: `200 OK`**
+
+```json
+{
+    "projeto": {
+        "codigo": "PRJ003",
+        "nome": "Unidade Teste Automatico"
+    },
+    "tarefas": [
+        {
+            "codigo": "TAR001",
+            "titulo": "Levantamento de Requisitos",
+            "responsavel": "Joao Pedro Alves",
+            "estimativa": 40,
+            "status": "Concluido",
+            "total_horas_trabalhadas": 20.5
+        },
+        {
+            "codigo": "TSK009",
+            "titulo": "Prototipacao da placa",
+            "responsavel": "Marcelo Cardoso",
+            "estimativa": 46,
+            "status": "Em andamento",
+            "total_horas_trabalhadas": 5.94
+        }
+    ],
+    "evolucao_horas": {
+        "2022-05-09": 26.44,
+        "2024-11-21": 2.17
+    }
+}
+```
+
+### **Resposta de Erro: `404 Not Found`**
+
+Retornada quando o `codigo_projeto` informado nao existe.
