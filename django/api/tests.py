@@ -276,9 +276,22 @@ class ProjetoEmpenhoViewTest(TestCase):
         self.assertEqual(materiais['MAT03']['total_custo'], 1500.00)
 
         # Empenho por Tempo
-        tempo = {t['data']: t['total_custo'] for t in data['empenho_por_tempo']}
-        self.assertEqual(tempo['2024-02-01'], 955.00) # MAT01 + MAT02
-        self.assertEqual(tempo['2024-03-15'], 1500.00) # MAT03
+        tempo = {t['data']: t for t in data['empenho_por_tempo']}
+        
+        self.assertEqual(tempo['2024-02-01']['total_custo'], 955.00) # MAT01 + MAT02
+        materiais_fev = {m['codigo_material']: m for m in tempo['2024-02-01']['materiais']}
+        self.assertEqual(materiais_fev['MAT01']['quantidade'], 10)
+        self.assertEqual(materiais_fev['MAT01']['custo_unitario'], 35.50)
+        self.assertEqual(materiais_fev['MAT01']['total_custo'], 355.00)
+        self.assertEqual(materiais_fev['MAT02']['quantidade'], 5)
+        self.assertEqual(materiais_fev['MAT02']['custo_unitario'], 120.00)
+        self.assertEqual(materiais_fev['MAT02']['total_custo'], 600.00)
+        
+        self.assertEqual(tempo['2024-03-15']['total_custo'], 1500.00) # MAT03
+        materiais_mar = {m['codigo_material']: m for m in tempo['2024-03-15']['materiais']}
+        self.assertEqual(materiais_mar['MAT03']['quantidade'], 1000)
+        self.assertEqual(materiais_mar['MAT03']['custo_unitario'], 1.50)
+        self.assertEqual(materiais_mar['MAT03']['total_custo'], 1500.00)
 
     def test_empenho_success_without_data(self):
         """Testa os fallbacks para 0.0 quando nao ha empenhos no projeto."""
