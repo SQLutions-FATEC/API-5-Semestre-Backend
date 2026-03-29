@@ -140,7 +140,8 @@ def projeto_empenho_api(request, codigo_projeto):
     empenho_por_material_qs = empenhos.values(
         codigo_material=F('material__codigo_material'),
         descricao=F('material__descricao'),
-        categoria=F('material__categoria')
+        categoria=F('material__categoria'),
+        custo_unitario=F('material__custo_estimado')
     ).annotate(
         quantidade_total=Sum('quantidade_empenhada'),
         total_custo=Sum('custo')
@@ -151,6 +152,7 @@ def projeto_empenho_api(request, codigo_projeto):
             "codigo_material": item['codigo_material'],
             "descricao": item['descricao'],
             "categoria": item['categoria'],
+            "custo_unitario": float(item['custo_unitario'] or 0.0),
             "quantidade_total": item['quantidade_total'] or 0,
             "total_custo": float(item['total_custo'] or 0.0)
         }
@@ -158,21 +160,40 @@ def projeto_empenho_api(request, codigo_projeto):
     ]
 
     # 4. Dados em função do tempo
-    custo_por_tempo_qs = empenhos.values(
+    empenhos_tempo_materiais_qs = empenhos.values(
         ano=F('data_empenho__ano'),
         mes=F('data_empenho__mes'),
-        dia=F('data_empenho__dia')
+        dia=F('data_empenho__dia'),
+        codigo_material=F('material__codigo_material'),
+        descricao=F('material__descricao'),
+        custo_unitario=F('material__custo_estimado')
     ).annotate(
+        quantidade_total=Sum('quantidade_empenhada'),
         total_custo=Sum('custo')
-    ).order_by('ano', 'mes', 'dia')
+    ).order_by('ano', 'mes', 'dia', 'descricao')
 
-    custo_por_tempo = [
-        {
-            "data": f"{item['ano']:04d}-{item['mes']:02d}-{item['dia']:02d}",
-            "total_custo": float(item['total_custo'] or 0.0)
-        }
-        for item in custo_por_tempo_qs
-    ]
+    custo_por_tempo_dict = {}
+    for item in empenhos_tempo_materiais_qs:
+        data_str = f"{item['ano']:04d}-{item['mes']:02d}-{item['dia']:02d}"
+        
+        if data_str not in custo_por_tempo_dict:
+            custo_por_tempo_dict[data_str] = {
+                "data": data_str,
+                "total_custo": 0.0,
+                "materiais": []
+            }
+        
+        custo_item = float(item['total_custo'] or 0.0)
+        custo_por_tempo_dict[data_str]["total_custo"] += custo_item
+        custo_por_tempo_dict[data_str]["materiais"].append({
+            "codigo_material": item['codigo_material'],
+            "descricao": item['descricao'],
+            "custo_unitario": float(item['custo_unitario'] or 0.0),
+            "quantidade": item['quantidade_total'] or 0,
+            "total_custo": custo_item
+        })
+
+    custo_por_tempo = list(custo_por_tempo_dict.values())
 
     data = {
         "projeto": {
