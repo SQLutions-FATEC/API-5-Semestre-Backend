@@ -4,26 +4,8 @@ from datetime import date, timedelta
 import unicodedata
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum
-from api.models import DimMaterial, DimProjeto, DimSolicitacao, DimTarefa, FatoTarefa, FatoCompra
-
-
-def _normaliza_texto(valor):
-        if valor is None:
-                return ''
-
-        texto_sem_acentos = unicodedata.normalize('NFKD', str(valor)).encode('ASCII', 'ignore').decode('ASCII')
-        return texto_sem_acentos.strip().lower()
-
-
-def _dim_data_para_date(dim_data):
-        if dim_data is None:
-                return None
-
-        try:
-                return date(dim_data.ano, dim_data.mes, dim_data.dia)
-        except (TypeError, ValueError):
-                return None
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+from api.models import DimProjeto, DimTarefa, FatoTarefa, FatoCompra, FatoEmpenho
 
 @require_GET
 def projeto_dashboard_api(request, codigo_projeto):
@@ -127,85 +109,80 @@ def projeto_tarefas_timesheet_api(request, codigo_projeto):
 
 
 @require_GET
-def projeto_alertas_api(request, codigo_projeto):
-        projeto = get_object_or_404(DimProjeto, codigo_projeto=codigo_projeto)
+def projeto_empenho_api(request, codigo_projeto):
+    projeto = get_object_or_404(DimProjeto, codigo_projeto=codigo_projeto)
 
-        data_atual = date.today()
-        limite_pedido_recente = data_atual - timedelta(days=30)
-
-        compras = (
-                FatoCompra.objects
-                .filter(solicitacao__projeto=projeto)
-                .select_related('data_previsao_entrega', 'data_pedido', 'solicitacao__material')
-                .order_by('numero_pedido')
+    # Query base anotada com o custo calculado (quantidade * custo_estimado do material)
+    empenhos = FatoEmpenho.objects.filter(projeto=projeto).annotate(
+        custo=ExpressionWrapper(
+            F('quantidade_empenhada') * F('material__custo_estimado'),
+            output_field=DecimalField()
         )
+    )
 
-        pedidos_atrasados = []
-        pedidos_prioritarios_pendentes = []
-        materiais_pedidos_recentes_ids = set()
+    # 1. Custo total do projeto (empenho)
+    total_empenho = empenhos.aggregate(total=Sum('custo'))['total'] or 0.0
 
-        for compra in compras:
-                data_previsao_entrega = _dim_data_para_date(compra.data_previsao_entrega)
-                data_pedido = _dim_data_para_date(compra.data_pedido)
-                status_normalizado = _normaliza_texto(compra.status)
-                prioridade_normalizada = _normaliza_texto(compra.solicitacao.prioridade)
+    # 2. Custo por categoria
+    custo_por_categoria_qs = empenhos.values(categoria=F('material__categoria')).annotate(
+        total_custo=Sum('custo')
+    ).order_by('categoria')
 
-                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'concluida':
-                        pedidos_atrasados.append({
-                                'numero_pedido': compra.numero_pedido,
-                                'status': compra.status,
-                                'data_previsao_entrega': data_previsao_entrega.isoformat(),
-                                'dias_atraso': (data_atual - data_previsao_entrega).days,
-                        })
-
-                if prioridade_normalizada in {'alta', 'urgente'} and status_normalizado in {'aberto', 'enviado'}:
-                        pedidos_prioritarios_pendentes.append({
-                                'numero_pedido': compra.numero_pedido,
-                                'prioridade': compra.solicitacao.prioridade,
-                                'status': compra.status,
-                                'data_pedido': data_pedido.isoformat() if data_pedido else None,
-                        })
-
-                if data_pedido and data_pedido >= limite_pedido_recente:
-                        materiais_pedidos_recentes_ids.add(compra.solicitacao.material_id)
-
-        materiais_obsoletos_vinculados_ids = set(
-                DimSolicitacao.objects
-                .filter(projeto=projeto, material__status__iexact='Obsoleto')
-                .values_list('material_id', flat=True)
-        )
-
-        materiais_obsoletos_criticos_ids = materiais_obsoletos_vinculados_ids | materiais_pedidos_recentes_ids
-
-        materiais_obsoletos_qs = (
-                DimMaterial.objects
-                .filter(id__in=materiais_obsoletos_criticos_ids, status__iexact='Obsoleto')
-                .order_by('codigo_material')
-        )
-
-        materiais_obsoletos = [
-                {
-                        'codigo_material': material.codigo_material,
-                        'descricao': material.descricao,
-                        'status': material.status,
-                        'vinculado_ao_projeto': material.id in materiais_obsoletos_vinculados_ids,
-                        'pedido_recente': material.id in materiais_pedidos_recentes_ids,
-                }
-                for material in materiais_obsoletos_qs
-        ]
-
-        data = {
-                'projeto': {
-                        'codigo': projeto.codigo_projeto,
-                        'nome': projeto.nome_projeto,
-                },
-                'data_referencia': data_atual.isoformat(),
-                'alertas_criticos': {
-                        'pedidos_atrasados': pedidos_atrasados,
-                        'pedidos_prioritarios_pendentes': pedidos_prioritarios_pendentes,
-                        'materiais_obsoletos': materiais_obsoletos,
-                },
+    custo_por_categoria = [
+        {
+            "categoria": item['categoria'],
+            "total_custo": float(item['total_custo'] or 0.0)
         }
+        for item in custo_por_categoria_qs
+    ]
 
-        return JsonResponse(data)
+    # 3. Empenho por material (quantidade e custo)
+    empenho_por_material_qs = empenhos.values(
+        codigo_material=F('material__codigo_material'),
+        descricao=F('material__descricao'),
+        categoria=F('material__categoria')
+    ).annotate(
+        quantidade_total=Sum('quantidade_empenhada'),
+        total_custo=Sum('custo')
+    ).order_by('descricao')
 
+    empenho_por_material = [
+        {
+            "codigo_material": item['codigo_material'],
+            "descricao": item['descricao'],
+            "categoria": item['categoria'],
+            "quantidade_total": item['quantidade_total'] or 0,
+            "total_custo": float(item['total_custo'] or 0.0)
+        }
+        for item in empenho_por_material_qs
+    ]
+
+    # 4. Dados em função do tempo
+    custo_por_tempo_qs = empenhos.values(
+        ano=F('data_empenho__ano'),
+        mes=F('data_empenho__mes'),
+        dia=F('data_empenho__dia')
+    ).annotate(
+        total_custo=Sum('custo')
+    ).order_by('ano', 'mes', 'dia')
+
+    custo_por_tempo = [
+        {
+            "data": f"{item['ano']:04d}-{item['mes']:02d}-{item['dia']:02d}",
+            "total_custo": float(item['total_custo'] or 0.0)
+        }
+        for item in custo_por_tempo_qs
+    ]
+
+    data = {
+        "projeto": {
+            "codigo": projeto.codigo_projeto,
+            "nome": projeto.nome_projeto,
+        },
+        "empenho_total": float(total_empenho),
+        "empenho_por_categoria": custo_por_categoria,
+        "empenho_por_material": empenho_por_material,
+        "empenho_por_tempo": custo_por_tempo,
+    }
+
+    return JsonResponse(data)
