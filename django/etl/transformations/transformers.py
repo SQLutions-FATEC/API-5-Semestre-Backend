@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from datetime import datetime
+import unicodedata
 
 def standardize_strings(df, columns):
     """Remove espaços e padroniza para caixa alta."""
