@@ -150,7 +150,7 @@ def projeto_alertas_api(request, codigo_projeto):
                 status_normalizado = _normaliza_texto(compra.status)
                 prioridade_normalizada = _normaliza_texto(compra.solicitacao.prioridade)
 
-                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'Concluída':
+                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'concluida':
                         pedidos_atrasados.append({
                                 'numero_pedido': compra.numero_pedido,
                                 'status': compra.status,
@@ -158,7 +158,7 @@ def projeto_alertas_api(request, codigo_projeto):
                                 'dias_atraso': (data_atual - data_previsao_entrega).days,
                         })
 
-                if prioridade_normalizada in {'Alta', 'Urgente'} and (status_normalizado == 'Aberto' or status_normalizado == 'Enviado'):
+                if prioridade_normalizada in {'alta', 'urgente'} and status_normalizado in {'aberto', 'enviado'}:
                         pedidos_prioritarios_pendentes.append({
                                 'numero_pedido': compra.numero_pedido,
                                 'prioridade': compra.solicitacao.prioridade,
