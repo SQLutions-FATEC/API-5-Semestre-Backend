@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import projeto_dashboard_api, projeto_tarefas_timesheet_api
+from .views import projeto_dashboard_api, projeto_alertas_api, projeto_tarefas_timesheet_api
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +25,10 @@ urlpatterns = [
         'api/projetos/tarefas/<str:codigo_projeto>',
         projeto_tarefas_timesheet_api,
         name='projeto-tarefas-timesheet',
+    ),
+    path(
+        'api/projetos/criticos/<str:codigo_projeto>',
+        projeto_alertas_api,
+        name='projeto-alertas',
     ),
 ]
