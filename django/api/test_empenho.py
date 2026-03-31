@@ -6,31 +6,33 @@ class EmpenhoTest(TestCase):
     def setUp(self):
         self.data = DimData.objects.create(dia=1, mes=6, ano=2024)
 
-        self.material = DimMaterial.objects.create(
-            descricao="Cimento",
-            categoria="Construção",
-            custo_estimado=50,
-            codigo_material="MAT1",
-            fabricante="X",
+        self.programa = DimPrograma.objects.create(
+            codigo_programa="P1",
+            nome_programa="Programa A",
+            gerente_programa="X",
+            gerente_tecnico="Y",
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
             status="Ativo"
         )
 
         self.projeto = DimProjeto.objects.create(
-            nome_projeto="Obra A",
-            codigo_projeto="P1",
+            codigo_projeto="PR1",
+            nome_projeto="Projeto A",
+            programa=self.programa,
             responsavel="João",
             custo_hora=100,
-            programa=DimPrograma.objects.create(
-                codigo_programa="PRG",
-                nome_programa="Prog",
-                gerente_programa="A",
-                gerente_tecnico="B",
-                data_inicio=self.data,
-                data_fim_prevista=self.data,
-                status="Ativo"
-            ),
             data_inicio=self.data,
             data_fim_prevista=self.data,
+            status="Ativo"
+        )
+
+        self.material = DimMaterial.objects.create(
+            codigo_material="M1",
+            descricao="Cimento",
+            categoria="Construção",
+            fabricante="X",
+            custo_estimado=50,
             status="Ativo"
         )
 
@@ -41,9 +43,17 @@ class EmpenhoTest(TestCase):
             data_empenho=self.data
         )
 
-    def test_vinculo_projeto(self):
-        self.assertEqual(self.empenho.projeto.nome_projeto, "Obra A")
+    def test_vinculo_programa(self):
+        self.assertEqual(
+            self.empenho.projeto.programa.nome_programa,
+            "Programa A"
+        )
 
-    def test_custo_total(self):
-        custo = self.empenho.quantidade_empenhada * self.material.custo_estimado
-        self.assertEqual(custo, 500)
+    def test_valor_empenhado(self):
+        valor = self.empenho.quantidade_empenhada * self.material.custo_estimado
+        self.assertEqual(valor, 500)
+
+    def test_endpoint(self):
+        response = self.client.get('/api/empenhos-programa/?programa_id=1')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Projeto A")  
