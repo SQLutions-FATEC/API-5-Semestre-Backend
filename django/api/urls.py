@@ -20,12 +20,14 @@ from .views import (
     projeto_dashboard_api, 
     projeto_alertas_api, 
     projeto_tarefas_timesheet_api,
-    projeto_empenho_api
+    projeto_empenho_api,
+    compras_projeto_api
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/projetos/<str:codigo_projeto>/', projeto_dashboard_api, name='projeto-detalhe'),
+    path('api/projetos/<str:codigo_projeto>/compras/', compras_projeto_api, name='compras_projeto'),
     path(
         'api/projetos/tarefas/<str:codigo_projeto>',
         projeto_tarefas_timesheet_api,
