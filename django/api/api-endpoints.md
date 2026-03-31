@@ -175,3 +175,94 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
 ### **Resposta de Erro: `404 Not Found`**
 
 Retornada quando o `codigo_projeto` informado nao existe.
+
+## Rota Analítica de Empenho de Projeto
+
+Retorna dados analíticos sobre os materiais empenhados de um projeto específico, incluindo o custo total de empenho, agrupamento por categoria, agrupamento por material (com quantidades) e a evolução temporal do empenho.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/empenhos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Custo Total de Empenho:** Soma do custo calculado de cada empenho associado ao projeto. O custo individual é obtido multiplicando a `quantidade_empenhada` pelo `custo_estimado` do material no banco.
+* **Empenho por Categoria:** Agrupamento do custo total de empenho baseado na categoria dos materiais associados.
+* **Empenho por Material:** Agrupamento por material listando código, descrição, categoria, quantidade total empenhada e o custo correspondente.
+* **Empenho no Tempo:** Histórico diário (agregação no formato `YYYY-MM-DD`) com a soma dos custos de empenhos registrados naquele dia específico e a lista detalhada dos materiais atrelados àquela data.
+
+### **Resposta de Sucesso: `200 OK`**
+
+```json
+{
+    "projeto": {
+        "codigo": "PRJ003",
+        "nome": "Unidade Teste Automático"
+    },
+    "empenho_total": 4500.50,
+    "empenho_por_categoria": [
+        {
+            "categoria": "Eletrônicos",
+            "total_custo": 3000.50
+        },
+        {
+            "categoria": "Mecânica",
+            "total_custo": 1500.00
+        }
+    ],
+    "empenho_por_material": [
+        {
+            "codigo_material": "MAT101",
+            "descricao": "Capacitor 100uF",
+            "categoria": "Eletrônicos",
+            "custo_unitario": 6.00,
+            "quantidade_total": 500,
+            "total_custo": 3000.00
+        },
+        {
+            "codigo_material": "MAT205",
+            "descricao": "Parafuso M4",
+            "categoria": "Mecânica",
+            "custo_unitario": 1.50,
+            "quantidade_total": 1000,
+            "total_custo": 1500.00
+        }
+    ],
+    "empenho_por_tempo": [
+        {
+            "data": "2024-03-10",
+            "total_custo": 2000.00,
+            "materiais": [
+                {
+                    "codigo_material": "MAT101",
+                    "descricao": "Capacitor 100uF",
+                    "custo_unitario": 6.00,
+                    "quantidade": 333,
+                    "total_custo": 1998.00
+                }
+            ]
+        },
+        {
+            "data": "2024-03-15",
+            "total_custo": 2500.00,
+            "materiais": [
+                {
+                    "codigo_material": "MAT205",
+                    "descricao": "Parafuso M4",
+                    "custo_unitario": 1.50,
+                    "quantidade": 1000,
+                    "total_custo": 1500.00
+                }
+            ]
+        }
+    ]
+}
+```
+
+### **Resposta de Erro: `404 Not Found`**
+
+Retornada quando o `codigo_projeto` informado não existe.

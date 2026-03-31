@@ -4,9 +4,8 @@ from datetime import date, timedelta
 import unicodedata
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum
-from api.models import DimMaterial, DimProjeto, DimSolicitacao, DimTarefa, FatoTarefa, FatoCompra
-
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+from api.models import DimMaterial, DimProjeto, DimSolicitacao, DimTarefa, FatoTarefa, FatoCompra, FatoEmpenho
 
 def _normaliza_texto(valor):
         if valor is None:
@@ -150,7 +149,7 @@ def projeto_alertas_api(request, codigo_projeto):
                 status_normalizado = _normaliza_texto(compra.status)
                 prioridade_normalizada = _normaliza_texto(compra.solicitacao.prioridade)
 
-                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'concluida':
+                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'Concluída':
                         pedidos_atrasados.append({
                                 'numero_pedido': compra.numero_pedido,
                                 'status': compra.status,
@@ -158,7 +157,7 @@ def projeto_alertas_api(request, codigo_projeto):
                                 'dias_atraso': (data_atual - data_previsao_entrega).days,
                         })
 
-                if prioridade_normalizada in {'alta', 'urgente'} and status_normalizado in {'aberto', 'enviado'}:
+                if prioridade_normalizada in {'Alta', 'Urgente'} and (status_normalizado == 'Aberto' or status_normalizado == 'Enviado'):
                         pedidos_prioritarios_pendentes.append({
                                 'numero_pedido': compra.numero_pedido,
                                 'prioridade': compra.solicitacao.prioridade,
@@ -209,3 +208,102 @@ def projeto_alertas_api(request, codigo_projeto):
 
         return JsonResponse(data)
 
+@require_GET
+def projeto_empenho_api(request, codigo_projeto):
+    projeto = get_object_or_404(DimProjeto, codigo_projeto=codigo_projeto)
+
+    # Query base anotada com o custo calculado (quantidade * custo_estimado do material)
+    empenhos = FatoEmpenho.objects.filter(projeto=projeto).annotate(
+        custo=ExpressionWrapper(
+            F('quantidade_empenhada') * F('material__custo_estimado'),
+            output_field=DecimalField()
+        )
+    )
+
+    # 1. Custo total do projeto (empenho)
+    total_empenho = empenhos.aggregate(total=Sum('custo'))['total'] or 0.0
+
+    # 2. Custo por categoria
+    custo_por_categoria_qs = empenhos.values(categoria=F('material__categoria')).annotate(
+        total_custo=Sum('custo')
+    ).order_by('categoria')
+
+    custo_por_categoria = [
+        {
+            "categoria": item['categoria'],
+            "total_custo": float(item['total_custo'] or 0.0)
+        }
+        for item in custo_por_categoria_qs
+    ]
+
+    # 3. Empenho por material (quantidade e custo)
+    empenho_por_material_qs = empenhos.values(
+        codigo_material=F('material__codigo_material'),
+        descricao=F('material__descricao'),
+        categoria=F('material__categoria'),
+        custo_unitario=F('material__custo_estimado')
+    ).annotate(
+        quantidade_total=Sum('quantidade_empenhada'),
+        total_custo=Sum('custo')
+    ).order_by('descricao')
+
+    empenho_por_material = [
+        {
+            "codigo_material": item['codigo_material'],
+            "descricao": item['descricao'],
+            "categoria": item['categoria'],
+            "custo_unitario": float(item['custo_unitario'] or 0.0),
+            "quantidade_total": item['quantidade_total'] or 0,
+            "total_custo": float(item['total_custo'] or 0.0)
+        }
+        for item in empenho_por_material_qs
+    ]
+
+    # 4. Dados em função do tempo
+    empenhos_tempo_materiais_qs = empenhos.values(
+        ano=F('data_empenho__ano'),
+        mes=F('data_empenho__mes'),
+        dia=F('data_empenho__dia'),
+        codigo_material=F('material__codigo_material'),
+        descricao=F('material__descricao'),
+        custo_unitario=F('material__custo_estimado')
+    ).annotate(
+        quantidade_total=Sum('quantidade_empenhada'),
+        total_custo=Sum('custo')
+    ).order_by('ano', 'mes', 'dia', 'descricao')
+
+    custo_por_tempo_dict = {}
+    for item in empenhos_tempo_materiais_qs:
+        data_str = f"{item['ano']:04d}-{item['mes']:02d}-{item['dia']:02d}"
+        
+        if data_str not in custo_por_tempo_dict:
+            custo_por_tempo_dict[data_str] = {
+                "data": data_str,
+                "total_custo": 0.0,
+                "materiais": []
+            }
+        
+        custo_item = float(item['total_custo'] or 0.0)
+        custo_por_tempo_dict[data_str]["total_custo"] += custo_item
+        custo_por_tempo_dict[data_str]["materiais"].append({
+            "codigo_material": item['codigo_material'],
+            "descricao": item['descricao'],
+            "custo_unitario": float(item['custo_unitario'] or 0.0),
+            "quantidade": item['quantidade_total'] or 0,
+            "total_custo": custo_item
+        })
+
+    custo_por_tempo = list(custo_por_tempo_dict.values())
+
+    data = {
+        "projeto": {
+            "codigo": projeto.codigo_projeto,
+            "nome": projeto.nome_projeto,
+        },
+        "empenho_total": float(total_empenho),
+        "empenho_por_categoria": custo_por_categoria,
+        "empenho_por_material": empenho_por_material,
+        "empenho_por_tempo": custo_por_tempo,
+    }
+
+    return JsonResponse(data)

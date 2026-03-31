@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.test import TestCase, Client
 from api.models import (
     DimData, DimPrograma, DimProjeto, DimTarefa, FatoTarefa,
-    DimMaterial, DimSolicitacao, FatoCompra, DimFornecedor
+    DimMaterial, DimSolicitacao, FatoCompra, DimFornecedor, FatoEmpenho
 )
 
 class ProjetoDashboardViewTest(TestCase):
@@ -185,152 +185,130 @@ class ProjetoTarefasTimesheetViewTest(TestCase):
         response = self.client.post(f'/api/projetos/tarefas/{self.projeto_com_dados.codigo_projeto}')
         self.assertEqual(response.status_code, 405)
 
-
-class ProjetoAlertasViewTest(TestCase):
+class ProjetoEmpenhoViewTest(TestCase):
     def setUp(self):
         self.client = Client()
 
-        # Base dates: data_atual will be today
-        self.data_passado_45d = DimData.objects.create(dia=14, mes=2, ano=2026)  # 45 dias atrás
-        self.data_passado_25d = DimData.objects.create(dia=7, mes=3, ano=2026)   # 25 dias atrás (dentro de 30d)
-        self.data_passado_20d = DimData.objects.create(dia=10, mes=3, ano=2026)  # 20 dias atrás (dentro de 30d)
-        self.data_hoje = DimData.objects.create(dia=30, mes=3, ano=2026)         # Hoje
+        self.data_1 = DimData.objects.create(dia=1, mes=2, ano=2024)
+        self.data_2 = DimData.objects.create(dia=15, mes=3, ano=2024)
 
         self.programa = DimPrograma.objects.create(
             codigo_programa="PROG03", nome_programa="Prog 3",
             gerente_programa="Gerente P3", gerente_tecnico="Gerente T3",
-            data_inicio=self.data_passado_45d, data_fim_prevista=self.data_hoje, status="Ativo"
+            data_inicio=self.data_1, data_fim_prevista=self.data_2, status="Ativo"
         )
 
-        # Project WITH alerts
-        self.projeto_com_alertas = DimProjeto.objects.create(
-            codigo_projeto="PRJ20", nome_projeto="Projeto com Alertas",
-            programa=self.programa, responsavel="Resp Alertas",
+        self.projeto_com_dados = DimProjeto.objects.create(
+            codigo_projeto="PRJ20", nome_projeto="Projeto Empenho",
+            programa=self.programa, responsavel="Resp Empenho",
             custo_hora=Decimal('100.00'),
-            data_inicio=self.data_passado_45d, data_fim_prevista=self.data_hoje, status="Ativo"
+            data_inicio=self.data_1, data_fim_prevista=self.data_2, status="Ativo"
         )
 
-        # Project WITHOUT alerts
-        self.projeto_sem_alertas = DimProjeto.objects.create(
-            codigo_projeto="PRJ21", nome_projeto="Projeto Sem Alertas",
-            programa=self.programa, responsavel="Resp Sem Alertas",
-            custo_hora=Decimal('100.00'),
-            data_inicio=self.data_passado_45d, data_fim_prevista=self.data_hoje, status="Ativo"
+        self.projeto_vazio = DimProjeto.objects.create(
+            codigo_projeto="PRJ21", nome_projeto="Projeto Sem Empenho",
+            programa=self.programa, responsavel="Resp Sem Dados",
+            custo_hora=Decimal('80.00'),
+            data_inicio=self.data_1, data_fim_prevista=self.data_2, status="Ativo"
         )
 
-        # Create materials
-        self.material_ativo = DimMaterial.objects.create(
-            codigo_material="M20", descricao="Material Ativo", categoria="Cat",
-            fabricante="Fab", custo_estimado=Decimal('50.00'), status="Ativo"
-        )
-        self.material_obsoleto = DimMaterial.objects.create(
-            codigo_material="M21", descricao="Material Obsoleto", categoria="Cat",
-            fabricante="Fab", custo_estimado=Decimal('30.00'), status="Obsoleto"
+        self.material_1 = DimMaterial.objects.create(
+            codigo_material="MAT01", descricao="Cimento", categoria="Construcao",
+            fabricante="Votorantim", custo_estimado=Decimal('35.50'), status="Ativo"
         )
 
-        # Create supplier
-        self.fornecedor = DimFornecedor.objects.create(
-            codigo_fornecedor="F20", razao_social="Fornecedor Teste", cidade="Cid",
-            estado="Est", categoria="Cat", status="Ativo"
+        self.material_2 = DimMaterial.objects.create(
+            codigo_material="MAT02", descricao="Tinta", categoria="Acabamento",
+            fabricante="Suvinil", custo_estimado=Decimal('120.00'), status="Ativo"
+        )
+        
+        self.material_3 = DimMaterial.objects.create(
+            codigo_material="MAT03", descricao="Tijolo", categoria="Construcao",
+            fabricante="Olaria", custo_estimado=Decimal('1.50'), status="Ativo"
         )
 
-        # Create requests and purchases with alerts
-        # 1. Pedido ATRASADO
-        self.solicitacao_atrasada = DimSolicitacao.objects.create(
-            numero_solicitacao="S20", projeto=self.projeto_com_alertas, material=self.material_ativo,
-            quantidade=5, data_solicitacao=self.data_passado_45d, prioridade="Normal", status="Ativo"
+        # Custo MAT01 no dia 1: 10 * 35.50 = 355.00
+        FatoEmpenho.objects.create(
+            quantidade_empenhada=10, projeto=self.projeto_com_dados, 
+            material=self.material_1, data_empenho=self.data_1
         )
-        FatoCompra.objects.create(
-            numero_pedido="PED20", valor_total=Decimal('250.00'), status="Aberto",
-            solicitacao=self.solicitacao_atrasada, fornecedor=self.fornecedor,
-            data_pedido=self.data_passado_45d, data_previsao_entrega=self.data_passado_20d  # Atrasado
+        # Custo MAT02 no dia 1: 5 * 120.00 = 600.00
+        FatoEmpenho.objects.create(
+            quantidade_empenhada=5, projeto=self.projeto_com_dados, 
+            material=self.material_2, data_empenho=self.data_1
         )
-
-        # 2. Pedido PRIORITÁRIO PENDENTE
-        self.solicitacao_prioritaria = DimSolicitacao.objects.create(
-            numero_solicitacao="S21", projeto=self.projeto_com_alertas, material=self.material_ativo,
-            quantidade=3, data_solicitacao=self.data_passado_25d, prioridade="Alta", status="Ativo"
-        )
-        FatoCompra.objects.create(
-            numero_pedido="PED21", valor_total=Decimal('150.00'), status="Enviado",
-            solicitacao=self.solicitacao_prioritaria, fornecedor=self.fornecedor,
-            data_pedido=self.data_passado_25d, data_previsao_entrega=self.data_hoje
+        # Custo MAT03 no dia 2: 1000 * 1.50 = 1500.00
+        FatoEmpenho.objects.create(
+            quantidade_empenhada=1000, projeto=self.projeto_com_dados, 
+            material=self.material_3, data_empenho=self.data_2
         )
 
-        # 3. Material OBSOLETO vinculado RECENTEMENTE
-        self.solicitacao_obsoleto = DimSolicitacao.objects.create(
-            numero_solicitacao="S22", projeto=self.projeto_com_alertas, material=self.material_obsoleto,
-            quantidade=2, data_solicitacao=self.data_passado_20d, prioridade="Normal", status="Ativo"
-        )
-        FatoCompra.objects.create(
-            numero_pedido="PED22", valor_total=Decimal('60.00'), status="Aberto",
-            solicitacao=self.solicitacao_obsoleto, fornecedor=self.fornecedor,
-            data_pedido=self.data_passado_20d, data_previsao_entrega=self.data_hoje
-        )
-
-        # 4. Pedido CONCLUÍDO (não deve aparecer em atrasados)
-        self.solicitacao_concluida = DimSolicitacao.objects.create(
-            numero_solicitacao="S23", projeto=self.projeto_com_alertas, material=self.material_ativo,
-            quantidade=1, data_solicitacao=self.data_passado_45d, prioridade="Normal", status="Ativo"
-        )
-        FatoCompra.objects.create(
-            numero_pedido="PED23", valor_total=Decimal('50.00'), status="Concluída",
-            solicitacao=self.solicitacao_concluida, fornecedor=self.fornecedor,
-            data_pedido=self.data_passado_45d, data_previsao_entrega=self.data_passado_45d
-        )
-
-    def test_alertas_success_with_data(self):
-        """Covers all alert branches with related data (delayed orders, priority pending, obsolete materials)"""
-        response = self.client.get(f'/api/projetos/criticos/{self.projeto_com_alertas.codigo_projeto}')
+    def test_empenho_success_with_data(self):
+        """Testa o calculo dos empenhos quando ha dados factuais."""
+        response = self.client.get(f'/api/projetos/{self.projeto_com_dados.codigo_projeto}/empenhos/')
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
-        self.assertEqual(data['projeto']['codigo'], self.projeto_com_alertas.codigo_projeto)
-        self.assertEqual(data['projeto']['nome'], self.projeto_com_alertas.nome_projeto)
+        
+        self.assertEqual(data['projeto']['codigo'], self.projeto_com_dados.codigo_projeto)
+        
+        # Empenho Total = 355.00 + 600.00 + 1500.00 = 2455.00
+        self.assertEqual(data['empenho_total'], 2455.00)
 
-        alertas = data['alertas_criticos']
+        # Empenho por Categoria
+        # Construcao: 355.00 (MAT01) + 1500.00 (MAT03) = 1855.00
+        # Acabamento: 600.00 (MAT02)
+        categorias = {c['categoria']: c['total_custo'] for c in data['empenho_por_categoria']}
+        self.assertEqual(categorias['Construcao'], 1855.00)
+        self.assertEqual(categorias['Acabamento'], 600.00)
 
-        # Verify delayed orders (PED20 is delayed)
-        self.assertEqual(len(alertas['pedidos_atrasados']), 1)
-        pedido_atrasado = alertas['pedidos_atrasados'][0]
-        self.assertEqual(pedido_atrasado['numero_pedido'], 'PED20')
-        self.assertEqual(pedido_atrasado['status'], 'Aberto')
-        self.assertGreater(pedido_atrasado['dias_atraso'], 0)
+        # Empenho por Material
+        materiais = {m['codigo_material']: m for m in data['empenho_por_material']}
+        self.assertEqual(materiais['MAT01']['quantidade_total'], 10)
+        self.assertEqual(materiais['MAT01']['total_custo'], 355.00)
+        
+        self.assertEqual(materiais['MAT02']['quantidade_total'], 5)
+        self.assertEqual(materiais['MAT02']['total_custo'], 600.00)
+        
+        self.assertEqual(materiais['MAT03']['quantidade_total'], 1000)
+        self.assertEqual(materiais['MAT03']['total_custo'], 1500.00)
 
-        # Verify priority pending orders (PED21 is priority + open/sent)
-        self.assertEqual(len(alertas['pedidos_prioritarios_pendentes']), 1)
-        pedido_prioritario = alertas['pedidos_prioritarios_pendentes'][0]
-        self.assertEqual(pedido_prioritario['numero_pedido'], 'PED21')
-        self.assertEqual(pedido_prioritario['prioridade'], 'Alta')
-        self.assertEqual(pedido_prioritario['status'], 'Enviado')
+        # Empenho por Tempo
+        tempo = {t['data']: t for t in data['empenho_por_tempo']}
+        
+        self.assertEqual(tempo['2024-02-01']['total_custo'], 955.00) # MAT01 + MAT02
+        materiais_fev = {m['codigo_material']: m for m in tempo['2024-02-01']['materiais']}
+        self.assertEqual(materiais_fev['MAT01']['quantidade'], 10)
+        self.assertEqual(materiais_fev['MAT01']['custo_unitario'], 35.50)
+        self.assertEqual(materiais_fev['MAT01']['total_custo'], 355.00)
+        self.assertEqual(materiais_fev['MAT02']['quantidade'], 5)
+        self.assertEqual(materiais_fev['MAT02']['custo_unitario'], 120.00)
+        self.assertEqual(materiais_fev['MAT02']['total_custo'], 600.00)
+        
+        self.assertEqual(tempo['2024-03-15']['total_custo'], 1500.00) # MAT03
+        materiais_mar = {m['codigo_material']: m for m in tempo['2024-03-15']['materiais']}
+        self.assertEqual(materiais_mar['MAT03']['quantidade'], 1000)
+        self.assertEqual(materiais_mar['MAT03']['custo_unitario'], 1.50)
+        self.assertEqual(materiais_mar['MAT03']['total_custo'], 1500.00)
 
-        # Verify obsolete materials (M21 is obsolete and recently ordered via PED22)
-        self.assertEqual(len(alertas['materiais_obsoletos']), 1)
-        material_obsoleto = alertas['materiais_obsoletos'][0]
-        self.assertEqual(material_obsoleto['codigo_material'], 'M21')
-        self.assertEqual(material_obsoleto['status'], 'Obsoleto')
-        self.assertTrue(material_obsoleto['vinculado_ao_projeto'])
-        self.assertTrue(material_obsoleto['pedido_recente'])
-
-    def test_alertas_success_without_data(self):
-        """Covers empty alerts when project has no related purchases"""
-        response = self.client.get(f'/api/projetos/criticos/{self.projeto_sem_alertas.codigo_projeto}')
+    def test_empenho_success_without_data(self):
+        """Testa os fallbacks para 0.0 quando nao ha empenhos no projeto."""
+        response = self.client.get(f'/api/projetos/{self.projeto_vazio.codigo_projeto}/empenhos/')
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
-        self.assertEqual(data['projeto']['codigo'], self.projeto_sem_alertas.codigo_projeto)
-        alertas = data['alertas_criticos']
+        self.assertEqual(data['projeto']['codigo'], self.projeto_vazio.codigo_projeto)
+        self.assertEqual(data['empenho_total'], 0.0)
+        self.assertEqual(data['empenho_por_categoria'], [])
+        self.assertEqual(data['empenho_por_material'], [])
+        self.assertEqual(data['empenho_por_tempo'], [])
 
-        self.assertEqual(alertas['pedidos_atrasados'], [])
-        self.assertEqual(alertas['pedidos_prioritarios_pendentes'], [])
-        self.assertEqual(alertas['materiais_obsoletos'], [])
-
-    def test_alertas_not_found(self):
-        """Covers the get_object_or_404 failure branch"""
-        response = self.client.get('/api/projetos/criticos/CODIGO-INVALIDO')
+    def test_empenho_not_found(self):
+        """Testa o status 404 quando o projeto nao existe."""
+        response = self.client.get('/api/projetos/CODIGO-INVALIDO/empenhos/')
         self.assertEqual(response.status_code, 404)
 
-    def test_alertas_wrong_method(self):
-        """Covers the @require_GET decorator blocking POST requests"""
-        response = self.client.post(f'/api/projetos/criticos/{self.projeto_com_alertas.codigo_projeto}')
+    def test_empenho_wrong_method(self):
+        """Testa o status 405 caso utilize verbo nao suportado como POST."""
+        response = self.client.post(f'/api/projetos/{self.projeto_com_dados.codigo_projeto}/empenhos/')
         self.assertEqual(response.status_code, 405)
