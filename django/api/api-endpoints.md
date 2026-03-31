@@ -111,9 +111,70 @@ Retorna as tarefas de um projeto com total de horas trabalhadas por tarefa e um 
 
 ### **Resposta de Erro: `404 Not Found`**
 
-Retornada quando o `codigo_projeto` informado não existe.
+Retornada quando o `codigo_projeto` informado nao existe.
 
 ---
+
+## Rota Inteligencia de Alertas Criticos
+
+Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos, prioridades e materiais obsoletos.
+
+### **Endpoint**
+`GET /api/projetos/criticos/<codigo_projeto>`
+
+### **Parametros de Rota (Path Parameters)**
+
+| Parametro | Tipo | Descricao | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Codigo identificador do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negocio e Criterios de Aceitacao**
+* **Pedidos Atrasados:** Lista pedidos em que `data_atual > data_previsao_entrega` e o `status` nao e `Concluido`.
+* **Pedidos Prioritarios Pendentes:** Lista pedidos com prioridade `Alta` ou `Urgente` cujo status seja `Aberto` ou `Enviado`.
+* **Materiais Obsoletos Criticos:** Lista materiais com `status = Obsoleto` vinculados ao projeto ou presentes em pedidos recentes (ultimos 30 dias).
+
+### **Resposta de Sucesso: `200 OK`**
+
+```json
+{
+    "projeto": {
+        "codigo": "PRJ003",
+        "nome": "Unidade Teste Automatico"
+    },
+    "data_referencia": "2026-03-30",
+    "alertas_criticos": {
+        "pedidos_atrasados": [
+            {
+                "numero_pedido": "PED001",
+                "status": "Pendente",
+                "data_previsao_entrega": "2026-03-10",
+                "dias_atraso": 20
+            }
+        ],
+        "pedidos_prioritarios_pendentes": [
+            {
+                "numero_pedido": "PED007",
+                "prioridade": "Urgente",
+                "status": "Pendente",
+                "data_pedido": "2026-03-25"
+            }
+        ],
+        "materiais_obsoletos": [
+            {
+                "codigo_material": "MAT015",
+                "descricao": "Controlador legado",
+                "status": "Obsoleto",
+                "vinculado_ao_projeto": true,
+                "pedido_recente": false
+            }
+        ]
+    }
+}
+```
+
+### **Resposta de Erro: `404 Not Found`**
+
+Retornada quando o `codigo_projeto` informado nao existe.
 
 ## Rota Analítica de Empenho de Projeto
 

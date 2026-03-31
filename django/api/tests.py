@@ -2,8 +2,7 @@ from decimal import Decimal
 from django.test import TestCase, Client
 from api.models import (
     DimData, DimPrograma, DimProjeto, DimTarefa, FatoTarefa,
-    DimMaterial, DimSolicitacao, FatoCompra, DimFornecedor,
-    FatoEmpenho
+    DimMaterial, DimSolicitacao, FatoCompra, DimFornecedor, FatoEmpenho
 )
 
 class ProjetoDashboardViewTest(TestCase):
@@ -185,7 +184,6 @@ class ProjetoTarefasTimesheetViewTest(TestCase):
         """Covers the @require_GET decorator blocking POST requests"""
         response = self.client.post(f'/api/projetos/tarefas/{self.projeto_com_dados.codigo_projeto}')
         self.assertEqual(response.status_code, 405)
-
 
 class ProjetoEmpenhoViewTest(TestCase):
     def setUp(self):
