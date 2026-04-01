@@ -126,38 +126,49 @@ def load_solicitacoes(df: pd.DataFrame):
 
 
 def load_fato_tarefa(df: pd.DataFrame):
-    logger.info("[Loader] Carregando FatoTarefa...")
+    logger.info("[Loader] Carregando FatoTarefa em lote...")
     FatoTarefa.objects.all().delete()
-    for _, row in df.iterrows():
-        FatoTarefa.objects.create(
+    
+    #cria uma lista de objetos em memoria antes de salvar
+    objs = [
+        FatoTarefa(
             id=row['id'],
             usuario=row['usuario'],
             horas_trabalhadas=row['horas_trabalhadas'],
             tarefa_id=row['tarefa_id'],
             data=get_or_create_dim_data(row['data'])
-        )
-    logger.info(f"[Loader] FatoTarefa carregado: {len(df)} registros.")
+        ) for _, row in df.iterrows()
+    ]
+    
+    #inserção única no banco de dados (Bulk Insert)
+    FatoTarefa.objects.bulk_create(objs, batch_size=500)
+    logger.info(f"[Loader] FatoTarefa carregado: {len(objs)} registros.")
 
 
 def load_fato_empenho(df: pd.DataFrame):
-    logger.info("[Loader] Carregando FatoEmpenho...")
+    logger.info("[Loader] Carregando FatoEmpenho em lote...")
     FatoEmpenho.objects.all().delete()
-    for _, row in df.iterrows():
-        FatoEmpenho.objects.create(
+    
+    objs = [
+        FatoEmpenho(
             id=row['id'],
             quantidade_empenhada=row['quantidade_empenhada'],
             projeto_id=row['projeto_id'],
             material_id=row['material_id'],
             data_empenho=get_or_create_dim_data(row['data_empenho'])
-        )
-    logger.info(f"[Loader] FatoEmpenho carregado: {len(df)} registros.")
+        ) for _, row in df.iterrows()
+    ]
+    
+    FatoEmpenho.objects.bulk_create(objs, batch_size=500)
+    logger.info(f"[Loader] FatoEmpenho carregado: {len(objs)} registros.")
 
 
 def load_fato_compra(df: pd.DataFrame):
-    logger.info("[Loader] Carregando FatoCompra...")
+    logger.info("[Loader] Carregando FatoCompra em lote...")
     FatoCompra.objects.all().delete()
-    for _, row in df.iterrows():
-        FatoCompra.objects.create(
+    
+    objs = [
+        FatoCompra(
             id=row['id'],
             numero_pedido=row['numero_pedido'],
             valor_total=row['valor_total'],
@@ -166,5 +177,8 @@ def load_fato_compra(df: pd.DataFrame):
             fornecedor_id=row['fornecedor_id'],
             data_pedido=get_or_create_dim_data(row['data_pedido']),
             data_previsao_entrega=get_or_create_dim_data(row['data_previsao_entrega'])
-        )
-    logger.info(f"[Loader] FatoCompra carregado: {len(df)} registros.")
+        ) for _, row in df.iterrows()
+    ]
+    
+    FatoCompra.objects.bulk_create(objs, batch_size=500)
+    logger.info(f"[Loader] FatoCompra carregado: {len(objs)} registros.")
