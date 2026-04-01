@@ -622,6 +622,7 @@ class EmpenhoTest(TestCase):
         self.assertEqual(valor, 500)
 
     def test_endpoint(self):
-        response = self.client.get('/api/empenhos-programa/?programa_id=1')
+        url = f'/api/empenhos-programa/?programa_id={self.programa.id}'
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Projeto A")  
+        self.assertContains(response, "Projeto A")
