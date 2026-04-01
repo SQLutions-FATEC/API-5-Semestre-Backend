@@ -344,3 +344,63 @@ Retornado caso a requisição utilize um método diferente de GET (ex: POST, PUT
 ```
 
 ---
+
+## Rota de Empenhos por Programa
+
+Retorna uma listagem detalhada dos empenhos de materiais realizados, permitindo a filtragem por um programa específico ou por categoria de material. O endpoint também fornece o cálculo do valor total empenhado com base no custo estimado dos materiais.
+
+### **Endpoint**
+`GET /api/empenhos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_id` | `Integer` | (Opcional) ID do programa para filtrar os empenhos vinculados. | `12` |
+| `categoria` | `String` | (Opcional) Filtra os materiais por categoria específica. | `Eletrônicos` |
+
+### **Regras de Negócio e Cálculos**
+* **Valor Empenhado (Item):** Calculado multiplicando a quantidade empenhada pelo custo unitário estimado do material. O cálculo seria `Valor` = `Quantidade Empenhada` x `Custo Estimado Material`.
+* **Valor Total Empenhado:** Soma acumulada de todos os valores empenhados dos itens retornados na consulta.
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado com a lista de empenhos (resultados) e o somatório total. Se nenhum filtro for aplicado, retorna todos os registros.
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "resultados": [
+        {
+            "nome_projeto": "Unidade Teste Automático",
+            "nome_material": "Conector Molex 4 vias",
+            "quantidade_empenhada": 470,
+            "valor_empenhado": 18630.8,
+            "data_empenho": "3/11/2024"
+        },
+        {
+            "nome_projeto": "Controlador Motor Brushless",
+            "nome_material": "Diodo Retificador UF4007",
+            "quantidade_empenhada": 286,
+            "valor_empenhado": 34305.7,
+            "data_empenho": "18/5/2024"
+        }
+    ],
+    "valor_total_empenhado": 52936.5
+}
+```
+
+#### Erro: `500 Internal Server Error`
+Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha de conexão com o banco de dados.
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Erro interno no servidor. Por favor, tente novamente mais tarde."
+}
+```
+
+---
