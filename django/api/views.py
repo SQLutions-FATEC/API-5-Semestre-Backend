@@ -356,6 +356,7 @@ def projeto_empenho_api(request, codigo_projeto):
 
     return JsonResponse(data)
 
+@require_GET
 def empenhos_programa(request):
     programa_id = request.GET.get('programa_id')
     categoria = request.GET.get('categoria')
