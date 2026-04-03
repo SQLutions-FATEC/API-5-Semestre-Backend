@@ -266,3 +266,141 @@ Retorna dados analíticos sobre os materiais empenhados de um projeto específic
 ### **Resposta de Erro: `404 Not Found`**
 
 Retornada quando o `codigo_projeto` informado não existe.
+
+---
+
+## Rota Detalhes de Compras do Projeto
+
+Retorna a listagem de todos os pedidos de compra vinculados a um projeto específico, processando métricas de prazos de entrega e consolidando informações de fornecedores e centros de custo.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/compras/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+
+* **Dias Previstos de Entrega:** Calculado individualmente para cada pedido através da diferença entre a data de previsão e a data de emissão: (Data Previsão - Data Pedido).
+* **Tempo Médio de Entrega:** Média aritmética simples de todos os `dias_previstos_entrega` dos pedidos vinculados ao projeto.
+* **Otimização de Query:** Utiliza `Select Related` para buscar dimensões de Fornecedor, Datas e Solicitações em uma única consulta.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas (neste caso, retorna lista vazia e média 0).
+
+**Exemplo de Resposta (JSON)**:
+
+```json
+{
+    "projeto": "PRJ01",
+    "tempo_medio_entrega_dias": 15.0,
+    "pedidos": [
+        {
+            "numero": "PED01",
+            "emissao": "2024-01-01",
+            "previsao": "2024-01-11",
+            "fornecedor": "Forn Teste",
+            "centro_custo": "Proj 1",
+            "status": "Entregue",
+            "dias_previstos_entrega": 10
+        },
+        {
+            "numero": "PED02",
+            "emissao": "2024-01-01",
+            "previsao": "2024-01-21",
+            "fornecedor": "Forn Teste",
+            "centro_custo": "Proj 1",
+            "status": "Pendente",
+            "dias_previstos_entrega": 20
+        }
+    ]
+}
+
+```
+
+#### Erro: `404 Not Found`
+Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dados.
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+
+#### Erro: `405 Method Not Allowed`
+Retornado caso a requisição utilize um método diferente de GET (ex: POST, PUT, DELETE).
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Method \"POST\" not allowed."
+}
+```
+
+---
+
+## Rota de Empenhos por Programa
+
+Retorna uma listagem detalhada dos empenhos de materiais realizados, permitindo a filtragem por um programa específico ou por categoria de material. O endpoint também fornece o cálculo do valor total empenhado com base no custo estimado dos materiais.
+
+### **Endpoint**
+`GET /api/empenhos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_id` | `Integer` | (Opcional) ID do programa para filtrar os empenhos vinculados. | `12` |
+| `categoria` | `String` | (Opcional) Filtra os materiais por categoria específica. | `Eletrônicos` |
+
+### **Regras de Negócio e Cálculos**
+* **Valor Empenhado (Item):** Calculado multiplicando a quantidade empenhada pelo custo unitário estimado do material. O cálculo seria `Valor` = `Quantidade Empenhada` x `Custo Estimado Material`.
+* **Valor Total Empenhado:** Soma acumulada de todos os valores empenhados dos itens retornados na consulta.
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado com a lista de empenhos (resultados) e o somatório total. Se nenhum filtro for aplicado, retorna todos os registros.
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "resultados": [
+        {
+            "nome_projeto": "Unidade Teste Automático",
+            "nome_material": "Conector Molex 4 vias",
+            "quantidade_empenhada": 470,
+            "valor_empenhado": 18630.8,
+            "data_empenho": "3/11/2024"
+        },
+        {
+            "nome_projeto": "Controlador Motor Brushless",
+            "nome_material": "Diodo Retificador UF4007",
+            "quantidade_empenhada": 286,
+            "valor_empenhado": 34305.7,
+            "data_empenho": "18/5/2024"
+        }
+    ],
+    "valor_total_empenhado": 52936.5
+}
+```
+
+#### Erro: `500 Internal Server Error`
+Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha de conexão com o banco de dados.
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Erro interno no servidor. Por favor, tente novamente mais tarde."
+}
+```
+
+---

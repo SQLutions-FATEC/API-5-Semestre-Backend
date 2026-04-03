@@ -1,4 +1,5 @@
 from django.views.decorators.http import require_GET
+from datetime import date
 from decimal import Decimal
 from datetime import date, timedelta
 import unicodedata
@@ -68,6 +69,53 @@ def projeto_dashboard_api(request, codigo_projeto):
 
     return JsonResponse(data)
 
+# Endpoint para listar as compras vinculadas a um projeto
+@require_GET
+def compras_projeto_api(request, codigo_projeto):
+    projeto = get_object_or_404(DimProjeto, codigo_projeto = codigo_projeto)
+
+    compras = FatoCompra.objects.filter(
+        solicitacao__projeto=projeto
+    ).select_related(
+        'fornecedor',
+        'data_pedido',
+        'data_previsao_entrega',
+        'solicitacao__projeto'
+    )
+
+    lista_compras = []
+    soma_dias_entrega = 0
+    quantidade_pedidos = 0
+
+    for compra in compras:
+        dt_pedido = compra.data_pedido
+        dt_previsao = compra.data_previsao_entrega
+
+        data_emissao = date(dt_pedido.ano, dt_pedido.mes, dt_pedido.dia)
+        data_previsao = date(dt_previsao.ano, dt_previsao.mes, dt_previsao.dia)
+
+        dias_previstos = (data_previsao - data_emissao).days
+
+        soma_dias_entrega += dias_previstos
+        quantidade_pedidos += 1
+
+        lista_compras.append({
+            "numero": compra.numero_pedido,
+            "emissao": data_emissao.strftime("%Y-%m-%d"),
+            "previsao": data_previsao.strftime("%Y-%m-%d"),
+            "fornecedor": compra.fornecedor.razao_social,
+            "centro_custo": compra.solicitacao.projeto.nome_projeto,
+            "status": compra.status,
+            "dias_previstos_entrega": dias_previstos
+        })
+    
+    tempo_medio = round(soma_dias_entrega / quantidade_pedidos, 2) if quantidade_pedidos > 0 else 0.0
+
+    return JsonResponse({
+        "projeto": projeto.codigo_projeto,
+        "tempo_medio_entrega_dias": tempo_medio,
+        "pedidos": lista_compras
+    })
 
 @require_GET
 def projeto_tarefas_timesheet_api(request, codigo_projeto):
@@ -149,7 +197,7 @@ def projeto_alertas_api(request, codigo_projeto):
                 status_normalizado = _normaliza_texto(compra.status)
                 prioridade_normalizada = _normaliza_texto(compra.solicitacao.prioridade)
 
-                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'Concluída':
+                if data_previsao_entrega and data_atual > data_previsao_entrega and status_normalizado != 'concluida':
                         pedidos_atrasados.append({
                                 'numero_pedido': compra.numero_pedido,
                                 'status': compra.status,
@@ -157,7 +205,7 @@ def projeto_alertas_api(request, codigo_projeto):
                                 'dias_atraso': (data_atual - data_previsao_entrega).days,
                         })
 
-                if prioridade_normalizada in {'Alta', 'Urgente'} and (status_normalizado == 'Aberto' or status_normalizado == 'Enviado'):
+                if prioridade_normalizada in {'alta', 'urgente'} and (status_normalizado == 'aberto' or status_normalizado == 'enviado'):
                         pedidos_prioritarios_pendentes.append({
                                 'numero_pedido': compra.numero_pedido,
                                 'prioridade': compra.solicitacao.prioridade,
@@ -307,3 +355,40 @@ def projeto_empenho_api(request, codigo_projeto):
     }
 
     return JsonResponse(data)
+
+@require_GET
+def empenhos_programa(request):
+    programa_id = request.GET.get('programa_id')
+    categoria = request.GET.get('categoria')
+
+    queryset = FatoEmpenho.objects.select_related(
+        'projeto__programa',
+        'material',
+        'data_empenho'
+    )
+
+    if programa_id:
+        queryset = queryset.filter(projeto__programa__id=programa_id)
+
+    if categoria:
+        queryset = queryset.filter(material__categoria=categoria)
+
+    resultados = []
+    total = 0
+
+    for emp in queryset:
+        valor = emp.quantidade_empenhada * emp.material.custo_estimado
+        total += valor
+
+        resultados.append({
+            "nome_projeto": emp.projeto.nome_projeto,
+            "nome_material": emp.material.descricao,
+            "quantidade_empenhada": emp.quantidade_empenhada,
+            "valor_empenhado": float(valor),
+            "data_empenho": f"{emp.data_empenho.dia}/{emp.data_empenho.mes}/{emp.data_empenho.ano}"
+        })
+
+    return JsonResponse({
+        "resultados": resultados,
+        "valor_total_empenhado": float(total)
+    })
