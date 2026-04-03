@@ -9,7 +9,7 @@ Retorna um consolidado de dados (dashboard) de um projeto específico, incluindo
 
 | Parâmetro | Tipo | Descrição | Exemplo |
 | :--- | :--- | :--- | :--- |
-| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ003` |
+| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ100` |
 
 ### **Regras de Negócio e Cálculos**
 * **Custo Total de Materiais:** Soma do `valor_total` de todas as compras associadas às solicitações do projeto.
@@ -26,23 +26,24 @@ Retornado quando o projeto é encontrado com sucesso.
 **Exemplo de Resposta (JSON):**
 ```json
 {
-    "projeto": {
-        "codigo": "PRJ003",
-        "nome": "Unidade Teste Automático",
-        "status": "Suspenso",
-        "data_inicio": "2022-05-09",
-        "data_fim_prevista": "2025-04-30"
-    },
-    "financeiro": {
-        "total_horas_trabalhadas": 26.44,
-        "custo_total_materiais": 27070.40,
-        "custo_total_projeto": 30166.26
-    },
-    "programa": {
-        "codigo": "MAX12AC",
-        "nome": "MAX 1.2 AC",
-        "gerente": "Ana Paula Ribeiro"
-    }
+  "financeiro": {
+    "custo_total_materiais": 37009.71,
+    "custo_total_projeto": 39167.4487,
+    "total_horas_trabalhadas": 18.07
+  },
+  "programa": {
+    "codigo": "MAX12AC",
+    "gerente": "Ana Paula Ribeiro",
+    "nome": "MAX 1.2 AC"
+  },
+  "projeto": {
+    "codigo": "PRJ100",
+    "data_fim_prevista": "2025-09-28",
+    "data_inicio": "2024-11-09",
+    "nome": "Driver Motor de Passo 3",
+    "responsavel": "Lucas Pereira",
+    "status": "EM ANDAMENTO"
+  }
 }
 ```
 

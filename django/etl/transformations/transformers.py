@@ -27,17 +27,12 @@ def handle_nulls(df):
     numeric_cols = df.select_dtypes(include=[np.number]).columns
     df[numeric_cols] = df[numeric_cols].fillna(0)
     return df
-
-def calculate_project_metrics(df):
-    """Calcula lead_time_dias e is_atrasado para Projetos e Tarefas."""
-    if 'data_inicio' in df.columns and 'data_fim_prevista' in df.columns:
-        #garante que são objetos datetime
         df['data_inicio'] = pd.to_datetime(df['data_inicio'], errors='coerce')
         df['data_fim_prevista'] = pd.to_datetime(df['data_fim_prevista'], errors='coerce')
-        
+
         # 1. Cálculo de lead_time_dias (diferença entre fim previsto e início)
         df['lead_time_dias'] = (df['data_fim_prevista'] - df['data_inicio']).dt.days.fillna(0).astype(int)
-        
+
         # 2. Cálculo de is_atrasado (com base na data prevista e status)
         hoje = pd.Timestamp(datetime.now().date())
         
@@ -55,5 +50,5 @@ def calculate_project_metrics(df):
             
         #garante que valores nulos em datas não resultem em atraso True
         df['is_atrasado'] = df['is_atrasado'].fillna(False)
-        
+
     return df
