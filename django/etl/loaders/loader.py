@@ -8,79 +8,122 @@ from etl.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-
-def get_or_create_dim_data(date_str: str) -> DimData:
+#funções auxiliares de cache
+def get_date_cache(df: pd.DataFrame, columns: list) -> dict:
     """
-    Converte uma string de data em um registro DimData.
-    Cria o registro se ainda não existir.
+    Pré-processa todas as datas únicas do DataFrame e garante que existam na DimData.
+    Retorna um dicionário {date_obj: dim_data_instance} para acesso rápido.
     """
-    date = datetime.strptime(str(date_str), '%Y-%m-%d').date()
-    obj, _ = DimData.objects.get_or_create(
-        dia=date.day,
-        mes=date.month,
-        ano=date.year
-    )
-    return obj
+    all_dates = pd.concat([df[col] for col in columns if col in df.columns]).unique()
+    cache = {}
+    
+    for date_str in all_dates:
+        if pd.isna(date_str): continue
+        
+        clean_date = str(date_str)[:10]
+        dt_obj = datetime.strptime(clean_date, '%Y-%m-%d').date()
+        
+        #o get_or_create aqui seguro porque roda poucas vezes (apenas para datas únicas)
+        obj, _ = DimData.objects.get_or_create(
+            dia=dt_obj.day,
+            mes=dt_obj.month,
+            ano=dt_obj.year
+        )
+        cache[date_str] = obj
+    return cache
 
+def filter_valid_ids(df: pd.DataFrame, model, column_name: str) -> pd.DataFrame:
+    """
+    Remove linhas do DataFrame que referenciam IDs inexistentes no banco de dados.
+    """
+    valid_ids = set(model.objects.values_list('id', flat=True))
+    initial_count = len(df)
+    df_filtered = df[df[column_name].isin(valid_ids)]
+    
+    diff = initial_count - len(df_filtered)
+    if diff > 0:
+        logger.warning(f"[Integridade] {diff} registros descartados em {model.__name__} por ID inválido em {column_name}.")
+    
+    return df_filtered
+
+# --- LOADERS REFATORADOS ---
 
 def load_programas(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimPrograma...")
     DimPrograma.objects.all().delete()
-    for _, row in df.iterrows():
-        DimPrograma.objects.create(
+    date_cache = get_date_cache(df, ['data_inicio', 'data_fim_prevista'])
+    
+    objs = [
+        DimPrograma(
             id=row['id'],
             codigo_programa=row['codigo_programa'],
             nome_programa=row['nome_programa'],
             gerente_programa=row['gerente_programa'],
             gerente_tecnico=row['gerente_tecnico'],
-            data_inicio=get_or_create_dim_data(row['data_inicio']),
-            data_fim_prevista=get_or_create_dim_data(row['data_fim_prevista']),
+            data_inicio=date_cache.get(row['data_inicio']),
+            data_fim_prevista=date_cache.get(row['data_fim_prevista']),
             status=row['status']
-        )
-    logger.info(f"[Loader] DimPrograma carregado: {len(df)} registros.")
-
+        ) for _, row in df.iterrows()
+    ]
+    DimPrograma.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimPrograma carregado: {len(objs)} registros.")
 
 def load_projetos(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimProjeto...")
+    #valida FK com programas
+    df = filter_valid_ids(df, DimPrograma, 'programa_id')
+    
     DimProjeto.objects.all().delete()
-    for _, row in df.iterrows():
-        DimProjeto.objects.create(
+    date_cache = get_date_cache(df, ['data_inicio', 'data_fim_prevista'])
+    
+    objs = [
+        DimProjeto(
             id=row['id'],
             codigo_projeto=row['codigo_projeto'],
             nome_projeto=row['nome_projeto'],
             programa_id=row['programa_id'],
             responsavel=row['responsavel'],
             custo_hora=row['custo_hora'],
-            data_inicio=get_or_create_dim_data(row['data_inicio']),
-            data_fim_prevista=get_or_create_dim_data(row['data_fim_prevista']),
-            status=row['status']
-        )
-    logger.info(f"[Loader] DimProjeto carregado: {len(df)} registros.")
-
+            data_inicio=date_cache.get(row['data_inicio']),
+            data_fim_prevista=date_cache.get(row['data_fim_prevista']),
+            status=row['status'],
+            lead_time_dias=row.get('lead_time_dias', 0),
+            is_atrasado=row.get('is_atrasado', False)
+        ) for _, row in df.iterrows()
+    ]
+    DimProjeto.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimProjeto carregado: {len(objs)} registros.")
 
 def load_tarefas(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimTarefa...")
+    df = filter_valid_ids(df, DimProjeto, 'projeto_id')
+    
     DimTarefa.objects.all().delete()
-    for _, row in df.iterrows():
-        DimTarefa.objects.create(
+    date_cache = get_date_cache(df, ['data_inicio', 'data_fim_prevista'])
+    
+    objs = [
+        DimTarefa(
             id=row['id'],
             codigo_tarefa=row['codigo_tarefa'],
             projeto_id=row['projeto_id'],
             titulo=row['titulo'],
             responsavel=row['responsavel'],
             estimativa=row['estimativa_horas'],
-            data_inicio=get_or_create_dim_data(row['data_inicio']),
-            data_fim_prevista=get_or_create_dim_data(row['data_fim_prevista']),
-            status=row['status']
-        )
-    logger.info(f"[Loader] DimTarefa carregado: {len(df)} registros.")
-
+            data_inicio=date_cache.get(row['data_inicio']),
+            data_fim_prevista=date_cache.get(row['data_fim_prevista']),
+            status=row['status'],
+            lead_time_dias=row.get('lead_time_dias', 0),
+            is_atrasado=row.get('is_atrasado', False)
+        ) for _, row in df.iterrows()
+    ]
+    DimTarefa.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimTarefa carregado: {len(objs)} registros.")
 
 def load_materiais(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimMaterial...")
     DimMaterial.objects.all().delete()
-    for _, row in df.iterrows():
-        DimMaterial.objects.create(
+    objs = [
+        DimMaterial(
             id=row['id'],
             codigo_material=row['codigo_material'],
             descricao=row['descricao'],
@@ -88,15 +131,16 @@ def load_materiais(df: pd.DataFrame):
             fabricante=row['fabricante'],
             custo_estimado=row['custo_estimado'],
             status=row['status']
-        )
-    logger.info(f"[Loader] DimMaterial carregado: {len(df)} registros.")
-
+        ) for _, row in df.iterrows()
+    ]
+    DimMaterial.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimMaterial carregado: {len(objs)} registros.")
 
 def load_fornecedores(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimFornecedor...")
     DimFornecedor.objects.all().delete()
-    for _, row in df.iterrows():
-        DimFornecedor.objects.create(
+    objs = [
+        DimFornecedor(
             id=row['id'],
             codigo_fornecedor=row['codigo_fornecedor'],
             razao_social=row['razao_social'],
@@ -104,50 +148,60 @@ def load_fornecedores(df: pd.DataFrame):
             estado=row['estado'],
             categoria=row['categoria'],
             status=row['status']
-        )
-    logger.info(f"[Loader] DimFornecedor carregado: {len(df)} registros.")
-
+        ) for _, row in df.iterrows()
+    ]
+    DimFornecedor.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimFornecedor carregado: {len(objs)} registros.")
 
 def load_solicitacoes(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimSolicitacao...")
+    df = filter_valid_ids(df, DimProjeto, 'projeto_id')
+    df = filter_valid_ids(df, DimMaterial, 'material_id')
+    
     DimSolicitacao.objects.all().delete()
-    for _, row in df.iterrows():
-        DimSolicitacao.objects.create(
+    date_cache = get_date_cache(df, ['data_solicitacao'])
+    
+    objs = [
+        DimSolicitacao(
             id=row['id'],
             numero_solicitacao=row['numero_solicitacao'],
             projeto_id=row['projeto_id'],
             material_id=row['material_id'],
             quantidade=row['quantidade'],
-            data_solicitacao=get_or_create_dim_data(row['data_solicitacao']),
+            data_solicitacao=date_cache.get(row['data_solicitacao']),
             prioridade=row['prioridade'],
             status=row['status']
-        )
-    logger.info(f"[Loader] DimSolicitacao carregado: {len(df)} registros.")
-
+        ) for _, row in df.iterrows()
+    ]
+    DimSolicitacao.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimSolicitacao carregado: {len(objs)} registros.")
 
 def load_fato_tarefa(df: pd.DataFrame):
-    logger.info("[Loader] Carregando FatoTarefa em lote...")
-    FatoTarefa.objects.all().delete()
+    logger.info("[Loader] Carregando FatoTarefa...")
+    df = filter_valid_ids(df, DimTarefa, 'tarefa_id')
     
-    #cria uma lista de objetos em memoria antes de salvar
+    FatoTarefa.objects.all().delete()
+    date_cache = get_date_cache(df, ['data'])
+    
     objs = [
         FatoTarefa(
             id=row['id'],
             usuario=row['usuario'],
             horas_trabalhadas=row['horas_trabalhadas'],
             tarefa_id=row['tarefa_id'],
-            data=get_or_create_dim_data(row['data'])
+            data=date_cache.get(row['data'])
         ) for _, row in df.iterrows()
     ]
-    
-    #inserção única no banco de dados (Bulk Insert)
-    FatoTarefa.objects.bulk_create(objs, batch_size=500)
+    FatoTarefa.objects.bulk_create(objs)
     logger.info(f"[Loader] FatoTarefa carregado: {len(objs)} registros.")
 
-
 def load_fato_empenho(df: pd.DataFrame):
-    logger.info("[Loader] Carregando FatoEmpenho em lote...")
+    logger.info("[Loader] Carregando FatoEmpenho...")
+    df = filter_valid_ids(df, DimProjeto, 'projeto_id')
+    df = filter_valid_ids(df, DimMaterial, 'material_id')
+    
     FatoEmpenho.objects.all().delete()
+    date_cache = get_date_cache(df, ['data_empenho'])
     
     objs = [
         FatoEmpenho(
@@ -155,17 +209,19 @@ def load_fato_empenho(df: pd.DataFrame):
             quantidade_empenhada=row['quantidade_empenhada'],
             projeto_id=row['projeto_id'],
             material_id=row['material_id'],
-            data_empenho=get_or_create_dim_data(row['data_empenho'])
+            data_empenho=date_cache.get(row['data_empenho'])
         ) for _, row in df.iterrows()
     ]
-    
-    FatoEmpenho.objects.bulk_create(objs, batch_size=500)
+    FatoEmpenho.objects.bulk_create(objs)
     logger.info(f"[Loader] FatoEmpenho carregado: {len(objs)} registros.")
 
-
 def load_fato_compra(df: pd.DataFrame):
-    logger.info("[Loader] Carregando FatoCompra em lote...")
+    logger.info("[Loader] Carregando FatoCompra...")
+    df = filter_valid_ids(df, DimSolicitacao, 'solicitacao_id')
+    df = filter_valid_ids(df, DimFornecedor, 'fornecedor_id')
+    
     FatoCompra.objects.all().delete()
+    date_cache = get_date_cache(df, ['data_pedido', 'data_previsao_entrega'])
     
     objs = [
         FatoCompra(
@@ -175,10 +231,9 @@ def load_fato_compra(df: pd.DataFrame):
             status=row['status'],
             solicitacao_id=row['solicitacao_id'],
             fornecedor_id=row['fornecedor_id'],
-            data_pedido=get_or_create_dim_data(row['data_pedido']),
-            data_previsao_entrega=get_or_create_dim_data(row['data_previsao_entrega'])
+            data_pedido=date_cache.get(row['data_pedido']),
+            data_previsao_entrega=date_cache.get(row['data_previsao_entrega'])
         ) for _, row in df.iterrows()
     ]
-    
-    FatoCompra.objects.bulk_create(objs, batch_size=500)
+    FatoCompra.objects.bulk_create(objs)
     logger.info(f"[Loader] FatoCompra carregado: {len(objs)} registros.")
