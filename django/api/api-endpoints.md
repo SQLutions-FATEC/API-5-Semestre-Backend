@@ -28,8 +28,8 @@ Retornado quando o projeto é encontrado com sucesso.
 {
     "projeto": {
         "codigo": "PRJ003",
-        "nome": "Unidade Teste Automático",
-        "status": "Suspenso",
+        "nome": "UNIDADE TESTE AUTOMATICO",
+        "status": "SUSPENSO",
         "data_inicio": "2022-05-09",
         "data_fim_prevista": "2025-04-30"
     },
@@ -82,23 +82,23 @@ Retorna as tarefas de um projeto com total de horas trabalhadas por tarefa e um 
 {
     "projeto": {
         "codigo": "PRJ003",
-        "nome": "Unidade Teste Automatico"
+        "nome": "UNIDADE TESTE AUTOMATICO"
     },
     "tarefas": [
         {
             "codigo": "TAR001",
             "titulo": "Levantamento de Requisitos",
-            "responsavel": "Joao Pedro Alves",
+            "responsavel": "JOAO PEDRO ALVES",
             "estimativa": 40,
-            "status": "Concluido",
+            "status": "CONCLUIDO",
             "total_horas_trabalhadas": 20.5
         },
         {
             "codigo": "TSK009",
             "titulo": "Prototipacao da placa",
-            "responsavel": "Marcelo Cardoso",
+            "responsavel": "MARCELO CARDOSO",
             "estimativa": 46,
-            "status": "Em andamento",
+            "status": "EM ANDAMENTO",
             "total_horas_trabalhadas": 5.94
         }
     ],
@@ -129,9 +129,9 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
 | `codigo_projeto` | `String` | Codigo identificador do projeto no banco de dados. | `PRJ003` |
 
 ### **Regras de Negocio e Criterios de Aceitacao**
-* **Pedidos Atrasados:** Lista pedidos em que `data_atual > data_previsao_entrega` e o `status` nao e `Concluido`.
-* **Pedidos Prioritarios Pendentes:** Lista pedidos com prioridade `Alta` ou `Urgente` cujo status seja `Aberto` ou `Enviado`.
-* **Materiais Obsoletos Criticos:** Lista materiais com `status = Obsoleto` vinculados ao projeto ou presentes em pedidos recentes (ultimos 30 dias).
+* **Pedidos Atrasados:** Lista pedidos em que `data_atual > data_previsao_entrega` e o `status` nao é `CONCLUIDO`.
+* **Pedidos Prioritarios Pendentes:** Lista pedidos com prioridade `ALTA` ou `URGENTE` cujo status seja `ABERTO` ou `ENVIADO`.
+* **Materiais Obsoletos Criticos:** Lista materiais com `status = OBSOLETO` vinculados ao projeto ou presentes em pedidos recentes (ultimos 30 dias).
 
 ### **Resposta de Sucesso: `200 OK`**
 
@@ -139,14 +139,14 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
 {
     "projeto": {
         "codigo": "PRJ003",
-        "nome": "Unidade Teste Automatico"
+        "nome": "UNIDADE TESTE AUTOMATICO"
     },
     "data_referencia": "2026-03-30",
     "alertas_criticos": {
         "pedidos_atrasados": [
             {
                 "numero_pedido": "PED001",
-                "status": "Pendente",
+                "status": "PENDENTE",
                 "data_previsao_entrega": "2026-03-10",
                 "dias_atraso": 20
             }
@@ -154,8 +154,8 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
         "pedidos_prioritarios_pendentes": [
             {
                 "numero_pedido": "PED007",
-                "prioridade": "Urgente",
-                "status": "Pendente",
+                "prioridade": "URGENTE",
+                "status": "PENDENTE",
                 "data_pedido": "2026-03-25"
             }
         ],
@@ -163,7 +163,7 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
             {
                 "codigo_material": "MAT015",
                 "descricao": "Controlador legado",
-                "status": "Obsoleto",
+                "status": "OBSOLETO",
                 "vinculado_ao_projeto": true,
                 "pedido_recente": false
             }
@@ -201,7 +201,7 @@ Retorna dados analíticos sobre os materiais empenhados de um projeto específic
 {
     "projeto": {
         "codigo": "PRJ003",
-        "nome": "Unidade Teste Automático"
+        "nome": "UNIDADE TESTE AUTOMATICO"
     },
     "empenho_total": 4500.50,
     "empenho_por_categoria": [
@@ -297,7 +297,7 @@ Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas
 
 ```json
 {
-    "projeto": "PRJ01",
+    "projeto": "PRJ003",
     "tempo_medio_entrega_dias": 15.0,
     "pedidos": [
         {
@@ -306,7 +306,7 @@ Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas
             "previsao": "2024-01-11",
             "fornecedor": "Forn Teste",
             "centro_custo": "Proj 1",
-            "status": "Entregue",
+            "status": "ENTREGUE",
             "dias_previstos_entrega": 10
         },
         {
@@ -315,7 +315,7 @@ Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas
             "previsao": "2024-01-21",
             "fornecedor": "Forn Teste",
             "centro_custo": "Proj 1",
-            "status": "Pendente",
+            "status": "PENDENTE",
             "dias_previstos_entrega": 20
         }
     ]
@@ -375,14 +375,14 @@ Retornado com a lista de empenhos (resultados) e o somatório total. Se nenhum f
 {
     "resultados": [
         {
-            "nome_projeto": "Unidade Teste Automático",
+            "nome_projeto": "UNIDADE TESTE AUTOMATICO",
             "nome_material": "Conector Molex 4 vias",
             "quantidade_empenhada": 470,
             "valor_empenhado": 18630.8,
             "data_empenho": "3/11/2024"
         },
         {
-            "nome_projeto": "Controlador Motor Brushless",
+            "nome_projeto": "CONTROLADOR MOTOR BRUSHLESS",
             "nome_material": "Diodo Retificador UF4007",
             "quantidade_empenhada": 286,
             "valor_empenhado": 34305.7,
