@@ -22,12 +22,12 @@ class ETLIntegrationTest(TestCase):
             path = os.path.join(CSV_BASE_PATH, f)
             self.assertTrue(os.path.exists(path), f"Arquivo não encontrado: {path}")
 
-    def test_run_extraction_command(self):
+    def test_run_etl_command(self):
         """
-        Testa se o comando 'run_extraction' popula o banco corretamente.
+        Testa se o comando 'run_etl' popula o banco corretamente.
         """
         # 1. Executa o comando de gerenciamento que criamos
-        call_command('run_extraction')
+        call_command('run_etl')
 
         # 2. Valida DimPrograma (Dimensão Base)
         df_programas = pd.read_csv(os.path.join(CSV_BASE_PATH, 'programas.csv'))
@@ -48,8 +48,8 @@ class ETLIntegrationTest(TestCase):
         Opcional: Garante que o loader lida com exclusão prévia (delete())
         rodando o comando duas vezes.
         """
-        call_command('run_extraction')
+        call_command('run_etl')
         count_first_run = DimProjeto.objects.count()
         
-        call_command('run_extraction') #deve truncar e carregar de novo
+        call_command('run_etl') #deve truncar e carregar de novo
         self.assertEqual(DimProjeto.objects.count(), count_first_run)
