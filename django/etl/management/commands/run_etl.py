@@ -3,6 +3,9 @@ from api.models import (
     DimPrograma, DimProjeto, DimTarefa, DimMaterial,
     DimFornecedor, DimSolicitacao, FatoTarefa, FatoEmpenho, FatoCompra
 )
+
+from etl.transformations.transformers import standardize_strings, handle_nulls, calculate_project_metrics
+
 from etl.extractors.extractors import (
     ProgramasExtractor,
     ProjetosExtractor,
@@ -50,16 +53,8 @@ class Command(BaseCommand):
     help = "Executa o processo manual do ETL: Extração, Transformação e Carga no DW"
 
     def handle(self, *args, **kwargs):
-        #log interno
-        logger.info(SEPARATOR)
-        logger.info("PROCESSO ETL INICIADO")
-        logger.info(SEPARATOR)
+        # ... (logs iniciais)
         
-        #saída visual no terminal
-        self.stdout.write(self.style.WARNING(SEPARATOR))
-        self.stdout.write(self.style.WARNING("INICIANDO SINCRONIZAÇÃO ETL"))
-        self.stdout.write(self.style.WARNING(SEPARATOR))
-
         erros = []
 
         for extractor_class, loader_fn, model_dw, nome in PIPELINE:
@@ -71,8 +66,16 @@ class Command(BaseCommand):
                 extractor = extractor_class()
                 df = extractor.extract()
 
-                # 2. Transformação e 3. Carga
-                self.stdout.write(f" -> Aplicando transformações e carregando no Data Warehouse...")
+                # 2. Transformação
+                self.stdout.write(" -> Aplicando transformações de negócio...")
+                df = standardize_strings(df, ['status', 'categoria', 'prioridade', 'cidade', 'estado', 'nome', 'responsavel'])
+                df = handle_nulls(df)
+                
+                if nome in ['Projetos', 'Tarefas']:
+                    df = calculate_project_metrics(df)
+
+                # 3. Carga
+                self.stdout.write(" -> Carregando no Data Warehouse...")
                 loader_fn(df)
 
                 #validação de integridade

@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import pytest
 from django.test import TestCase
 from django.core.management import call_command
 from api.models import DimPrograma, DimProjeto, DimTarefa, FatoCompra
@@ -24,7 +25,7 @@ class ETLIntegrationTest(TestCase):
 
     def test_run_etl_command(self):
         """
-        Testa se o comando 'run_etl' popula o banco corretamente.
+        Testa se o comando 'run_etl' popula o banco corretamente e aplica transformações.
         """
         # 1. Executa o comando de gerenciamento que criamos
         call_command('run_etl')
@@ -38,18 +39,27 @@ class ETLIntegrationTest(TestCase):
         self.assertEqual(FatoCompra.objects.count(), len(df_pedidos))
 
         # 4. Valida um dado específico para garantir que o mapeamento de colunas está OK
-        #exemplo: Verificar se o primeiro pedido do CSV bate com o banco
         primeiro_pedido_csv = df_pedidos.iloc[0]['numero_pedido']
         primeiro_pedido_db = FatoCompra.objects.get(id=df_pedidos.iloc[0]['id'])
         self.assertEqual(primeiro_pedido_db.numero_pedido, primeiro_pedido_csv)
 
-    def test_integrity_on_empty_csv(self):
+        # 5. Validação das Transformações (Adicionado conforme Comentário do PR)
+        projeto = DimProjeto.objects.first()
+        self.assertIsNotNone(projeto, "O banco deveria ter pelo menos um projeto carregado.")
+        
+        #garante que o status ficou tudo em maiúsculo (standardize_strings)
+        self.assertEqual(projeto.status, projeto.status.upper())
+        
+        #garante que o cálculo de métricas rodou corretamente (calculate_project_metrics)
+        self.assertGreaterEqual(projeto.lead_time_dias, 0)
+
+    def test_etl_command_idempotency(self):
         """
-        Opcional: Garante que o loader lida com exclusão prévia (delete())
-        rodando o comando duas vezes.
+        Garante que rodar o comando duas vezes não duplica dados (Idempotência).
         """
         call_command('run_etl')
         count_first_run = DimProjeto.objects.count()
+        self.assertGreater(count_first_run, 0, "A tabela não deveria estar vazia após a carga.")
         
-        call_command('run_etl') #deve truncar e carregar de novo
+        call_command('run_etl') # deve apagar os dados antigos e carregar de novo
         self.assertEqual(DimProjeto.objects.count(), count_first_run)
