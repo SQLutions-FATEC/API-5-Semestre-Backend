@@ -64,7 +64,7 @@ django/etl/
 │   ├── test_extraction.py         # Testes de integração do pipeline
 │   └── test_transformers.py       # Testes unitários das métricas e cálculos
 └── management/commands/
-    └── run_etl.py           # Orquestrador (Comando de execução)
+    └── run_etl.py                 # Gatilho manual (Comando de execução)
 ```
 
 ## 7. Qualidade e Testes
@@ -90,24 +90,22 @@ Para garantir o contexto correto de banco de dados e dependências, siga os pass
     docker compose exec backend python -m pytest --cov=etl --cov-report=term-missing etl/tests/
     ```
 
-## 8. Como Executar o Processo de Carga
-Para disparar a extração e carga completa (Full Load) do Data Warehouse:
+## 8. Gatilho de Sincronização Manual (Execução)
+Para consolidar os dados dos arquivos operacionais para o Data Warehouse sob demanda, foi desenvolvido um comando de gerenciamento customizado do Django.
+
+Para disparar o processo completo:
 
 1.  **No diretório de deploy, execute:**
     ```bash
     docker compose exec backend python manage.py run_etl
     ```
-2.  **Acompanhe o processamento através dos logs:**
-    ```bash
-    docker compose logs -f backend
-    ```
-## 9. Processo de Carga das Tabelas Fato
-O carregamento das tabelas fato (FatoTarefa, FatoEmpenho e FatoCompra) é a etapa final do pipeline analítico.
+2.  **Acompanhamento:**
+    O terminal exibirá o progresso de cada etapa ("Extraindo...", "Carregando..."). Ao final, será exibida a mensagem de sucesso ou um relatório de erros caso ocorram falhas de integridade.
 
-### **Otimização com Bulk Insert**
-Para garantir alta performance, o carregamento utiliza o método `bulk_create` do Django ORM. Em vez de centenas de requisições individuais ao banco, os dados são agrupados em listas de objetos em memória e persistidos em uma única transação por entidade.
+## 9. Processo de Carga e Idempotência
+O carregamento das tabelas fato (`FatoTarefa`, `FatoEmpenho` e `FatoCompra`) e dimensões é a etapa final do pipeline analítico.
 
-### **Garantia de Integridade**
-O pipeline realiza uma limpeza prévia (`.delete()`) de registros antigos antes da carga, garantindo que o Data Warehouse reflita fielmente o estado mais recente dos arquivos CSV, sem duplicidade ou dados órfãos.
-
+* **Otimização com Bulk Insert:** Para garantir alta performance, o carregamento utiliza o método `bulk_create` do Django ORM, persistindo os dados em listas de objetos em memória em uma única transação por entidade.
+* **Garantia de Integridade e Idempotência:** O pipeline realiza uma limpeza prévia (`.delete()`) de registros antigos antes de cada carga. Isso garante que o Data Warehouse possa ser sincronizado múltiplas vezes sem duplicar dados, refletindo sempre o estado mais recente dos arquivos CSV.
+* 
 ---
