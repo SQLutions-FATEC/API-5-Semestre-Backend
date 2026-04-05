@@ -28,6 +28,14 @@ from etl.loaders.loader import (
 from etl.validators.integrity import validate
 from etl.utils.logger import get_logger
 
+
+from etl.transformations.transformers import (
+    standardize_strings, 
+    handle_nulls, 
+    calculate_project_metrics
+)
+
+
 logger = get_logger("etl.command")
 
 SEPARATOR = "=============================="
@@ -61,6 +69,17 @@ class Command(BaseCommand):
                 #extração
                 extractor = extractor_class()
                 df = extractor.extract()
+
+                #transformacao
+                logger.info(f"[{nome}] Aplicando transformações e limpeza...")
+
+                #padronização de strings e tratamento de nulos geral
+                df = standardize_strings(df, ['status', 'categoria', 'prioridade', 'cidade', 'estado'])
+                df = handle_nulls(df)
+
+                #calculos especificos para tabelas de Projetos e Tarefas
+                if nome in ['DimProjeto', 'DimTarefa']:
+                    df = calculate_project_metrics(df)
 
                 #carregamento no DW
                 loader_fn(df)

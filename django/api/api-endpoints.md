@@ -9,7 +9,7 @@ Retorna um consolidado de dados (dashboard) de um projeto específico, incluindo
 
 | Parâmetro | Tipo | Descrição | Exemplo |
 | :--- | :--- | :--- | :--- |
-| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ003` |
+| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ100` |
 
 ### **Regras de Negócio e Cálculos**
 * **Custo Total de Materiais:** Soma do `valor_total` de todas as compras associadas às solicitações do projeto.

@@ -8,7 +8,8 @@ from etl.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-#funções auxiliares de cache
+# --- FUNÇÕES AUXILIARES DE CACHE ---
+
 def get_date_cache(df: pd.DataFrame, columns: list) -> dict:
     """
     Pré-processa todas as datas únicas do DataFrame e garante que existam na DimData.
@@ -23,7 +24,7 @@ def get_date_cache(df: pd.DataFrame, columns: list) -> dict:
         clean_date = str(date_str)[:10]
         dt_obj = datetime.strptime(clean_date, '%Y-%m-%d').date()
         
-        #o get_or_create aqui seguro porque roda poucas vezes (apenas para datas únicas)
+        # O get_or_create aqui é seguro porque roda poucas vezes (apenas para datas únicas)
         obj, _ = DimData.objects.get_or_create(
             dia=dt_obj.day,
             mes=dt_obj.month,
@@ -70,7 +71,7 @@ def load_programas(df: pd.DataFrame):
 
 def load_projetos(df: pd.DataFrame):
     logger.info("[Loader] Carregando DimProjeto...")
-    #valida FK com programas
+    # Valida FK com programas
     df = filter_valid_ids(df, DimPrograma, 'programa_id')
     
     DimProjeto.objects.all().delete()
