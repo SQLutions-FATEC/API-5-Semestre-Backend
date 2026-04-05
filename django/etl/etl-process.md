@@ -107,5 +107,5 @@ O carregamento das tabelas fato (`FatoTarefa`, `FatoEmpenho` e `FatoCompra`) e d
 
 * **Otimização com Bulk Insert:** Para garantir alta performance, o carregamento utiliza o método `bulk_create` do Django ORM, persistindo os dados em listas de objetos em memória em uma única transação por entidade.
 * **Garantia de Integridade e Idempotência:** O pipeline realiza uma limpeza prévia (`.delete()`) de registros antigos antes de cada carga. Isso garante que o Data Warehouse possa ser sincronizado múltiplas vezes sem duplicar dados, refletindo sempre o estado mais recente dos arquivos CSV.
-
+* 
 ---
