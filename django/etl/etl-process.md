@@ -1,5 +1,3 @@
-
-
 ---
 
 # Documentação do Processo ETL (Extração, Transformação e Carga)
@@ -66,7 +64,7 @@ django/etl/
 │   ├── test_extraction.py         # Testes de integração do pipeline
 │   └── test_transformers.py       # Testes unitários das métricas e cálculos
 └── management/commands/
-    └── run_extraction.py          # Orquestrador (Comando de execução)
+    └── run_etl.py           # Orquestrador (Comando de execução)
 ```
 
 ## 7. Qualidade e Testes
@@ -97,11 +95,19 @@ Para disparar a extração e carga completa (Full Load) do Data Warehouse:
 
 1.  **No diretório de deploy, execute:**
     ```bash
-    docker compose exec backend python manage.py run_extraction
+    docker compose exec backend python manage.py run_etl
     ```
 2.  **Acompanhe o processamento através dos logs:**
     ```bash
     docker compose logs -f backend
     ```
+## 9. Processo de Carga das Tabelas Fato
+O carregamento das tabelas fato (FatoTarefa, FatoEmpenho e FatoCompra) é a etapa final do pipeline analítico.
+
+### **Otimização com Bulk Insert**
+Para garantir alta performance, o carregamento utiliza o método `bulk_create` do Django ORM. Em vez de centenas de requisições individuais ao banco, os dados são agrupados em listas de objetos em memória e persistidos em uma única transação por entidade.
+
+### **Garantia de Integridade**
+O pipeline realiza uma limpeza prévia (`.delete()`) de registros antigos antes da carga, garantindo que o Data Warehouse reflita fielmente o estado mais recente dos arquivos CSV, sem duplicidade ou dados órfãos.
 
 ---
