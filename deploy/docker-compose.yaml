@@ -1,0 +1,66 @@
+services:
+  # -------------------- Backend --------------------
+  backend:
+    build:
+      context: ../django
+      dockerfile: ../deploy/backend/Dockerfile
+    container_name: django-app
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=custom-postgres
+      - DB_PORT=5432
+    depends_on:
+      custom-postgres:
+        condition: service_healthy
+    volumes:
+      - ../django:/app
+
+  # -------------------- Frontend --------------------
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Usa a variável do .env ou assume 'main' como padrão
+        - FRONTEND_BRANCH=${FRONTEND_BRANCH:-main}
+        # Substitua pela URL real do repositório de frontend do 5º semestre
+        - REPO_URL=https://github.com/SQLutions-FATEC/API-5-Semestre-Frontend
+    container_name: nextjs-app
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+
+  # -------------------- Database --------------------
+  custom-postgres:
+    build:
+      context: ./postgres
+    container_name: psql-db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # O pg_isready vai usar as variáveis de ambiente para testar a conexão real
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+
+
