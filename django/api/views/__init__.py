@@ -1,0 +1,16 @@
+# Dentro de sua_app/views/__init__.py
+
+from .dashboard import projeto_dashboard_api
+from .compras import compras_projeto_api
+from .tarefas import projeto_tarefas_timesheet_api
+from .alertas import projeto_alertas_api
+from .empenhos import projeto_empenho_api, empenhos_programa
+
+__all__ = [
+    'projeto_dashboard_api',
+    'compras_projeto_api',
+    'projeto_tarefas_timesheet_api',
+    'projeto_alertas_api',
+    'projeto_empenho_api',
+    'empenhos_programa',
+]
