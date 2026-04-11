@@ -68,7 +68,7 @@ class ComprasProjetoViewTest(TestCase):
         
         pedido_1 = next(p for p in data['pedidos'] if p['numero'] == 'PED01')
         self.assertEqual(pedido_1['fornecedor'], "Forn Teste")
-        self.assertEqual(pedido_1['nome_material'], "Proj 1")
+        self.assertEqual(pedido_1['centro_custo'], "Proj 1")
         self.assertEqual(pedido_1['status'], "Entregue")
         self.assertEqual(pedido_1['dias_previstos_entrega'], 10)
 
