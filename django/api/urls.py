@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/projetos/<str:codigo_projeto>/', projeto_dashboard_api, name='projeto-detalhe'),
     path('api/projetos/<str:codigo_projeto>/compras/', compras_projeto_api, name='compras_projeto'),
     path('api/empenhos-programa/', empenhos_programa, name='empenhos-programa'),
-    path(
+     path(
         'api/projetos/tarefas/<str:codigo_projeto>',
         projeto_tarefas_timesheet_api,
         name='projeto-tarefas-timesheet',
@@ -39,7 +39,7 @@ urlpatterns = [
         'api/projetos/criticos/<str:codigo_projeto>',
         projeto_alertas_api,
         name='projeto-alertas',
-    ),
+    ), 
     path(
         'api/projetos/<str:codigo_projeto>/empenhos/', 
         projeto_empenho_api, 
