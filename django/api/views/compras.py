@@ -38,7 +38,7 @@ def compras_projeto_api(request, codigo_projeto):
             "emissao": data_emissao.strftime("%Y-%m-%d"),
             "previsao": data_previsao.strftime("%Y-%m-%d"),
             "fornecedor": compra.fornecedor.razao_social,
-            "centro_custo": compra.solicitacao.projeto.nome_projeto,
+            "nome_material": compra.solicitacao.material.descricao,
             "status": compra.status,
             "dias_previstos_entrega": dias_previstos
         })
