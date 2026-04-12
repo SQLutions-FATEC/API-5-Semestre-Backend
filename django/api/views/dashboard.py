@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
 from django.views.decorators.http import require_GET
-from api.models import DimProjeto, FatoTarefa, FatoCompra
+from api.models import DimProjeto, DimTarefa, FatoTarefa, FatoCompra
 
 @require_GET
 def projeto_dashboard_api(request, codigo_projeto):
@@ -15,7 +15,13 @@ def projeto_dashboard_api(request, codigo_projeto):
     horas_trabalhadas = FatoTarefa.objects.filter(tarefa__projeto=projeto).aggregate(
         total_horas=Sum('horas_trabalhadas')
     )
+    horas_totais_estimadas = DimTarefa.objects.filter(projeto=projeto).aggregate(
+        total_horas_estimadas=Sum('estimativa')
+    )
+
     total_horas = horas_trabalhadas['total_horas'] or 0.0
+    total_horas_estimadas = horas_totais_estimadas['total_horas_estimadas'] or 0.0
+
 
     compras_agregadas = FatoCompra.objects.filter(solicitacao__projeto=projeto).aggregate(
         total_materiais=Sum('valor_total')
@@ -40,7 +46,8 @@ def projeto_dashboard_api(request, codigo_projeto):
         "financeiro": {
             "total_horas_trabalhadas": round(total_horas, 2),
             "custo_total_materiais": float(total_materiais),
-            "custo_total_projeto": float(custo_total)
+            "custo_total_projeto": float(custo_total),
+            "horas_totais_estimadas": round(total_horas_estimadas, 2)
         },
         "programa": {
             "codigo": projeto.programa.codigo_programa,
