@@ -8,7 +8,7 @@ from etl.extractors.base import CSV_BASE_PATH
 
 class ETLIntegrationTest(TestCase):
     """
-    Testes de integração para validar o fluxo CSV -> DW.
+    Testes de integração para validar o fluxo CSV -> DW e comandos de carga.
     """
 
     def setUp(self):
@@ -27,7 +27,7 @@ class ETLIntegrationTest(TestCase):
         """
         Testa se o comando 'run_etl' popula o banco corretamente e aplica transformações.
         """
-        # 1. Executa o comando de gerenciamento que criamos
+        # 1. Executa o comando de gerenciamento para rodar o ETL
         call_command('run_etl')
 
         # 2. Valida DimPrograma (Dimensão Base)
@@ -63,3 +63,25 @@ class ETLIntegrationTest(TestCase):
         
         call_command('run_etl') # deve apagar os dados antigos e carregar de novo
         self.assertEqual(DimProjeto.objects.count(), count_first_run)
+
+    def test_seed_db_command(self):
+        """
+        Testa se o comando 'seed_db' limpa o banco e insere os dados mockados.
+        Garante a cobertura do arquivo api/management/commands/seed_db.py.
+        """
+        # 1. Executa o comando de seed que refatoramos para o Sonar
+        call_command('seed_db')
+
+        # 2. Valida se os dados básicos do seed foram inseridos
+        # O script de seed insere exatamente 3 programas: MANSUP, MANSUP-ER e MAX12AC
+        self.assertEqual(DimPrograma.objects.count(), 3)
+
+        # 3. Valida se a limpeza (delete) está funcionando para garantir idempotência
+        # Ao rodar novamente, ele deve deletar os 3 e inserir os mesmos 3 (total continua 3)
+        call_command('seed_db')
+        self.assertEqual(DimPrograma.objects.count(), 3)
+
+        # 4. Valida um dado específico inserido via constante no Command
+        # O programa 1 no seed tem status "Concluído"
+        programa = DimPrograma.objects.get(id=1)
+        self.assertEqual(programa.status, 'Concluído')
