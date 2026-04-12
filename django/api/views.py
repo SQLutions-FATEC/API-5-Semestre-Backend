@@ -161,7 +161,7 @@ def projeto_tarefas_timesheet_api(request, codigo_projeto):
                 for item in evolucao_qs
         }
 
-        Data = {
+        response_data = {
                         'projeto': {
                                 'codigo': projeto.codigo_projeto,
                                 'nome': projeto.nome_projeto,
@@ -170,8 +170,8 @@ def projeto_tarefas_timesheet_api(request, codigo_projeto):
                         'evolucao_horas': evolucao_horas,
                 }
         
-        return JsonResponse(Data)
-
+        return JsonResponse(response_data)
+git statu
 
 @require_GET
 def projeto_alertas_api(request, codigo_projeto):
