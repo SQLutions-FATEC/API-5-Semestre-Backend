@@ -39,6 +39,11 @@ class ProjetoDashboardViewTest(TestCase):
             responsavel="Resp", estimativa=10, data_inicio=self.data,
             data_fim_prevista=self.data, status="Ativo"
         )
+        self.tarefa_sem_apontamento = DimTarefa.objects.create(
+            codigo_tarefa="T02", projeto=self.projeto_com_dados, titulo="Tarefa 2",
+            responsavel="Resp", estimativa=20, data_inicio=self.data,
+            data_fim_prevista=self.data, status="Ativo"
+        )
         FatoTarefa.objects.create(
             usuario="User", horas_trabalhadas=5.5, tarefa=self.tarefa, data=self.data
         )
@@ -69,6 +74,7 @@ class ProjetoDashboardViewTest(TestCase):
         
         data = response.json()
         self.assertEqual(data['financeiro']['total_horas_trabalhadas'], 5.5)
+        self.assertEqual(data['financeiro']['horas_totais_estimadas'], 30)
         self.assertEqual(data['financeiro']['custo_total_materiais'], 150.5)
         self.assertEqual(data['financeiro']['custo_total_projeto'], 700.5)
 
