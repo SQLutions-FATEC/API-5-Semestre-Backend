@@ -8,3 +8,10 @@ from .utils import obter_projeto, _dim_data_para_date
 @require_GET
 def request_analytics_api(request, codigo_projeto):
     projeto = get_object_or_404(codigo_projeto=codigo_projeto)
+
+    total_pendentes = DimSolicitacao.objects.filter(
+        projeto = projeto,
+        status__iexact = 'aberto'
+    ).count()
+
+    
