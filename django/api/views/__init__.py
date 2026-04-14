@@ -5,6 +5,7 @@ from .compras import compras_projeto_api
 from .tarefas import projeto_tarefas_timesheet_api
 from .alertas import projeto_alertas_api
 from .empenhos import projeto_empenho_api, empenhos_programa
+from .requestAnalytics import request_analytics_api
 
 __all__ = [
     'projeto_dashboard_api',
@@ -13,4 +14,5 @@ __all__ = [
     'projeto_alertas_api',
     'projeto_empenho_api',
     'empenhos_programa',
+    'request_analytics_api',
 ]
