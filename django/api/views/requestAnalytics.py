@@ -31,7 +31,7 @@ def request_analytics_api(request, codigo_projeto):
             "numero_solicitacao": sol.numero_solicitacao,
             "prioridade": sol.prioridade,
             "status": sol.status,
-            "dias_pendentes": dias_pendentes
+            "dias_desde_criacao": dias_pendentes
         })
 
     data = {
