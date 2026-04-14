@@ -43,17 +43,17 @@ class SolicitacoesStatsViewTest(TestCase):
         # Encurtado de "SOL-001" para "S01" (3 chars)
         DimSolicitacao.objects.create(
             numero_solicitacao="S01", projeto=self.projeto_com_dados, material=self.material,
-            quantidade=1, data_solicitacao=self.data_5d, prioridade="Normal", status="Aberto"
+            quantidade=1, data_solicitacao=self.data_5d, prioridade="Normal", status="Pendente"
         )
         
         DimSolicitacao.objects.create(
             numero_solicitacao="S02", projeto=self.projeto_com_dados, material=self.material,
-            quantidade=1, data_solicitacao=self.data_5d, prioridade="Urgente", status="Aberto"
+            quantidade=1, data_solicitacao=self.data_5d, prioridade="Urgente", status="Pendente"
         )
 
         DimSolicitacao.objects.create(
             numero_solicitacao="S03", projeto=self.projeto_com_dados, material=self.material,
-            quantidade=1, data_solicitacao=self.data_2d, prioridade="Alta", status="Aberto"
+            quantidade=1, data_solicitacao=self.data_2d, prioridade="Alta", status="Pendente"
         )
 
         DimSolicitacao.objects.create(
@@ -74,7 +74,7 @@ class SolicitacoesStatsViewTest(TestCase):
         self.assertEqual(len(estatisticas['urgentes_criticas']), 2)
 
         sol_urgente = next(s for s in estatisticas['urgentes_criticas'] if s['numero_solicitacao'] == 'S02')
-        self.assertEqual(sol_urgente['status'], 'Aberto')
+        self.assertEqual(sol_urgente['status'], 'Pendente')
         self.assertEqual(sol_urgente['prioridade'], 'Urgente')
         self.assertEqual(sol_urgente['dias_desde_criacao'], 5) 
 
