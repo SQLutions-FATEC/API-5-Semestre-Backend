@@ -34,7 +34,14 @@ def request_analytics_api(request, codigo_projeto):
             "dias_pendentes": dias_pendentes
         })
 
-    
+    data = {
+        "projeto": projeto.codigo_projeto,
+        "estatisticas": {
+            "total_pendentes": total_pendentes,
+            "urgentes_criticas": lista_urgentes
+        }
+    }
+    return JsonResponse(data)
 
 
 
