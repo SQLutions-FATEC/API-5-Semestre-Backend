@@ -402,5 +402,66 @@ Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha 
     "detail": "Erro interno no servidor. Por favor, tente novamente mais tarde."
 }
 ```
+---
+## Rota Analítica de Solicitações (Estatísticas)
+
+Retorna as estatísticas e indicadores de topo (cards de resumo) para a tela de solicitações de um projeto específico. O endpoint consolida o volume de requisições pendentes e destaca os itens críticos e urgentes que exigem atenção imediata, calculando o tempo de espera desde a abertura.
+
+### **Endpoint**
+`GET /api/empenhos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | (Obrigatório) Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Total de Pendentes (`total_pendentes`):** Contagem absoluta de solicitações vinculadas ao projeto que se encontram com o status exato de "ABERTO".
+* **Urgentes e Críticas (`urgentes_criticas`):** Contagem absoluta de solicitações vinculadas ao projeto que se encontram com o status exato de "ABERTO".
+* **Dias Pendentes (`dias_pendentes`):** Campo inserido dinamicamente no backend, calculado pela diferença em dias entre a data em que o servidor processa a requisição e a data de criação da solicitação (`Data Atual` - `data_solicitacao`).
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado quando o projeto é encontrado e as estatísticas são processadas corretamente. O objeto é estruturado para consumo direto nos cards do front-end.
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    {
+        "projeto": "PRJ003",
+        "estatisticas": {
+            "total_pendentes": 12,
+            "urgentes_criticas": [
+                {
+                    "numero_solicitacao": "SOL-998",
+                    "prioridade": "URGENTE",
+                    "status": "Aberto",
+                    "dias_desde_criacao": 5
+                },
+                {
+                    "numero_solicitacao": "SOL-1005",
+                    "prioridade": "ALTA",
+                    "status": "Aberto",
+                    "dias_desde_criacao": 2
+                }
+            ]
+        }
+    }
+}
+```
+
+#### Erro: `404 Not Found`
+Retornado caso o código do projeto fornecido na URL não seja localizado na base de dados (`DimProjeto`).
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Não encontrado."
+}
+```
 
 ---
