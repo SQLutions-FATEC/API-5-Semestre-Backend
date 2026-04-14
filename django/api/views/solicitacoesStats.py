@@ -17,7 +17,7 @@ def request_analytics_api(request, codigo_projeto):
     solicitacoes_criticas = DimSolicitacao.objects.filter(
         projeto = projeto,
         status__iexact = 'pendente',
-        prioridade__in=['ALTA', 'URGENTE','Alta','Urgente']
+        prioridade__in=['ALTA', 'CRITICA','Alta','Critica']
     ).select_related('data_solicitacao')
 
     hoje = date.today()
