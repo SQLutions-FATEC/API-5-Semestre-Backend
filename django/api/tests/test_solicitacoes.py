@@ -40,7 +40,6 @@ class SolicitacoesStatsViewTest(TestCase):
             fabricante="Fab", custo_estimado=Decimal('10.00'), status="Ativo"
         )
 
-        # Encurtado de "SOL-001" para "S01" (3 chars)
         DimSolicitacao.objects.create(
             numero_solicitacao="S01", projeto=self.projeto_com_dados, material=self.material,
             quantidade=1, data_solicitacao=self.data_5d, prioridade="Normal", status="Pendente"
@@ -48,7 +47,7 @@ class SolicitacoesStatsViewTest(TestCase):
         
         DimSolicitacao.objects.create(
             numero_solicitacao="S02", projeto=self.projeto_com_dados, material=self.material,
-            quantidade=1, data_solicitacao=self.data_5d, prioridade="Urgente", status="Pendente"
+            quantidade=1, data_solicitacao=self.data_5d, prioridade="Critica", status="Pendente"
         )
 
         DimSolicitacao.objects.create(
@@ -58,7 +57,7 @@ class SolicitacoesStatsViewTest(TestCase):
 
         DimSolicitacao.objects.create(
             numero_solicitacao="S04", projeto=self.projeto_com_dados, material=self.material,
-            quantidade=1, data_solicitacao=self.data_5d, prioridade="Urgente", status="Fechado"
+            quantidade=1, data_solicitacao=self.data_5d, prioridade="Critica", status="Fechado"
         )
     
     def test_stats_success_with_data(self):
@@ -75,7 +74,7 @@ class SolicitacoesStatsViewTest(TestCase):
 
         sol_urgente = next(s for s in estatisticas['urgentes_criticas'] if s['numero_solicitacao'] == 'S02')
         self.assertEqual(sol_urgente['status'], 'Pendente')
-        self.assertEqual(sol_urgente['prioridade'], 'Urgente')
+        self.assertEqual(sol_urgente['prioridade'], 'Critica')
         self.assertEqual(sol_urgente['dias_desde_criacao'], 5) 
 
         sol_alta = next(s for s in estatisticas['urgentes_criticas'] if s['numero_solicitacao'] == 'S03')
