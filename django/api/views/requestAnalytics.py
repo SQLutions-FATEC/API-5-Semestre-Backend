@@ -20,4 +20,23 @@ def request_analytics_api(request, codigo_projeto):
         prioridadade__in=['ALTA', 'URGENTE']
     ).select_related('data_solicitacao')
 
+    hoje = date.today()
+    lista_urgentes = []
+
+    for sol in solicitacoes_criticas:
+        data_criacao = _dim_data_para_date(sol.data_solicitacao)
+        dias_pendentes = (hoje - data_criacao).days if data_criacao else 0
+
+        lista_urgentes.append({
+            "numero_solicitacao": sol.numero_solicitacao,
+            "prioridade": sol.prioridade,
+            "status": sol.status,
+            "dias_pendentes": dias_pendentes
+        })
+
+    
+
+
+
+
 
