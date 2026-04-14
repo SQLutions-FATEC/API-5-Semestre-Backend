@@ -11,7 +11,7 @@ def request_analytics_api(request, codigo_projeto):
 
     total_pendentes = DimSolicitacao.objects.filter(
         projeto = projeto,
-        status__iexact = 'aberto'
+        status__iexact = 'pendente'
     ).count()
 
     solicitacoes_criticas = DimSolicitacao.objects.filter(
