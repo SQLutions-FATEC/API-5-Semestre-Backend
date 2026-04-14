@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET
 from api.models import DimSolicitacao
-from .utils import obter_projeto, _dim_data_para_date
+from .utils import _dim_data_para_date
 
 @require_GET
 def request_analytics_api(request, codigo_projeto):
@@ -14,4 +14,10 @@ def request_analytics_api(request, codigo_projeto):
         status__iexact = 'aberto'
     ).count()
 
-    
+    solicitacoes_criticas = DimSolicitacao.objects.filter(
+        projeto = projeto,
+        status__iexact = 'aberto',
+        prioridadade__in=['ALTA', 'URGENTE']
+    ).select_related('data_solicitacao')
+
+
