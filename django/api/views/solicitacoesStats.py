@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET
 from api.models import DimSolicitacao, DimProjeto
 from .utils import _dim_data_para_date
+from django.db.models import F, ExpressionWrapper, DecimalField
 
 @require_GET
 def request_analytics_api(request, codigo_projeto):
@@ -42,8 +43,3 @@ def request_analytics_api(request, codigo_projeto):
         }
     }
     return JsonResponse(data)
-
-
-
-
-
