@@ -41,4 +41,7 @@ def listagem_solicitacoes(request, codigo_projeto):
             "status": sol.status
         })
 
-    return null
+    return JsonResponse({
+        "projeto": projeto.codigo_projeto,
+        "solicitacoes": lista_detalhes
+    })
