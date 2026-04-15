@@ -24,4 +24,21 @@ def listagem_solicitacoes(request, codigo_projeto):
         )
     )
 
+    lista_detalhes = []
+
+    for sol in solicitacoes:
+        data_sol = _dim_data_para_date(sol.data_solicitacao)
+
+        pedido_vinculado = sol.fatocompra_set.first()
+        numero_pedido = pedido_vinculado.numero_pedido if pedido_vinculado else None
+
+        lista_detalhes.append({
+            "numero_solicitacao": sol.numero_solicitacao,
+            "numero_pedido": numero_pedido,
+            "nome_material": sol.material.descricao,
+            "data_solicitacao": data_sol.isoformat() if data_sol else None,
+            "valor_total_estimado": float(sol.valor_total_estimado) if sol.valor_total_estimado else 0.0,
+            "status": sol.status
+        })
+
     return null
