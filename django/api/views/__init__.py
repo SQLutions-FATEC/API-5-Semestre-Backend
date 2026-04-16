@@ -6,6 +6,7 @@ from .tarefas import projeto_tarefas_timesheet_api
 from .alertas import projeto_alertas_api
 from .empenhos import projeto_empenho_api, empenhos_programa
 from .solicitacoesStats import request_analytics_api
+from .solicitacoesLista import listagem_solicitacoes
 
 __all__ = [
     'projeto_dashboard_api',
@@ -15,4 +16,5 @@ __all__ = [
     'projeto_empenho_api',
     'empenhos_programa',
     'request_analytics_api',
+    'listagem_solicitacoes',
 ]
