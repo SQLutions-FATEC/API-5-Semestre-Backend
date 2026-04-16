@@ -36,7 +36,6 @@ def _adiciona_material_pedido_recente(materiais_pedidos_recentes_ids, compra, da
 
 
 def _serializa_pedido_recente(compra):
-    data_solicitacao = _dim_data_para_date(compra.solicitacao.data_solicitacao)
     data_pedido = _dim_data_para_date(compra.data_pedido)
     data_previsao = _dim_data_para_date(compra.data_previsao_entrega)
 
@@ -47,7 +46,7 @@ def _serializa_pedido_recente(compra):
             'valor_total': float(compra.valor_total),
             'data_pedido': data_pedido.isoformat() if data_pedido else None,
             'data_previsao_entrega': data_previsao.isoformat() if data_previsao else None,
-            'solicitacao_numero': data_solicitacao.isoformat() if data_solicitacao else None,
+            'solicitacao_numero': compra.solicitacao.numero_solicitacao,
         }
     }
 
