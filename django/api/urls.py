@@ -23,7 +23,8 @@ from .views import (
     projeto_empenho_api,
     compras_projeto_api,
     empenhos_programa,
-    request_analytics_api
+    request_analytics_api,
+    listagem_solicitacoes
 )
 
 urlpatterns = [
@@ -50,5 +51,10 @@ urlpatterns = [
         'api/projetos/<str:codigo_projeto>/solicitacoes/stats/',
         request_analytics_api, 
         name='projeto-solicitacoes-stats'
+    ),
+    path(
+        'api/projetos/<str:codigo_projeto>/solicitacoes/detalhes/',
+        listagem_solicitacoes, 
+        name='projeto-solicitacoes-detalhes'
     ),
 ]
