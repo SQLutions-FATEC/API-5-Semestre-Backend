@@ -13,7 +13,7 @@ def listagem_solicitacoes(request, codigo_projeto):
     solicitacoes = DimSolicitacao.objects.filter(
         projeto = projeto
     ).select_related(
-        'material_id',
+        'material',
         'data_solicitacao'
     ).prefetch_related(
         'fatocompra_set'
