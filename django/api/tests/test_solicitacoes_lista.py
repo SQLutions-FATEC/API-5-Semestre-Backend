@@ -49,3 +49,23 @@ class SolicitacoesDetalhesViewTest(TestCase):
             numero_solicitacao="S11", projeto=self.projeto, material=self.material,
             quantidade=5, data_solicitacao=self.data_obj, prioridade="Alta", status="Pendente"
         )
+
+    def test_detalhes_success_with_data(self):
+        """Garante que a matemática da view funcione e que o join com pedido seja feito/omitido corretamente"""
+        response = self.client.get(f'/api/projetos/{self.projeto.codigo_projeto}/solicitacoes/detalhes/')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(data['projeto'], "PRJ03")
+        
+        solicitacoes = data['solicitacoes']
+        self.assertEqual(len(solicitacoes), 2)
+
+        sol_1 = next(s for s in solicitacoes if s['numero_solicitacao'] == 'S10')
+        self.assertEqual(sol_1['numero_pedido'], 'PED10')
+        self.assertEqual(sol_1['valor_total_estimado'], 300.00)
+        self.assertEqual(sol_1['nome_material'], 'Placa Mãe')
+
+        sol_2 = next(s for s in solicitacoes if s['numero_solicitacao'] == 'S11')
+        self.assertIsNone(sol_2['numero_pedido'])
+        self.assertEqual(sol_2['valor_total_estimado'], 750.00) 
