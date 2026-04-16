@@ -21,6 +21,8 @@ def projeto_alertas_api(request, codigo_projeto):
 
     pedidos_atrasados = []
     pedidos_prioritarios_pendentes = []
+    ultimas_solicitacoes_com_pedido = []
+    
     materiais_pedidos_recentes_ids = set()
 
     for compra in compras:
@@ -73,6 +75,46 @@ def projeto_alertas_api(request, codigo_projeto):
         for material in materiais_obsoletos_qs
     ]
 
+    solicitacoes_aprovadas_recentes = (
+        DimSolicitacao.objects
+        .filter(projeto=projeto, status__iexact='Aprovada')
+        .order_by(
+            '-data_solicitacao__ano',
+            '-data_solicitacao__mes',
+            '-data_solicitacao__dia',
+            '-id',
+        )[:3]
+    )
+
+    compras_recentes = (
+        FatoCompra.objects
+        .filter(solicitacao__in=solicitacoes_aprovadas_recentes)
+        .select_related('solicitacao__data_solicitacao', 'data_pedido', 'data_previsao_entrega')
+        .order_by(
+            '-solicitacao__data_solicitacao__ano',
+            '-solicitacao__data_solicitacao__mes',
+            '-solicitacao__data_solicitacao__dia',
+            '-solicitacao_id',
+            '-id',
+        )
+    )
+
+    for compra in compras_recentes:
+        data_solicitacao = _dim_data_para_date(compra.solicitacao.data_solicitacao)
+        data_pedido = _dim_data_para_date(compra.data_pedido)
+        data_previsao = _dim_data_para_date(compra.data_previsao_entrega)
+
+        ultimas_solicitacoes_com_pedido.append({
+            'pedido': {
+                'numero_pedido': compra.numero_pedido,
+                'status': compra.status,
+                'valor_total': float(compra.valor_total),
+                'data_pedido': data_pedido.isoformat() if data_pedido else None,
+                'data_previsao_entrega': data_previsao.isoformat() if data_previsao else None,
+                'solicitacao_numero': compra.solicitacao.numero_solicitacao,
+            }
+        })
+
     return JsonResponse({
         'projeto': {
             'codigo': projeto.codigo_projeto,
@@ -83,5 +125,6 @@ def projeto_alertas_api(request, codigo_projeto):
             'pedidos_atrasados': pedidos_atrasados,
             'pedidos_prioritarios_pendentes': pedidos_prioritarios_pendentes,
             'materiais_obsoletos': materiais_obsoletos,
+            'solicitacoes_para_projetos': ultimas_solicitacoes_com_pedido,
         },
     })
