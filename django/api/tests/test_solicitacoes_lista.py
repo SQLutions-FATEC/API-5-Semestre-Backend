@@ -69,3 +69,19 @@ class SolicitacoesDetalhesViewTest(TestCase):
         sol_2 = next(s for s in solicitacoes if s['numero_solicitacao'] == 'S11')
         self.assertIsNone(sol_2['numero_pedido'])
         self.assertEqual(sol_2['valor_total_estimado'], 750.00) 
+    
+    def test_detalhes_success_without_data(self):
+        """Projetos sem solicitações devem retornar uma lista vazia"""
+        response = self.client.get(f'/api/projetos/{self.projeto_vazio.codigo_projeto}/solicitacoes/detalhes/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['solicitacoes'], [])
+
+    def test_detalhes_not_found(self):
+        """Verifica o bloqueio de projetos inexistentes"""
+        response = self.client.get('/api/projetos/CODIGO-INVALIDO/solicitacoes/detalhes/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_detalhes_wrong_method(self):
+        """Garante a restrição de verbo HTTP"""
+        response = self.client.post(f'/api/projetos/{self.projeto.codigo_projeto}/solicitacoes/detalhes/')
+        self.assertEqual(response.status_code, 405)
