@@ -63,20 +63,18 @@ class ProgramaProjetosViewTest(TestCase):
         )
         self.assertEqual(programa_10['nome_programa'], 'Programa 10')
         self.assertEqual(programa_10['status'], 'Ativo')
-        self.assertEqual(len(programa_10['projetos']), 2)
-
-        projetos_programa_10 = {
-            p['codigo_projeto']: p for p in programa_10['projetos']
-        }
-        self.assertEqual(projetos_programa_10['PRJ10']['nome_projeto'], 'Projeto 10')
-        self.assertEqual(projetos_programa_10['PRJ10']['status'], 'Ativo')
-        self.assertEqual(projetos_programa_10['PRJ11']['nome_projeto'], 'Projeto 11')
-        self.assertEqual(projetos_programa_10['PRJ11']['status'], 'Concluido')
+        self.assertEqual(programa_10['gerente'], 'Gerente 10')
+        self.assertEqual(programa_10['gerente_tecnico'], 'Tecnico 10')
+        self.assertNotIn('projetos', programa_10)
 
         programa_11 = next(
             p for p in data['programas'] if p['codigo_programa'] == 'PROG11'
         )
-        self.assertEqual(programa_11['projetos'], [])
+        self.assertEqual(programa_11['nome_programa'], 'Programa 11')
+        self.assertEqual(programa_11['status'], 'Planejado')
+        self.assertEqual(programa_11['gerente'], 'Gerente 11')
+        self.assertEqual(programa_11['gerente_tecnico'], 'Tecnico 11')
+        self.assertNotIn('projetos', programa_11)
 
     def test_programa_projetos_wrong_method(self):
         response = self.client.post('/api/programas/projetos/')
