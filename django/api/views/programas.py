@@ -12,20 +12,13 @@ def programa_projetos_api(request):
 
     response_data = []
     for programa in programas:
-        projetos = programa.dimprojeto_set.order_by('codigo_projeto')
         response_data.append({
             'codigo_programa': programa.codigo_programa,
             'nome_programa': programa.nome_programa,
             'status': programa.status,
             'gerente': programa.gerente_programa,
-            'projetos': [
-                {
-                    'codigo_projeto': projeto.codigo_projeto,
-                    'nome_projeto': projeto.nome_projeto,
-                    'status': projeto.status,
-                }
-                for projeto in projetos
-            ],
+            'gerente_tecnico': programa.gerente_tecnico,
+            
         })
 
     return JsonResponse({'programas': response_data})
