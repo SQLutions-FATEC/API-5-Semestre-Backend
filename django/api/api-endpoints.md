@@ -431,25 +431,23 @@ Retornado quando o projeto é encontrado e as estatísticas são processadas cor
 **Exemplo de Resposta (JSON):**
 ```json
 {
-    {
-        "projeto": "PRJ003",
-        "estatisticas": {
-            "total_pendentes": 12,
-            "urgentes_criticas": [
-                {
-                    "numero_solicitacao": "SOL-998",
-                    "prioridade": "URGENTE",
-                    "status": "Aberto",
-                    "dias_desde_criacao": 5
-                },
-                {
-                    "numero_solicitacao": "SOL-1005",
-                    "prioridade": "ALTA",
-                    "status": "Aberto",
-                    "dias_desde_criacao": 2
-                }
-            ]
-        }
+    "projeto": "PRJ003",
+    "estatisticas": {
+        "total_pendentes": 12,
+        "urgentes_criticas": [
+            {
+                "numero_solicitacao": "SOL-998",
+                "prioridade": "URGENTE",
+                "status": "Aberto",
+                "dias_desde_criacao": 5
+            },
+            {
+                "numero_solicitacao": "SOL-1005",
+                "prioridade": "ALTA",
+                "status": "Aberto",
+                "dias_desde_criacao": 2
+            }
+        ]
     }
 }
 ```
@@ -461,6 +459,67 @@ Retornado caso o código do projeto fornecido na URL não seja localizado na bas
 ```json
 {
     "detail": "Não encontrado."
+}
+```
+
+## Rota Detalhamento de Gastos do Projeto
+
+Retorna o detalhamento financeiro consolidado de um projeto específico, incluindo o valor total gasto e uma lista detalhada de todos os pedidos de compra associados às solicitações do projeto.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/gastos/detalhes/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ-Gasto` |
+
+### **Regras de Negócio e Cálculos**
+* **Gasto Total Consolidado:** Soma (agregação) do campo `valor_total` de todos os pedidos de compra (`FatoCompra`) vinculados ao projeto através das solicitações.
+* **Lista de Pedidos:** Listagem detalhada das compras, ordenada pelo maior valor, incluindo material, fornecedor e o status atual do pedido. A query é otimizada (`select_related`) para buscar dados do fornecedor e material em uma única consulta.
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado quando o projeto é encontrado com sucesso na base de dados. Retorna a listagem e o gasto total, mesmo que os pedidos estejam zerados (neste caso, `0.0`).
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto": {
+        "codigo": "PRJ-Gasto",
+        "nome": "Projeto Teste Gasto"
+    },
+    "gasto_total_consolidado": 2000.0,
+    "pedidos": [
+        {
+            "numero_pedido": "PED-01",
+            "material_nome": "Material X",
+            "fornecedor_nome": "Fornecedor Y",
+            "valor_total_pedido": 1500.0,
+            "status": "Concluido"
+        },
+        {
+            "numero_pedido": "PED-02",
+            "material_nome": "Material X",
+            "fornecedor_nome": "Fornecedor Y",
+            "valor_total_pedido": 500.0,
+            "status": "Pendente"
+        }
+    ]
+}
+```
+
+#### Erro: `404 Not Found`
+Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dados.
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
 }
 ```
 
