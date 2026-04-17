@@ -538,3 +538,81 @@ Retornado caso o código do projeto fornecido na URL não seja localizado na bas
     "detail": "Not found."
 }
 ```
+
+
+
+## Rota Programas e Projetos
+
+Retorna todos os programas com codigo,nome,status e gerente, juntamente com todos os projetos com o codigo do projeto, nome do projeto e seu status.
+
+### **Endpoint**
+
+`GET /api/programas/projetos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+Sem parãmetros para essa rota
+
+### **Regras de Negócio e Cálculos**
+
+* **Programas:** Os programas estão listados com código,nome,status e seu gerente.
+* **Projetos:** Os projetos estão listados abaixo de seus programas código,nome e status do projeto.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+Retorna uma lista de programas junto com os projetos vinculados a cada programa.
+
+**Exemplo de Resposta (JSON):**
+
+```json
+{
+  "programas": [
+    {
+      "codigo_programa": "MANSUP-ER",
+      "nome_programa": "MANSUP-ER",
+      "status": "EM ANDAMENTO",
+      "gerente": "Mariana Fernandes",
+      "projetos": [
+        {
+          "codigo_projeto": "PRJ086",
+          "nome_projeto": "Unidade Proteção Surto 3",
+          "status": "CONCLUIDO"
+        },
+        {
+          "codigo_projeto": "PRJ089",
+          "nome_projeto": "Placa Regulador Switching 3",
+          "status": "EM ANDAMENTO"
+        }
+      ]
+    },
+    {
+      "codigo_programa": "MAX12AC",
+      "nome_programa": "MAX 1.2 AC",
+      "status": "EM ANDAMENTO",
+      "gerente": "Ana Paula Ribeiro",
+      "projetos": [
+        {
+          "codigo_projeto": "PRJ001",
+          "nome_projeto": "Conversor DC-DC Isolado",
+          "status": "PLANEJAMENTO"
+        },
+        {
+          "codigo_projeto": "PRJ002",
+          "nome_projeto": "Driver LED Dimerizável",
+          "status": "PLANEJAMENTO"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Exemplo de Resposta (JSON padrão do Django):**
+
+```json
+{
+  "detail": "Not found."
+}
+```
