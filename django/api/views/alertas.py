@@ -7,7 +7,7 @@ from .utils import _dim_data_para_date, _normaliza_texto
 
 
 def _adiciona_pedido_atrasado(pedidos_atrasados, compra, data_atual, data_previsao_entrega, status_normalizado):
-    if not data_previsao_entrega or data_atual <= data_previsao_entrega or status_normalizado == 'concluida':
+    if not data_previsao_entrega or data_atual <= data_previsao_entrega or status_normalizado not in {'aberto', 'pendente'}:
         return
 
     pedidos_atrasados.append({
