@@ -114,8 +114,9 @@ class ProjetoAlertasViewTest(TestCase):
         self.assertEqual(len(alertas['pedidos_atrasados']), 1)
         self.assertEqual(alertas['pedidos_atrasados'][0]['numero_pedido'], 'PED20')
 
-        self.assertEqual(len(alertas['pedidos_prioritarios_pendentes']), 1)
-        self.assertEqual(alertas['pedidos_prioritarios_pendentes'][0]['numero_pedido'], 'PED24')
+        self.assertEqual(len(alertas['pedidos_prioritarios_pendentes']), 2)
+        self.assertEqual(alertas['pedidos_prioritarios_pendentes'][0]['numero_pedido'], 'PED21')
+        self.assertEqual(alertas['pedidos_prioritarios_pendentes'][1]['numero_pedido'], 'PED24')
 
         self.assertEqual(len(alertas['materiais_obsoletos']), 1)
         self.assertTrue(alertas['materiais_obsoletos'][0]['vinculado_ao_projeto'])
