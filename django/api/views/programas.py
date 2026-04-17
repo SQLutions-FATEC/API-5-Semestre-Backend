@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 @require_GET
-def programa_projetos_api(request):
+def programa_api(request):
     programas = (
         DimPrograma.objects
         .prefetch_related('dimprojeto_set')

@@ -7,7 +7,7 @@ from .alertas import projeto_alertas_api
 from .empenhos import projeto_empenho_api, empenhos_programa
 from .solicitacoesStats import request_analytics_api
 from .solicitacoesLista import listagem_solicitacoes
-from .programas import programa_projetos_api
+from .programas import programa_api
 
 __all__ = [
     'projeto_dashboard_api',
@@ -19,5 +19,5 @@ __all__ = [
     'request_analytics_api',
     'listagem_solicitacoes',
     'evolucao_gastos_api',
-    'programa_projetos_api',
+    'programa_api',
 ]
