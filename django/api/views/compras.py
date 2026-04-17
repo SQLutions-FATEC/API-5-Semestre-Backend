@@ -1,8 +1,10 @@
 from datetime import date
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET
 from api.models import DimProjeto, FatoCompra
+from django.db.models import Count
 
 @require_GET
 def compras_projeto_api(request, codigo_projeto):
@@ -50,3 +52,70 @@ def compras_projeto_api(request, codigo_projeto):
         "tempo_medio_entrega_dias": tempo_medio,
         "pedidos": lista_compras
     })
+
+@require_GET
+def evolucao_gastos_api(request, codigo_projeto):
+    projeto = get_object_or_404(DimProjeto, codigo_projeto=codigo_projeto)
+
+    # Informações de debug se a query vier com ?debug=true
+    is_debug = request.GET.get('debug', 'false').lower() == 'true'
+    debug_info = {}
+    
+    if is_debug:
+        todas_compras = FatoCompra.objects.filter(solicitacao__projeto=projeto)
+        debug_info = {
+            "total_compras_geral": todas_compras.count(),
+            "compras_por_status": list(todas_compras.values('status').annotate(total=Count('id'))),
+            "codigo_projeto": projeto.codigo_projeto,
+            "data_inicio_projeto": f"{projeto.data_inicio.ano}-{projeto.data_inicio.mes:02d}"
+        }
+
+    gastos_agrupados = (
+        FatoCompra.objects.filter(
+            solicitacao__projeto=projeto,
+            status__in=["ENVIADO", "ENTREGUE", "PARCIALMENTE ENTREGUE"]
+        )
+        .values('data_pedido__ano', 'data_pedido__mes')
+        .annotate(total=Sum('valor_total'))
+        .order_by('data_pedido__ano', 'data_pedido__mes')
+    )
+
+    dados_dict = {
+        (g['data_pedido__ano'], g['data_pedido__mes']): float(g['total'] or 0)
+        for g in gastos_agrupados
+    }
+
+    if not dados_dict:
+        if is_debug:
+            return JsonResponse({"resultado": [], "debug": debug_info})
+        return JsonResponse([], safe=False)
+
+    anos_meses = list(dados_dict.keys())
+    
+    ano_inicio = projeto.data_inicio.ano
+    mes_inicio = projeto.data_inicio.mes
+    ano_fim, mes_fim = max(anos_meses)
+
+    if min(anos_meses) < (ano_inicio, mes_inicio):
+        ano_inicio, mes_inicio = min(anos_meses)
+
+    resultado = []
+    ano_atual, mes_atual = ano_inicio, mes_inicio
+
+    while (ano_atual < ano_fim) or (ano_atual == ano_fim and mes_atual <= mes_fim):
+        total = dados_dict.get((ano_atual, mes_atual), 0.0)
+        data_str = f"{ano_atual}-{mes_atual:02d}"
+        resultado.append({
+            "data": data_str,
+            "total_gasto": total,
+        })
+
+        mes_atual += 1
+        if mes_atual > 12:
+            mes_atual = 1
+            ano_atual += 1
+
+    if is_debug:
+        return JsonResponse({"resultado": resultado, "debug": debug_info})
+
+    return JsonResponse(resultado, safe=False)

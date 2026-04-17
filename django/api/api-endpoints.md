@@ -465,3 +465,64 @@ Retornado caso o código do projeto fornecido na URL não seja localizado na bas
 ```
 
 ---
+
+## Rota Evolução de Gastos do Projeto
+
+Retorna a evolução do total de gastos (compras) de um projeto específico ao longo dos meses, agregando por mês e ano dados para o consumo em gráficos temporais.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/gastos/evolucao/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `debug` | `Boolean` | (Opcional) Quando `true`, encapsula a resposta original em um nó `"resultado"` e adiciona um nó `"debug"` com o total geral e a quebra de quantidade de compras por todos os possíveis status para auxiliar análises de payload vazio. | `true` |
+
+### **Regras de Negócio e Cálculos**
+* **Filtros de Status:** Estão inclusos na soma da tabela fato de compra apenas os pedidos com status "ENVIADO", "ENTREGUE" ou "PARCIALMENTE ENTREGUE".
+* **Agrupamento Mensal:** Sumarização do `valor_total` dos pedidos, agrupada mês/ano associados à `data_pedido`.
+* **Tratamento de Meses Vazios:** O backend constrói uma lista contígua garantindo o preenchimento com `total_gasto` igual a `0.0` para meses intermédios em que não houve faturamento, garantindo a integridade do gráfico no lado cliente.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retorna uma lista de objetos contendo o mês/ano correspondente e o valor gasto.
+
+**Exemplo de Resposta (JSON):**
+```json
+[
+    {
+        "data": "2024-01",
+        "total_gasto": 0.0
+    },
+    {
+        "data": "2024-02",
+        "total_gasto": 1500.50
+    },
+    {
+        "data": "2024-03",
+        "total_gasto": 0.0
+    },
+    {
+        "data": "2024-04",
+        "total_gasto": 3200.00
+    }
+]
+```
+
+#### Erro: `404 Not Found`
+Retornado caso o código do projeto fornecido na URL não seja localizado na base de dados (`DimProjeto`).
+
+**Exemplo de Resposta (JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
