@@ -166,8 +166,20 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
                 "status": "OBSOLETO",
                 "vinculado_ao_projeto": true,
                 "pedido_recente": false
+            }     
+        ],
+        "solicitacoes_para_projetos": {
+            {
+                "pedido" : {
+                    "numero_pedido": "PED001",
+                    "status" : "Concluída",
+                    "valor_total" : 27070.4,
+                    "data_pedido" : "2024-12-35",
+                    "data_previsao_entrega" : "2025-04-30",
+                    "solicitacao_numero" : "SC0038"
+                }
             }
-        ]
+        }
     }
 }
 ```
