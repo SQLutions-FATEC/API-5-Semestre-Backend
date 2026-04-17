@@ -66,7 +66,7 @@ class ProjetoAlertasViewTest(TestCase):
 
         self.solicitacao_prioritaria = DimSolicitacao.objects.create(
             numero_solicitacao="S21", projeto=self.projeto_com_alertas, material=self.material_ativo,
-            quantidade=3, data_solicitacao=self.data_passado_25d, prioridade="Alta", status="Ativo"
+            quantidade=3, data_solicitacao=self.data_passado_25d, prioridade="Alta", status="Aprovada"
         )
         FatoCompra.objects.create(
             numero_pedido="PED21", valor_total=Decimal('150.00'), status="Enviado",
@@ -76,7 +76,7 @@ class ProjetoAlertasViewTest(TestCase):
 
         self.solicitacao_obsoleto = DimSolicitacao.objects.create(
             numero_solicitacao="S22", projeto=self.projeto_com_alertas, material=self.material_obsoleto,
-            quantidade=2, data_solicitacao=self.data_passado_20d, prioridade="Normal", status="Ativo"
+            quantidade=2, data_solicitacao=self.data_passado_20d, prioridade="Normal", status="Aprovada"
         )
         FatoCompra.objects.create(
             numero_pedido="PED22", valor_total=Decimal('60.00'), status="Aberto",
@@ -94,6 +94,16 @@ class ProjetoAlertasViewTest(TestCase):
             data_pedido=self.data_passado_45d, data_previsao_entrega=self.data_passado_45d
         )
 
+        self.solicitacao_recente = DimSolicitacao.objects.create(
+            numero_solicitacao="S24", projeto=self.projeto_com_alertas, material=self.material_ativo,
+            quantidade=4, data_solicitacao=self.data_hoje, prioridade="Urgente", status="Aprovada"
+        )
+        FatoCompra.objects.create(
+            numero_pedido="PED24", valor_total=Decimal('320.00'), status="Aberto",
+            solicitacao=self.solicitacao_recente, fornecedor=self.fornecedor,
+            data_pedido=self.data_hoje, data_previsao_entrega=self.data_hoje
+        )
+
     def test_alertas_success_with_data(self):
         response = self.client.get(f'/api/projetos/criticos/{self.projeto_com_alertas.codigo_projeto}')
         self.assertEqual(response.status_code, 200)
@@ -104,12 +114,22 @@ class ProjetoAlertasViewTest(TestCase):
         self.assertEqual(len(alertas['pedidos_atrasados']), 1)
         self.assertEqual(alertas['pedidos_atrasados'][0]['numero_pedido'], 'PED20')
 
-        self.assertEqual(len(alertas['pedidos_prioritarios_pendentes']), 1)
+        self.assertEqual(len(alertas['pedidos_prioritarios_pendentes']), 2)
         self.assertEqual(alertas['pedidos_prioritarios_pendentes'][0]['numero_pedido'], 'PED21')
+        self.assertEqual(alertas['pedidos_prioritarios_pendentes'][1]['numero_pedido'], 'PED24')
 
         self.assertEqual(len(alertas['materiais_obsoletos']), 1)
         self.assertTrue(alertas['materiais_obsoletos'][0]['vinculado_ao_projeto'])
         self.assertTrue(alertas['materiais_obsoletos'][0]['pedido_recente'])
+
+        ultimas_solicitacoes = alertas['solicitacoes_para_projetos']
+        self.assertEqual(len(ultimas_solicitacoes), 3)
+        self.assertEqual(ultimas_solicitacoes[0]['pedido']['solicitacao_numero'], 'S24')
+        self.assertEqual(ultimas_solicitacoes[0]['pedido']['numero_pedido'], 'PED24')
+        self.assertEqual(ultimas_solicitacoes[1]['pedido']['solicitacao_numero'], 'S22')
+        self.assertEqual(ultimas_solicitacoes[1]['pedido']['numero_pedido'], 'PED22')
+        self.assertEqual(ultimas_solicitacoes[2]['pedido']['solicitacao_numero'], 'S21')
+        self.assertEqual(ultimas_solicitacoes[2]['pedido']['numero_pedido'], 'PED21')
 
     def test_alertas_success_without_data(self):
         response = self.client.get(f'/api/projetos/criticos/{self.projeto_sem_alertas.codigo_projeto}')
@@ -121,6 +141,7 @@ class ProjetoAlertasViewTest(TestCase):
         self.assertEqual(alertas['pedidos_atrasados'], [])
         self.assertEqual(alertas['pedidos_prioritarios_pendentes'], [])
         self.assertEqual(alertas['materiais_obsoletos'], [])
+        self.assertEqual(alertas['solicitacoes_para_projetos'], [])
 
     def test_alertas_not_found(self):
         response = self.client.get('/api/projetos/criticos/CODIGO-INVALIDO')
