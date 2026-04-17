@@ -24,7 +24,7 @@ from .views import (
     compras_projeto_api,
     empenhos_programa,
     request_analytics_api,
-    listagem_solicitacoes
+    listagem_solicitacoes,
     evolucao_gastos_api
 )
 
