@@ -26,11 +26,13 @@ from .views import (
     programa_api,
     request_analytics_api,
     listagem_solicitacoes,
-    evolucao_gastos_api
+    evolucao_gastos_api,
+    busca_projetos
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/<str:programa_cod>/projetos/busca/', busca_projetos, name='busca-projetos-programa'),
     path('api/projetos/<str:codigo_projeto>/', projeto_dashboard_api, name='projeto-detalhe'),
     path('api/projetos/<str:codigo_projeto>/compras/', compras_projeto_api, name='compras_projeto'),
     path('api/projetos/<str:codigo_projeto>/gastos/evolucao/', evolucao_gastos_api, name='evolucao-gastos'),

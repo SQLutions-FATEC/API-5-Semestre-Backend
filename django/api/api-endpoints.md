@@ -616,3 +616,45 @@ Retorna uma lista de programas junto com os projetos vinculados a cada programa.
   "detail": "Not found."
 }
 ```
+
+---
+
+## Rota Busca Global de Projetos por Programa
+
+Retorna uma lista de projetos vinculados a um programa específico, permitindo a busca textual (case-insensitive) tanto pelo código quanto pelo nome do projeto.
+
+### **Endpoint**
+`GET /api/<programa_cod>/projetos/busca/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_cod` | `String` | Código identificador do programa ao qual os projetos estão vinculados. | `MAX12AC` |
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos projetos. Se omitido, retorna os projetos do programa limitador. | `Projeto` |
+
+### **Regras de Negócio e Cálculos**
+* **Busca Textual Textual:** O filtro se aplica localmente sobre os campos `nome_projeto` e `codigo_projeto` de forma agnóstica à caixa (case-insensitive).
+* **Limitação:** Não é permitida a busca em projetos que não pertençam ativamente ao programa informado.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retorna uma lista de dicionários contendo os atributos nome, código, status e responsável dos respectivos projetos enquadrados na restrição de pesquisa.
+
+**Exemplo de Resposta (JSON):**
+```json
+[
+    {
+        "nome_projeto": "Placa Regulador Switching 3",
+        "codigo_projeto": "PRJ089",
+        "status": "EM ANDAMENTO",
+        "responsavel": "Ana Paula Ribeiro"
+    }
+]
+```
