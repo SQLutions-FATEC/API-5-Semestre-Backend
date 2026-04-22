@@ -264,71 +264,71 @@ class Command(BaseCommand):
                             )
                             count_solicitacoes += 1
                         
-                        if solicitacao_status == 'Aprovada':
-                            pedido_date = random_date(solic_date, proj_end)
-                            entrega_prev_date = pedido_date + timedelta(days=random.randint(5, 30))
-                            
-                            if global_fornecedores[cat]:
-                                fornecedor = random.choice(global_fornecedores[cat])
-                            else:
-                                fornecedor = DimFornecedor.objects.create(
-                                    codigo_fornecedor=uuid.uuid4().hex[:6].upper(),
-                                    razao_social=fake.company()[:256],
-                                    cidade=fake.city()[:256],
-                                    estado=fake.state_abbr(),
-                                    categoria=cat,
-                                    status='Ativo'
-                                )
-                                global_fornecedores[cat].append(fornecedor)
-
-                            if is_concluido:
-                                pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
-                            elif entrega_prev_date <= today:
-                                pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
-                            else:
-                                pedido_status = random.choices(['Aberto', 'Cancelado', 'Entregue', 'Enviado'], weights=[15, 5, 55, 25], k=1)[0]
-                            
-                            pedido = FatoCompra.objects.create(
-                                numero_pedido=uuid.uuid4().hex[:6].upper(),
-                                valor_total=round(material.custo_estimado * solicitacao.quantidade, 2),
-                                status=pedido_status,
-                                solicitacao=solicitacao,
-                                fornecedor=fornecedor,
-                                data_pedido=get_or_create_dim_data(pedido_date),
-                                data_previsao_entrega=get_or_create_dim_data(entrega_prev_date)
-                            )
-                            count_pedidos += 1
-
-                            if pedido_status == 'Entregue':
-                                consumption_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
+                            if solicitacao_status == 'Aprovada':
+                                pedido_date = random_date(solic_date, proj_end)
+                                entrega_prev_date = pedido_date + timedelta(days=random.randint(5, 30))
                                 
-                                target_qty = solicitacao.quantidade
-                                qty_consumed = 0
-                                num_empenhos = random.randint(1, 5)
-                                
-                                for i in range(num_empenhos):
-                                    remain = target_qty - qty_consumed
-                                    if remain <= 0: break
-                                    
-                                    if i == num_empenhos - 1:
-                                        qty = remain
-                                    else:
-                                        limit_qty = remain // 2
-                                        qty = random.randint(1, limit_qty) if limit_qty >= 1 else remain
-                                        
-                                    qty_consumed += qty
-                                    
-                                    FatoEmpenho.objects.create(
-                                        quantidade_empenhada=qty,
-                                        projeto=projeto,
-                                        material=material,
-                                        data_empenho=get_or_create_dim_data(consumption_date)
+                                if global_fornecedores[cat]:
+                                    fornecedor = random.choice(global_fornecedores[cat])
+                                else:
+                                    fornecedor = DimFornecedor.objects.create(
+                                        codigo_fornecedor=uuid.uuid4().hex[:6].upper(),
+                                        razao_social=fake.company()[:256],
+                                        cidade=fake.city()[:256],
+                                        estado=fake.state_abbr(),
+                                        categoria=cat,
+                                        status='Ativo'
                                     )
-                                    count_empenhos += 1
+                                    global_fornecedores[cat].append(fornecedor)
+
+                                if is_concluido:
+                                    pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
+                                elif entrega_prev_date <= today:
+                                    pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
+                                else:
+                                    pedido_status = random.choices(['Aberto', 'Cancelado', 'Entregue', 'Enviado'], weights=[15, 5, 55, 25], k=1)[0]
+                                
+                                pedido = FatoCompra.objects.create(
+                                    numero_pedido=uuid.uuid4().hex[:6].upper(),
+                                    valor_total=round(material.custo_estimado * solicitacao.quantidade, 2),
+                                    status=pedido_status,
+                                    solicitacao=solicitacao,
+                                    fornecedor=fornecedor,
+                                    data_pedido=get_or_create_dim_data(pedido_date),
+                                    data_previsao_entrega=get_or_create_dim_data(entrega_prev_date)
+                                )
+                                count_pedidos += 1
+
+                                if pedido_status == 'Entregue':
+                                    consumption_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
                                     
-                                    if consumption_date < proj_end:
-                                        # Advance date for the next proportional release
-                                        consumption_date = random_date(consumption_date + timedelta(days=1), proj_end)
+                                    target_qty = solicitacao.quantidade
+                                    qty_consumed = 0
+                                    num_empenhos = random.randint(1, 5)
+                                    
+                                    for i in range(num_empenhos):
+                                        remain = target_qty - qty_consumed
+                                        if remain <= 0: break
+                                        
+                                        if i == num_empenhos - 1:
+                                            qty = remain
+                                        else:
+                                            limit_qty = remain // 2
+                                            qty = random.randint(1, limit_qty) if limit_qty >= 1 else remain
+                                            
+                                        qty_consumed += qty
+                                        
+                                        FatoEmpenho.objects.create(
+                                            quantidade_empenhada=qty,
+                                            projeto=projeto,
+                                            material=material,
+                                            data_empenho=get_or_create_dim_data(consumption_date)
+                                        )
+                                        count_empenhos += 1
+                                        
+                                        if consumption_date < proj_end:
+                                            # Advance date for the next proportional release
+                                            consumption_date = random_date(consumption_date + timedelta(days=1), proj_end)
 
                 self.stdout.write(f'    -> Projeto "{projeto.nome_projeto[:30]}...": '
                                   f'{count_tarefas} Tarefas ({count_fatos_tarefa} interações), '
