@@ -168,15 +168,49 @@ class Command(BaseCommand):
                         is_atrasado=random.choice([True, False])
                     )
 
-                    # Create some FatoTarefa entries indicating execution hours
-                    for _ in range(random.randint(1, 3)):
-                        execution_date = random_date(task_start, task_end)
-                        FatoTarefa.objects.create(
-                            usuario=responsavel_tarefa,
-                            horas_trabalhadas=round(random.uniform(1.0, 8.0), 2),
-                            tarefa=tarefa,
-                            data=get_or_create_dim_data(execution_date)
-                        )
+                    # Lógica de FatoTarefa baseada no status
+                    if t_status == 'Não iniciada':
+                        pass # Sem logs de horas
+                        
+                    elif t_status == 'Concluído':
+                        target_hours = float(tarefa.estimativa)
+                        num_executions = random.randint(1, 4)
+                        hours_created = 0.0
+                        for i in range(num_executions):
+                            execution_date = random_date(task_start, task_end)
+                            if i == num_executions - 1:
+                                horas = round(target_hours - hours_created, 2)
+                            else:
+                                limit = max(0.5, (target_hours - hours_created) / 2)
+                                horas = round(random.uniform(0.5, limit), 2)
+                                hours_created += horas
+                            
+                            FatoTarefa.objects.create(
+                                usuario=responsavel_tarefa,
+                                horas_trabalhadas=horas,
+                                tarefa=tarefa,
+                                data=get_or_create_dim_data(execution_date)
+                            )
+                            
+                    elif t_status == 'Em andamento':
+                        target_hours = float(tarefa.estimativa) * random.uniform(0.1, 0.9)
+                        num_executions = random.randint(1, 3)
+                        hours_created = 0.0
+                        for i in range(num_executions):
+                            execution_date = random_date(task_start, task_end)
+                            if i == num_executions - 1:
+                                horas = round(target_hours - hours_created, 2)
+                            else:
+                                limit = max(0.5, (target_hours - hours_created) / 2)
+                                horas = round(random.uniform(0.5, limit), 2)
+                                hours_created += horas
+                            
+                            FatoTarefa.objects.create(
+                                usuario=responsavel_tarefa,
+                                horas_trabalhadas=horas,
+                                tarefa=tarefa,
+                                data=get_or_create_dim_data(execution_date)
+                            )
 
                 num_cats_to_pick = random.randint(1, len(categorias_globais))
                 picked_cats = random.sample(categorias_globais, num_cats_to_pick)
