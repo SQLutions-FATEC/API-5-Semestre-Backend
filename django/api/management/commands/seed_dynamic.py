@@ -139,8 +139,9 @@ class Command(BaseCommand):
                 # Densidade proporcional ao mês
                 duration_ratio = max(1.0, project_duration_days / 30.0)
                 scaled_tasks = int(num_tasks * duration_ratio)
+                scaled_users = max(1, int(num_users * duration_ratio))
                 
-                project_users = [fake.name()[:256] for _ in range(num_users)]
+                project_users = [fake.name()[:256] for _ in range(scaled_users)]
                 project_responsavel = random.choice(project_users) if project_users else fake.name()[:256]
 
                 today = timezone.now().date()
@@ -203,39 +204,20 @@ class Command(BaseCommand):
                     if t_status == 'Não iniciada':
                         pass # Sem logs de horas
                         
-                    elif t_status == 'Concluído':
-                        target_hours = float(tarefa.estimativa)
-                        num_executions = random.randint(1, 4)
-                        hours_created = 0.0
-                        for i in range(num_executions):
-                            execution_date = random_date(task_start, task_end)
-                            if i == num_executions - 1:
-                                horas = round(target_hours - hours_created, 2)
-                            else:
-                                limit = max(0.5, (target_hours - hours_created) / 2)
-                                horas = round(random.uniform(0.5, limit), 2)
-                                hours_created += horas
+                    elif t_status in ('Concluído', 'Em andamento'):
+                        if t_status == 'Concluído':
+                            target_hours = float(tarefa.estimativa)
+                        else:
+                            target_hours = float(tarefa.estimativa) * random.uniform(0.1, 0.9)
                             
-                            FatoTarefa.objects.create(
-                                usuario=responsavel_tarefa,
-                                horas_trabalhadas=horas,
-                                tarefa=tarefa,
-                                data=get_or_create_dim_data(execution_date)
-                            )
-                            count_fatos_tarefa += 1
-                            
-                    elif t_status == 'Em andamento':
-                        target_hours = float(tarefa.estimativa) * random.uniform(0.1, 0.9)
-                        num_executions = random.randint(1, 3)
                         hours_created = 0.0
-                        for i in range(num_executions):
+                        while target_hours - hours_created > 0.01:
                             execution_date = random_date(task_start, task_end)
-                            if i == num_executions - 1:
-                                horas = round(target_hours - hours_created, 2)
-                            else:
-                                limit = max(0.5, (target_hours - hours_created) / 2)
-                                horas = round(random.uniform(0.5, limit), 2)
-                                hours_created += horas
+                            remaining = target_hours - hours_created
+                            
+                            # Limite realista de 8 horas por dia por pessoa
+                            horas = round(min(remaining, random.uniform(2.0, 8.0)), 2)
+                            hours_created += horas
                             
                             FatoTarefa.objects.create(
                                 usuario=responsavel_tarefa,
@@ -314,15 +296,35 @@ class Command(BaseCommand):
                             count_pedidos += 1
 
                             if pedido_status == 'Entregue':
-                                empenho_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
+                                consumption_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
                                 
-                                FatoEmpenho.objects.create(
-                                    quantidade_empenhada=solicitacao.quantidade,
-                                    projeto=projeto,
-                                    material=material,
-                                    data_empenho=get_or_create_dim_data(empenho_date)
-                                )
-                                count_empenhos += 1
+                                target_qty = solicitacao.quantidade
+                                qty_consumed = 0
+                                num_empenhos = random.randint(1, 5)
+                                
+                                for i in range(num_empenhos):
+                                    remain = target_qty - qty_consumed
+                                    if remain <= 0: break
+                                    
+                                    if i == num_empenhos - 1:
+                                        qty = remain
+                                    else:
+                                        limit_qty = remain // 2
+                                        qty = random.randint(1, limit_qty) if limit_qty >= 1 else remain
+                                        
+                                    qty_consumed += qty
+                                    
+                                    FatoEmpenho.objects.create(
+                                        quantidade_empenhada=qty,
+                                        projeto=projeto,
+                                        material=material,
+                                        data_empenho=get_or_create_dim_data(consumption_date)
+                                    )
+                                    count_empenhos += 1
+                                    
+                                    if consumption_date < proj_end:
+                                        # Advance date for the next proportional release
+                                        consumption_date = random_date(consumption_date + timedelta(days=1), proj_end)
 
                 self.stdout.write(f'    -> Projeto "{projeto.nome_projeto[:30]}...": '
                                   f'{count_tarefas} Tarefas ({count_fatos_tarefa} interações), '
