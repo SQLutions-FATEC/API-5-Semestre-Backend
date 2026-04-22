@@ -131,6 +131,14 @@ class Command(BaseCommand):
                 project_users = [fake.name()[:256] for _ in range(num_users)]
                 project_responsavel = random.choice(project_users) if project_users else fake.name()[:256]
 
+                today = timezone.now().date()
+                if proj_start > today:
+                    proj_status = 'Planejamento'
+                elif proj_end < today:
+                    proj_status = random.choice(['Concluído', 'Em andamento', 'Suspenso'])
+                else:
+                    proj_status = random.choice(['Planejamento', 'Em andamento', 'Suspenso'])
+
                 projeto = DimProjeto.objects.create(
                     codigo_projeto=fake.unique.bothify(text='######').upper(),
                     nome_projeto=fake.catch_phrase()[:256],
@@ -139,21 +147,25 @@ class Command(BaseCommand):
                     custo_hora=round(random.uniform(50.0, 300.0), 2),
                     data_inicio=get_or_create_dim_data(proj_start),
                     data_fim_prevista=get_or_create_dim_data(proj_end),
-                    status=random.choice(status_projeto_choices),
+                    status=proj_status,
                     lead_time_dias=random.randint(0, 10),
-                    is_atrasado=random.choice([True, False])
+                    is_atrasado=(proj_end < today and proj_status == 'Em andamento')
                 )
 
-                if projeto.status == 'Planejamento': continue
-
-                is_concluido = projeto.status == 'Concluído'
+                is_concluido = proj_status == 'Concluído'
+                is_planejamento = proj_status == 'Planejamento'
 
                 for t_idx in range(num_tasks):
                     task_start = random_date(proj_start, proj_end)
                     task_end = random_date(task_start, proj_end)
                     responsavel_tarefa = random.choice(project_users) if project_users else fake.name()[:256]
                     
-                    t_status = 'Concluído' if is_concluido else random.choice(status_tarefa_choices)
+                    if is_planejamento:
+                        t_status = 'Não iniciada'
+                    elif is_concluido:
+                        t_status = 'Concluído'
+                    else:
+                        t_status = random.choice(status_tarefa_choices)
 
                     tarefa = DimTarefa.objects.create(
                         codigo_tarefa=fake.unique.bothify(text='######').upper(),
@@ -224,7 +236,13 @@ class Command(BaseCommand):
                     
                     for material in chosen_mats:
                         solic_date = random_date(proj_start, proj_end)
-                        solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada']) if is_concluido else random.choice(status_solicitacao_choices)
+                        
+                        if is_planejamento:
+                            solicitacao_status = random.choice(['Pendente', 'Cancelada', 'Rejeitada'])
+                        elif is_concluido:
+                            solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada'])
+                        else:
+                            solicitacao_status = random.choice(status_solicitacao_choices)
                         
                         solicitacao = DimSolicitacao.objects.create(
                             numero_solicitacao=fake.unique.bothify(text='######').upper(),
