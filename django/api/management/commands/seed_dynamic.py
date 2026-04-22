@@ -92,7 +92,7 @@ class Command(BaseCommand):
             global_fornecedores[cat].append(f)
 
         global_materiais = {c: [] for c in categorias_globais}
-        num_materiais_total = max(20, total_projects * 2)
+        num_materiais_total = max(50, total_projects * 10)
         for _ in range(num_materiais_total):
             cat = random.choice(categorias_globais)
             m = DimMaterial.objects.create(
@@ -231,28 +231,30 @@ class Command(BaseCommand):
                     if not global_materiais[cat]:
                         continue
                     
-                    num_mat_in_cat = random.randint(1, min(5, len(global_materiais[cat])))
+                    num_mat_in_cat = random.randint(min(3, len(global_materiais[cat])), min(15, len(global_materiais[cat])))
                     chosen_mats = random.sample(global_materiais[cat], num_mat_in_cat)
                     
                     for material in chosen_mats:
-                        solic_date = random_date(proj_start, proj_end)
-                        
-                        if is_planejamento:
-                            solicitacao_status = random.choice(['Pendente', 'Cancelada', 'Rejeitada'])
-                        elif is_concluido:
-                            solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada'])
-                        else:
-                            solicitacao_status = random.choice(status_solicitacao_choices)
-                        
-                        solicitacao = DimSolicitacao.objects.create(
-                            numero_solicitacao=fake.unique.bothify(text='######').upper(),
-                            projeto=projeto,
-                            material=material,
-                            quantidade=random.randint(1, 1000),
-                            data_solicitacao=get_or_create_dim_data(solic_date),
-                            prioridade=random.choice(['Baixa', 'Média', 'Alta', 'Crítica']),
-                            status=solicitacao_status
-                        )
+                        num_batches = random.randint(1, 4)
+                        for _ in range(num_batches):
+                            solic_date = random_date(proj_start, proj_end)
+                            
+                            if is_planejamento:
+                                solicitacao_status = random.choice(['Pendente', 'Cancelada', 'Rejeitada'])
+                            elif is_concluido:
+                                solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada'])
+                            else:
+                                solicitacao_status = random.choice(status_solicitacao_choices)
+                            
+                            solicitacao = DimSolicitacao.objects.create(
+                                numero_solicitacao=fake.unique.bothify(text='######').upper(),
+                                projeto=projeto,
+                                material=material,
+                                quantidade=random.randint(1, 1000),
+                                data_solicitacao=get_or_create_dim_data(solic_date),
+                                prioridade=random.choice(['Baixa', 'Média', 'Alta', 'Crítica']),
+                                status=solicitacao_status
+                            )
                         
                         if solicitacao_status == 'Aprovada':
                             pedido_date = random_date(solic_date, proj_end)
@@ -271,7 +273,12 @@ class Command(BaseCommand):
                                 )
                                 global_fornecedores[cat].append(fornecedor)
 
-                            pedido_status = random.choice(['Entregue', 'Cancelado']) if is_concluido else random.choice(status_pedido_choices)
+                            if is_concluido:
+                                pedido_status = random.choice(['Entregue', 'Cancelado'])
+                            elif entrega_prev_date <= today:
+                                pedido_status = random.choice(['Entregue', 'Cancelado'])
+                            else:
+                                pedido_status = random.choice(status_pedido_choices)
                             
                             pedido = FatoCompra.objects.create(
                                 numero_pedido=fake.unique.bothify(text='######').upper(),
