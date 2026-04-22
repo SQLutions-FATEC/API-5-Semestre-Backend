@@ -242,7 +242,9 @@ class Command(BaseCommand):
                     chosen_mats = random.sample(global_materiais[cat], num_mat_in_cat)
                     
                     for material in chosen_mats:
-                        num_batches = random.randint(1, int(4 * duration_ratio))
+                        # Em média, um suprimento é pedido a cada semestre de duração para conter o volume
+                        max_batches = max(2, int(duration_ratio / 6))
+                        num_batches = random.randint(1, max_batches)
                         for _ in range(num_batches):
                             solic_date = random_date(proj_start, proj_end)
                             
