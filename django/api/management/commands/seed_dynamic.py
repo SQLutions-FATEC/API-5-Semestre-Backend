@@ -2,6 +2,7 @@ import logging
 import random
 from datetime import timedelta
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils import timezone
 from faker import Faker
 from api.models import (
@@ -22,6 +23,7 @@ class Command(BaseCommand):
         parser.add_argument('--users', type=int, default=3, help='Number of users per project')
         parser.add_argument('--clear', action='store_true', help='Clear existing data before seeding')
 
+    @transaction.atomic
     def handle(self, *args, **options):
         num_programs = options['programs']
         num_projects = options['projects']
@@ -46,12 +48,16 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Iniciando seed dinâmico...'))
         fake = Faker('pt_BR')
 
+        dim_data_cache = {}
         def get_or_create_dim_data(dt_obj):
+            if dt_obj in dim_data_cache:
+                return dim_data_cache[dt_obj]
             dim_data, _ = DimData.objects.get_or_create(
                 dia=dt_obj.day,
                 mes=dt_obj.month,
                 ano=dt_obj.year
             )
+            dim_data_cache[dt_obj] = dim_data
             return dim_data
 
         def random_date(start_dt, end_dt):
@@ -66,16 +72,45 @@ class Command(BaseCommand):
         status_projeto_choices = ['Planejamento', 'Em andamento', 'Concluído', 'Suspenso']
         status_tarefa_choices = ['Não iniciada', 'Em andamento', 'Concluído']
 
-        # Categories for realism
-        fornecedor_categorias = ['Componentes Eletrônicos', 'Componentes Mecânicos', 'Placas de Circuito Impresso', 'Materiais de Solda']
-        material_categorias = ['Capacitor', 'Sensor', 'Diodo', 'Conector', 'Processador', 'Mecânico', 'Relé', 'Comunicação']
+        # Categorias unificadas para Materiais e Fornecedores
+        categorias_globais = ['Componentes Eletrônicos', 'Componentes Mecânicos', 'Placas de Circuito Impresso', 'Materiais de Solda', 'Sensores', 'Comunicação', 'Mecatrônica']
+
+        total_projects = num_programs * num_projects
+        
+        global_fornecedores = {c: [] for c in categorias_globais}
+        num_fornecedores_total = max(10, total_projects // 2)
+        for _ in range(num_fornecedores_total):
+            cat = random.choice(categorias_globais)
+            f = DimFornecedor.objects.create(
+                codigo_fornecedor=fake.unique.bothify(text='######').upper(),
+                razao_social=fake.company()[:256],
+                cidade=fake.city()[:256],
+                estado=fake.state_abbr(),
+                categoria=cat,
+                status='Ativo'
+            )
+            global_fornecedores[cat].append(f)
+
+        global_materiais = {c: [] for c in categorias_globais}
+        num_materiais_total = max(20, total_projects * 2)
+        for _ in range(num_materiais_total):
+            cat = random.choice(categorias_globais)
+            m = DimMaterial.objects.create(
+                codigo_material=fake.unique.bothify(text='######').upper(),
+                descricao=fake.sentence(nb_words=3)[:256],
+                categoria=cat,
+                fabricante=fake.company()[:256],
+                custo_estimado=round(random.uniform(5.0, 500.0), 2),
+                status='Ativo'
+            )
+            global_materiais[cat].append(m)
 
         for p_idx in range(num_programs):
             prog_start = fake.date_time_between(start_date='-2y', end_date='now').date()
             prog_end = prog_start + timedelta(days=random.randint(180, 730))
             
             programa = DimPrograma.objects.create(
-                codigo_programa=fake.unique.bothify(text='PRG###'),
+                codigo_programa=fake.unique.bothify(text='######').upper(),
                 nome_programa=fake.bs().title()[:256],
                 gerente_programa=fake.name()[:256],
                 gerente_tecnico=fake.name()[:256],
@@ -97,7 +132,7 @@ class Command(BaseCommand):
                 project_responsavel = random.choice(project_users) if project_users else fake.name()[:256]
 
                 projeto = DimProjeto.objects.create(
-                    codigo_projeto=fake.unique.bothify(text='PRJ###'),
+                    codigo_projeto=fake.unique.bothify(text='######').upper(),
                     nome_projeto=fake.catch_phrase()[:256],
                     programa=programa,
                     responsavel=project_responsavel,
@@ -121,7 +156,7 @@ class Command(BaseCommand):
                     t_status = 'Concluído' if is_concluido else random.choice(status_tarefa_choices)
 
                     tarefa = DimTarefa.objects.create(
-                        codigo_tarefa=fake.unique.bothify(text='TSK###'),
+                        codigo_tarefa=fake.unique.bothify(text='######').upper(),
                         projeto=projeto,
                         titulo=fake.sentence(nb_words=4)[:256],
                         responsavel=responsavel_tarefa,
@@ -143,66 +178,68 @@ class Command(BaseCommand):
                             data=get_or_create_dim_data(execution_date)
                         )
 
-                for m_idx in range(num_materials):
-                    material = DimMaterial.objects.create(
-                        codigo_material=fake.unique.bothify(text='MAT###'),
-                        descricao=fake.sentence(nb_words=3)[:256],
-                        categoria=random.choice(material_categorias)[:256],
-                        fabricante=fake.company()[:256],
-                        custo_estimado=round(random.uniform(5.0, 500.0), 2),
-                        status='Ativo'
-                    )
-
-                    solic_date = random_date(proj_start, proj_end)
-                    solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada']) if is_concluido else random.choice(status_solicitacao_choices)
+                num_cats_to_pick = random.randint(1, len(categorias_globais))
+                picked_cats = random.sample(categorias_globais, num_cats_to_pick)
+                
+                for cat in picked_cats:
+                    if not global_materiais[cat]:
+                        continue
                     
-                    solicitacao = DimSolicitacao.objects.create(
-                        numero_solicitacao=fake.unique.bothify(text='S####'),
-                        projeto=projeto,
-                        material=material,
-                        quantidade=random.randint(1, 1000),
-                        data_solicitacao=get_or_create_dim_data(solic_date),
-                        prioridade=random.choice(['Baixa', 'Média', 'Alta', 'Crítica']),
-                        status=solicitacao_status
-                    )
-
-                    if solicitacao_status == 'Aprovada':
-                        pedido_date = random_date(solic_date, proj_end)
-                        entrega_prev_date = pedido_date + timedelta(days=random.randint(5, 30))
+                    num_mat_in_cat = random.randint(1, min(5, len(global_materiais[cat])))
+                    chosen_mats = random.sample(global_materiais[cat], num_mat_in_cat)
+                    
+                    for material in chosen_mats:
+                        solic_date = random_date(proj_start, proj_end)
+                        solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada']) if is_concluido else random.choice(status_solicitacao_choices)
                         
-                        # Get or create a random supplier
-                        fornecedor, _ = DimFornecedor.objects.get_or_create(
-                            codigo_fornecedor=fake.bothify(text='F####'),
-                            defaults={
-                                'razao_social': fake.company()[:256],
-                                'cidade': fake.city()[:256],
-                                'estado': fake.state_abbr(),
-                                'categoria': random.choice(fornecedor_categorias)[:256],
-                                'status': 'Ativo'
-                            }
+                        solicitacao = DimSolicitacao.objects.create(
+                            numero_solicitacao=fake.unique.bothify(text='######').upper(),
+                            projeto=projeto,
+                            material=material,
+                            quantidade=random.randint(1, 1000),
+                            data_solicitacao=get_or_create_dim_data(solic_date),
+                            prioridade=random.choice(['Baixa', 'Média', 'Alta', 'Crítica']),
+                            status=solicitacao_status
                         )
-
-                        pedido_status = random.choice(['Entregue', 'Cancelado']) if is_concluido else random.choice(status_pedido_choices)
                         
-                        pedido = FatoCompra.objects.create(
-                            numero_pedido=fake.unique.bothify(text='P####'),
-                            valor_total=round(material.custo_estimado * solicitacao.quantidade, 2),
-                            status=pedido_status,
-                            solicitacao=solicitacao,
-                            fornecedor=fornecedor,
-                            data_pedido=get_or_create_dim_data(pedido_date),
-                            data_previsao_entrega=get_or_create_dim_data(entrega_prev_date)
-                        )
-
-                        if pedido_status == 'Entregue':
-                            empenho_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
+                        if solicitacao_status == 'Aprovada':
+                            pedido_date = random_date(solic_date, proj_end)
+                            entrega_prev_date = pedido_date + timedelta(days=random.randint(5, 30))
                             
-                            FatoEmpenho.objects.create(
-                                quantidade_empenhada=solicitacao.quantidade,
-                                projeto=projeto,
-                                material=material,
-                                data_empenho=get_or_create_dim_data(empenho_date)
+                            if global_fornecedores[cat]:
+                                fornecedor = random.choice(global_fornecedores[cat])
+                            else:
+                                fornecedor = DimFornecedor.objects.create(
+                                    codigo_fornecedor=fake.unique.bothify(text='######').upper(),
+                                    razao_social=fake.company()[:256],
+                                    cidade=fake.city()[:256],
+                                    estado=fake.state_abbr(),
+                                    categoria=cat,
+                                    status='Ativo'
+                                )
+                                global_fornecedores[cat].append(fornecedor)
+
+                            pedido_status = random.choice(['Entregue', 'Cancelado']) if is_concluido else random.choice(status_pedido_choices)
+                            
+                            pedido = FatoCompra.objects.create(
+                                numero_pedido=fake.unique.bothify(text='######').upper(),
+                                valor_total=round(material.custo_estimado * solicitacao.quantidade, 2),
+                                status=pedido_status,
+                                solicitacao=solicitacao,
+                                fornecedor=fornecedor,
+                                data_pedido=get_or_create_dim_data(pedido_date),
+                                data_previsao_entrega=get_or_create_dim_data(entrega_prev_date)
                             )
+
+                            if pedido_status == 'Entregue':
+                                empenho_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
+                                
+                                FatoEmpenho.objects.create(
+                                    quantidade_empenhada=solicitacao.quantidade,
+                                    projeto=projeto,
+                                    material=material,
+                                    data_empenho=get_or_create_dim_data(empenho_date)
+                                )
         
         self.stdout.write(self.style.SUCCESS(f'Seed dinâmico concluído! '
                                              f'Criados {num_programs} programas, {num_projects} projetos por programa.'))
