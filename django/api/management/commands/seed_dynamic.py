@@ -1,5 +1,7 @@
 import logging
 import random
+import time
+import uuid
 from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -33,6 +35,7 @@ class Command(BaseCommand):
         clear_db = options['clear']
 
         if clear_db:
+            start_clear = time.time()
             self.stdout.write(self.style.WARNING('Limpando dados existentes...'))
             FatoCompra.objects.all().delete()
             FatoEmpenho.objects.all().delete()
@@ -44,7 +47,9 @@ class Command(BaseCommand):
             DimProjeto.objects.all().delete()
             DimPrograma.objects.all().delete()
             DimData.objects.all().delete()
+            self.stdout.write(self.style.WARNING(f'Tabelas limpas em {time.time() - start_clear:.2f} segundos.'))
 
+        global_start = time.time()
         self.stdout.write(self.style.SUCCESS('Iniciando seed dinâmico...'))
         fake = Faker('pt_BR')
 
@@ -82,7 +87,7 @@ class Command(BaseCommand):
         for _ in range(num_fornecedores_total):
             cat = random.choice(categorias_globais)
             f = DimFornecedor.objects.create(
-                codigo_fornecedor=fake.unique.bothify(text='######').upper(),
+                codigo_fornecedor=uuid.uuid4().hex[:6].upper(),
                 razao_social=fake.company()[:256],
                 cidade=fake.city()[:256],
                 estado=fake.state_abbr(),
@@ -96,7 +101,7 @@ class Command(BaseCommand):
         for _ in range(num_materiais_total):
             cat = random.choice(categorias_globais)
             m = DimMaterial.objects.create(
-                codigo_material=fake.unique.bothify(text='######').upper(),
+                codigo_material=uuid.uuid4().hex[:6].upper(),
                 descricao=fake.sentence(nb_words=3)[:256],
                 categoria=cat,
                 fabricante=fake.company()[:256],
@@ -106,11 +111,11 @@ class Command(BaseCommand):
             global_materiais[cat].append(m)
 
         for p_idx in range(num_programs):
-            prog_start = fake.date_time_between(start_date='-2y', end_date='now').date()
-            prog_end = prog_start + timedelta(days=random.randint(180, 730))
+            prog_start = fake.date_time_between(start_date='-5y', end_date='-1y').date()
+            prog_end = prog_start + timedelta(days=random.randint(1095, 3650))
             
             programa = DimPrograma.objects.create(
-                codigo_programa=fake.unique.bothify(text='######').upper(),
+                codigo_programa=uuid.uuid4().hex[:6].upper(),
                 nome_programa=fake.bs().title()[:256],
                 gerente_programa=fake.name()[:256],
                 gerente_tecnico=fake.name()[:256],
@@ -120,13 +125,20 @@ class Command(BaseCommand):
             )
 
             for proj_idx in range(num_projects):
-                # Bounded by program
-                if prog_start == prog_end:
+                # Project: 6 months to 3 years (180 to 1095 days)
+                project_duration_days = random.randint(180, 1095)
+                max_start_date = prog_end - timedelta(days=project_duration_days)
+                
+                if max_start_date <= prog_start:
                     proj_start = prog_start
                     proj_end = prog_end
                 else:
-                    proj_start = random_date(prog_start, prog_end - timedelta(days=30))
-                    proj_end = random_date(proj_start + timedelta(days=30), prog_end)
+                    proj_start = random_date(prog_start, max_start_date)
+                    proj_end = proj_start + timedelta(days=project_duration_days)
+                
+                # Densidade proporcional ao mês
+                duration_ratio = max(1.0, project_duration_days / 30.0)
+                scaled_tasks = int(num_tasks * duration_ratio)
                 
                 project_users = [fake.name()[:256] for _ in range(num_users)]
                 project_responsavel = random.choice(project_users) if project_users else fake.name()[:256]
@@ -140,7 +152,7 @@ class Command(BaseCommand):
                     proj_status = random.choice(['Planejamento', 'Em andamento', 'Suspenso'])
 
                 projeto = DimProjeto.objects.create(
-                    codigo_projeto=fake.unique.bothify(text='######').upper(),
+                    codigo_projeto=uuid.uuid4().hex[:6].upper(),
                     nome_projeto=fake.catch_phrase()[:256],
                     programa=programa,
                     responsavel=project_responsavel,
@@ -155,7 +167,13 @@ class Command(BaseCommand):
                 is_concluido = proj_status == 'Concluído'
                 is_planejamento = proj_status == 'Planejamento'
 
-                for t_idx in range(num_tasks):
+                count_tarefas = 0
+                count_fatos_tarefa = 0
+                count_solicitacoes = 0
+                count_pedidos = 0
+                count_empenhos = 0
+
+                for t_idx in range(scaled_tasks):
                     task_start = random_date(proj_start, proj_end)
                     task_end = random_date(task_start, proj_end)
                     responsavel_tarefa = random.choice(project_users) if project_users else fake.name()[:256]
@@ -168,7 +186,7 @@ class Command(BaseCommand):
                         t_status = random.choice(status_tarefa_choices)
 
                     tarefa = DimTarefa.objects.create(
-                        codigo_tarefa=fake.unique.bothify(text='######').upper(),
+                        codigo_tarefa=uuid.uuid4().hex[:6].upper(),
                         projeto=projeto,
                         titulo=fake.sentence(nb_words=4)[:256],
                         responsavel=responsavel_tarefa,
@@ -179,6 +197,7 @@ class Command(BaseCommand):
                         lead_time_dias=random.randint(0, 5),
                         is_atrasado=random.choice([True, False])
                     )
+                    count_tarefas += 1
 
                     # Lógica de FatoTarefa baseada no status
                     if t_status == 'Não iniciada':
@@ -203,6 +222,7 @@ class Command(BaseCommand):
                                 tarefa=tarefa,
                                 data=get_or_create_dim_data(execution_date)
                             )
+                            count_fatos_tarefa += 1
                             
                     elif t_status == 'Em andamento':
                         target_hours = float(tarefa.estimativa) * random.uniform(0.1, 0.9)
@@ -223,6 +243,7 @@ class Command(BaseCommand):
                                 tarefa=tarefa,
                                 data=get_or_create_dim_data(execution_date)
                             )
+                            count_fatos_tarefa += 1
 
                 num_cats_to_pick = random.randint(1, len(categorias_globais))
                 picked_cats = random.sample(categorias_globais, num_cats_to_pick)
@@ -235,7 +256,7 @@ class Command(BaseCommand):
                     chosen_mats = random.sample(global_materiais[cat], num_mat_in_cat)
                     
                     for material in chosen_mats:
-                        num_batches = random.randint(1, 4)
+                        num_batches = random.randint(1, int(4 * duration_ratio))
                         for _ in range(num_batches):
                             solic_date = random_date(proj_start, proj_end)
                             
@@ -247,7 +268,7 @@ class Command(BaseCommand):
                                 solicitacao_status = random.choice(status_solicitacao_choices)
                             
                             solicitacao = DimSolicitacao.objects.create(
-                                numero_solicitacao=fake.unique.bothify(text='######').upper(),
+                                numero_solicitacao=uuid.uuid4().hex[:6].upper(),
                                 projeto=projeto,
                                 material=material,
                                 quantidade=random.randint(1, 1000),
@@ -255,6 +276,7 @@ class Command(BaseCommand):
                                 prioridade=random.choice(['Baixa', 'Média', 'Alta', 'Crítica']),
                                 status=solicitacao_status
                             )
+                            count_solicitacoes += 1
                         
                         if solicitacao_status == 'Aprovada':
                             pedido_date = random_date(solic_date, proj_end)
@@ -264,7 +286,7 @@ class Command(BaseCommand):
                                 fornecedor = random.choice(global_fornecedores[cat])
                             else:
                                 fornecedor = DimFornecedor.objects.create(
-                                    codigo_fornecedor=fake.unique.bothify(text='######').upper(),
+                                    codigo_fornecedor=uuid.uuid4().hex[:6].upper(),
                                     razao_social=fake.company()[:256],
                                     cidade=fake.city()[:256],
                                     estado=fake.state_abbr(),
@@ -281,7 +303,7 @@ class Command(BaseCommand):
                                 pedido_status = random.choice(status_pedido_choices)
                             
                             pedido = FatoCompra.objects.create(
-                                numero_pedido=fake.unique.bothify(text='######').upper(),
+                                numero_pedido=uuid.uuid4().hex[:6].upper(),
                                 valor_total=round(material.custo_estimado * solicitacao.quantidade, 2),
                                 status=pedido_status,
                                 solicitacao=solicitacao,
@@ -289,6 +311,7 @@ class Command(BaseCommand):
                                 data_pedido=get_or_create_dim_data(pedido_date),
                                 data_previsao_entrega=get_or_create_dim_data(entrega_prev_date)
                             )
+                            count_pedidos += 1
 
                             if pedido_status == 'Entregue':
                                 empenho_date = random_date(pedido_date, entrega_prev_date + timedelta(days=5))
@@ -299,6 +322,15 @@ class Command(BaseCommand):
                                     material=material,
                                     data_empenho=get_or_create_dim_data(empenho_date)
                                 )
+                                count_empenhos += 1
+
+                self.stdout.write(f'    -> Projeto "{projeto.nome_projeto[:30]}...": '
+                                  f'{count_tarefas} Tarefas ({count_fatos_tarefa} interações), '
+                                  f'{count_solicitacoes} Solic., {count_pedidos} Pedidos, {count_empenhos} Empenhos.')
         
-        self.stdout.write(self.style.SUCCESS(f'Seed dinâmico concluído! '
+            elapsed = time.time() - global_start
+            self.stdout.write(f'  - [{p_idx+1}/{num_programs}] Programa "{programa.nome_programa}" gerado em {elapsed:.2f} segundos.')
+            
+        final_elapsed = time.time() - global_start
+        self.stdout.write(self.style.SUCCESS(f'Seed dinâmico concluído em {final_elapsed:.2f} segundos! '
                                              f'Criados {num_programs} programas, {num_projects} projetos por programa.'))
