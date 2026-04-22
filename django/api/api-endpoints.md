@@ -36,7 +36,8 @@ Retornado quando o projeto é encontrado com sucesso.
     "financeiro": {
         "total_horas_trabalhadas": 26.44,
         "custo_total_materiais": 27070.40,
-        "custo_total_projeto": 30166.26
+        "custo_total_projeto": 30166.26,
+        "horas_totais_estimadas": 40
     },
     "programa": {
         "codigo": "MAX12AC",
@@ -362,7 +363,7 @@ Retornado caso a requisição utilize um método diferente de GET (ex: POST, PUT
 Retorna uma listagem detalhada dos empenhos de materiais realizados, permitindo a filtragem por um programa específico ou por categoria de material. O endpoint também fornece o cálculo do valor total empenhado com base no custo estimado dos materiais.
 
 ### **Endpoint**
-`GET /api/empenhos/`
+`GET /api/empenhos-programa/`
 
 ### **Parâmetros de Rota (Path Parameters)**
 
@@ -420,7 +421,7 @@ Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha 
 Retorna as estatísticas e indicadores de topo (cards de resumo) para a tela de solicitações de um projeto específico. O endpoint consolida o volume de requisições pendentes e destaca os itens críticos e urgentes que exigem atenção imediata, calculando o tempo de espera desde a abertura.
 
 ### **Endpoint**
-`GET /api/empenhos/`
+`GET /api/projetos/<codigo_projeto>/solicitacoes/stats/`
 
 ### **Parâmetros de Rota (Path Parameters)**
 
@@ -574,36 +575,13 @@ Retorna uma lista de programas junto com os projetos vinculados a cada programa.
       "nome_programa": "MANSUP-ER",
       "status": "EM ANDAMENTO",
       "gerente": "Mariana Fernandes",
-      "projetos": [
-        {
-          "codigo_projeto": "PRJ086",
-          "nome_projeto": "Unidade Proteção Surto 3",
-          "status": "CONCLUIDO"
-        },
-        {
-          "codigo_projeto": "PRJ089",
-          "nome_projeto": "Placa Regulador Switching 3",
-          "status": "EM ANDAMENTO"
-        }
-      ]
+      "gerente_tecnico": "Bruno Oliveira",
     },
     {
       "codigo_programa": "MAX12AC",
       "nome_programa": "MAX 1.2 AC",
       "status": "EM ANDAMENTO",
       "gerente": "Ana Paula Ribeiro",
-      "projetos": [
-        {
-          "codigo_projeto": "PRJ001",
-          "nome_projeto": "Conversor DC-DC Isolado",
-          "status": "PLANEJAMENTO"
-        },
-        {
-          "codigo_projeto": "PRJ002",
-          "nome_projeto": "Driver LED Dimerizável",
-          "status": "PLANEJAMENTO"
-        }
-      ]
     }
   ]
 }
@@ -721,4 +699,52 @@ Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dad
     "detail": "Not found."
 }
 ```
+
+---
+
+## Rota Detalhamento de Solicitações do Projeto
+
+Retorna a listagem detalhada de todas as solicitações (requisições de material) vinculadas a um projeto específico, incluindo informações sobre materiais, valores estimados e os pedidos de compra associados.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/solicitacoes/detalhes/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Valor Total Estimado:** Calculado multiplicando a `quantidade` solicitada pelo `custo_estimado` do material (`Quantidade` x `Custo Unitário Estimado`).
+* **Número do Pedido:** Referência ao número do pedido de compra vinculado à solicitação, quando disponível.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto": "PRJ003",
+    "solicitacoes": [
+        {
+            "numero_solicitacao": "SC0028",
+            "numero_pedido": "PC0020",
+            "nome_material": "FPGA Spartan-7 XC7S25",
+            "data_solicitacao": "2022-07-03",
+            "valor_total_estimado": 3894.8,
+            "status": "CANCELADA"
+        }
+    ]
+}
 ```
+
+#### Erro: `404 Not Found`
+**Exemplo de Resposta (JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+
