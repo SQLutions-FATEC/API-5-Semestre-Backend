@@ -23,7 +23,6 @@ class SeedDynamicCommandTest(TestCase):
             programs=2,
             projects=2,
             tasks=3,
-            materials=3,
             users=2
         )
         
@@ -58,7 +57,6 @@ class SeedDynamicCommandTest(TestCase):
             programs=1,
             projects=1,
             tasks=1,
-            materials=1,
             users=1,
             clear=True
         )
@@ -77,7 +75,6 @@ class SeedDynamicCommandTest(TestCase):
             programs=1,
             projects=2,
             tasks=2,
-            materials=2,
             users=1
         )
         
@@ -97,7 +94,6 @@ class SeedDynamicCommandTest(TestCase):
             programs=1,
             projects=2,
             tasks=2,
-            materials=2,
             users=1
         )
         
@@ -129,7 +125,6 @@ class SeedDynamicCommandTest(TestCase):
             programs=1,
             projects=1,
             tasks=5,
-            materials=1,
             users=2
         )
         
@@ -162,7 +157,6 @@ class SeedDynamicCommandTest(TestCase):
             programs=2,
             projects=5,
             tasks=5,
-            materials=5,
             users=3
         )
         self.assertTrue(DimProjeto.objects.count() > 0)

@@ -21,7 +21,6 @@ class Command(BaseCommand):
         parser.add_argument('--programs', type=int, default=1, help='Number of programs to create')
         parser.add_argument('--projects', type=int, default=3, help='Number of projects per program')
         parser.add_argument('--tasks', type=int, default=5, help='Number of tasks per project')
-        parser.add_argument('--materials', type=int, default=5, help='Number of materials per project')
         parser.add_argument('--users', type=int, default=3, help='Number of users per project')
         parser.add_argument('--clear', action='store_true', help='Clear existing data before seeding')
 
@@ -30,7 +29,6 @@ class Command(BaseCommand):
         num_programs = options['programs']
         num_projects = options['projects']
         num_tasks = options['tasks']
-        num_materials = options['materials']
         num_users = options['users']
         clear_db = options['clear']
 
@@ -72,9 +70,6 @@ class Command(BaseCommand):
             random_days = random.randrange(delta.days)
             return start_dt + timedelta(days=random_days)
 
-        status_solicitacao_choices = ['Pendente', 'Cancelada', 'Rejeitada', 'Aprovada']
-        status_pedido_choices = ['Aberto', 'Cancelado', 'Entregue', 'Enviado']
-        status_projeto_choices = ['Planejamento', 'Em andamento', 'Concluído', 'Suspenso']
         status_tarefa_choices = ['Não iniciada', 'Em andamento', 'Concluído']
 
         # Categorias unificadas para Materiais e Fornecedores
