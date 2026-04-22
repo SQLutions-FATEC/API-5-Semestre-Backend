@@ -210,6 +210,10 @@ class Command(BaseCommand):
                         else:
                             target_hours = float(tarefa.estimativa) * random.uniform(0.1, 0.9)
                             
+                        # Equipe de execução para a tarefa (1 membro a cada ~40h)
+                        team_size = max(1, min(len(project_users), int(target_hours / 40) + 1))
+                        task_team = random.sample(project_users, team_size)
+                        
                         hours_created = 0.0
                         while target_hours - hours_created > 0.01:
                             execution_date = random_date(task_start, task_end)
@@ -220,7 +224,7 @@ class Command(BaseCommand):
                             hours_created += horas
                             
                             FatoTarefa.objects.create(
-                                usuario=responsavel_tarefa,
+                                usuario=random.choice(task_team),
                                 horas_trabalhadas=horas,
                                 tarefa=tarefa,
                                 data=get_or_create_dim_data(execution_date)
@@ -243,11 +247,11 @@ class Command(BaseCommand):
                             solic_date = random_date(proj_start, proj_end)
                             
                             if is_planejamento:
-                                solicitacao_status = random.choice(['Pendente', 'Cancelada', 'Rejeitada'])
+                                solicitacao_status = random.choices(['Pendente', 'Cancelada', 'Rejeitada'], weights=[80, 15, 5], k=1)[0]
                             elif is_concluido:
-                                solicitacao_status = random.choice(['Aprovada', 'Cancelada', 'Rejeitada'])
+                                solicitacao_status = random.choices(['Aprovada', 'Cancelada', 'Rejeitada'], weights=[90, 5, 5], k=1)[0]
                             else:
-                                solicitacao_status = random.choice(status_solicitacao_choices)
+                                solicitacao_status = random.choices(['Pendente', 'Cancelada', 'Rejeitada', 'Aprovada'], weights=[20, 5, 5, 70], k=1)[0]
                             
                             solicitacao = DimSolicitacao.objects.create(
                                 numero_solicitacao=uuid.uuid4().hex[:6].upper(),
@@ -278,11 +282,11 @@ class Command(BaseCommand):
                                 global_fornecedores[cat].append(fornecedor)
 
                             if is_concluido:
-                                pedido_status = random.choice(['Entregue', 'Cancelado'])
+                                pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
                             elif entrega_prev_date <= today:
-                                pedido_status = random.choice(['Entregue', 'Cancelado'])
+                                pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
                             else:
-                                pedido_status = random.choice(status_pedido_choices)
+                                pedido_status = random.choices(['Aberto', 'Cancelado', 'Entregue', 'Enviado'], weights=[15, 5, 55, 25], k=1)[0]
                             
                             pedido = FatoCompra.objects.create(
                                 numero_pedido=uuid.uuid4().hex[:6].upper(),
