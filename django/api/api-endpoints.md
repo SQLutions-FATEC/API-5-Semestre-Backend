@@ -548,16 +548,21 @@ Retorna todos os programas com codigo,nome,status e gerente, juntamente com todo
 
 ### **Endpoint**
 
-`GET /api/programas/projetos/`
+`GET /api/programas/busca/`
 
 ### **Parâmetros de Rota (Path Parameters)**
 
 Sem parãmetros para essa rota
 
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos programas. Se omitido, retorna todos os programas. | `Programa` |
+
 ### **Regras de Negócio e Cálculos**
 
-* **Programas:** Os programas estão listados com código,nome,status e seu gerente.
-* **Projetos:** Os projetos estão listados abaixo de seus programas código,nome e status do projeto.
+* **Programas:** Os programas estão listados com código,nome,status,gerente e gerente técnico.
 
 ### **Respostas**
 
@@ -582,6 +587,7 @@ Retorna uma lista de programas junto com os projetos vinculados a cada programa.
       "nome_programa": "MAX 1.2 AC",
       "status": "EM ANDAMENTO",
       "gerente": "Ana Paula Ribeiro",
+      "gerente_tecnico": "Gabriel Carvalho",
     }
   ]
 }
