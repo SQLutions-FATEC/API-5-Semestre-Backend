@@ -5,15 +5,22 @@ from django.views.decorators.http import require_GET
 
 @require_GET
 def programa_api(request):
+    q = request.GET.get('q','').strip()
+
     programas = (
         DimPrograma.objects
         .prefetch_related('dimprojeto_set')
         .order_by('codigo_programa')
     )
 
+    if q:
+        programas = programas.filter(
+            Q(nome_programa__icontains=q) | Q(codigo_programa__icontains=q)
+        )
+
     response_data = []
     for programa in programas:
-        response_data.append({
+        response_data.append({  
             'codigo_programa': programa.codigo_programa,
             'nome_programa': programa.nome_programa,
             'status': programa.status,
