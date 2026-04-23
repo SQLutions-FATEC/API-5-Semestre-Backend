@@ -51,7 +51,7 @@ class ProgramaProjetosViewTest(TestCase):
         )
 
     def test_programa_projetos_success(self):
-        response = self.client.get('/api/programas/projetos/')
+        response = self.client.get('/api/programas/busca/')
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
@@ -77,8 +77,50 @@ class ProgramaProjetosViewTest(TestCase):
         self.assertNotIn('projetos', programa_11)
 
     def test_programa_projetos_wrong_method(self):
-        response = self.client.post('/api/programas/projetos/')
+        response = self.client.post('/api/programas/busca/')
         self.assertEqual(response.status_code, 405)
+
+
+class ProgramaApiFilterTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.data = DimData.objects.create(dia=1, mes=1, ano=2024)
+
+        DimPrograma.objects.create(
+            codigo_programa='PROG10',
+            nome_programa='Programa Alpha',
+            gerente_programa='Gerente 10',
+            gerente_tecnico='Tecnico 10',
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Ativo',
+        )
+        DimPrograma.objects.create(
+            codigo_programa='PROG20',
+            nome_programa='Programa Beta',
+            gerente_programa='Gerente 20',
+            gerente_tecnico='Tecnico 20',
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Planejado',
+        )
+
+    def test_programa_api_filtra_por_nome_ou_codigo(self):
+        response = self.client.get('/api/programas/busca/?q=alpha')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(len(data['programas']), 1)
+        self.assertEqual(data['programas'][0]['codigo_programa'], 'PROG10')
+
+    def test_programa_api_filtra_por_codigo(self):
+        response = self.client.get('/api/programas/busca/?q=prog20')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(len(data['programas']), 1)
+        self.assertEqual(data['programas'][0]['codigo_programa'], 'PROG20')
 
 class BuscaProjetosViewTest(TestCase):
     def setUp(self):
