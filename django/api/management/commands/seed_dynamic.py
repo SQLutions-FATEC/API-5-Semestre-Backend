@@ -97,7 +97,7 @@ class Command(BaseCommand):
             cat = random.choice(categorias_globais)
             m = DimMaterial.objects.create(
                 codigo_material=uuid.uuid4().hex[:6].upper(),
-                descricao=fake.sentence(nb_words=3)[:256],
+                descricao=f"{random.choice(['Módulo', 'Componente', 'Peça', 'Conjunto', 'Estrutura'])} de {cat} - {fake.bothify(text='???-####').upper()}"[:256],
                 categoria=cat,
                 fabricante=fake.company()[:256],
                 custo_estimado=round(random.uniform(5.0, 500.0), 2),
@@ -111,7 +111,7 @@ class Command(BaseCommand):
             
             programa = DimPrograma.objects.create(
                 codigo_programa=uuid.uuid4().hex[:6].upper(),
-                nome_programa=fake.bs().title()[:256],
+                nome_programa=f"Programa {fake.company()} - {fake.catch_phrase().title()}"[:256],
                 gerente_programa=fake.name()[:256],
                 gerente_tecnico=fake.name()[:256],
                 data_inicio=get_or_create_dim_data(prog_start),
@@ -145,7 +145,7 @@ class Command(BaseCommand):
                 elif proj_end < today:
                     proj_status = random.choice(['Concluído', 'Em andamento', 'Suspenso'])
                 else:
-                    proj_status = random.choice(['Planejamento', 'Em andamento', 'Suspenso'])
+                    proj_status = random.choice(['Em andamento', 'Suspenso'])
 
                 projeto = DimProjeto.objects.create(
                     codigo_projeto=uuid.uuid4().hex[:6].upper(),
@@ -170,8 +170,16 @@ class Command(BaseCommand):
                 count_empenhos = 0
 
                 for t_idx in range(scaled_tasks):
-                    task_start = random_date(proj_start, proj_end)
-                    task_end = random_date(task_start, proj_end)
+                    estimativa_horas = random.randint(2, 40)
+                    estimativa_dias = (estimativa_horas + 7) // 8
+                    
+                    max_start = proj_end - timedelta(days=estimativa_dias)
+                    if max_start < proj_start:
+                        max_start = proj_start
+                        
+                    task_start = random_date(proj_start, max_start)
+                    task_end = task_start + timedelta(days=estimativa_dias)
+                    
                     responsavel_tarefa = random.choice(project_users) if project_users else fake.name()[:256]
                     
                     if is_planejamento:
@@ -184,9 +192,9 @@ class Command(BaseCommand):
                     tarefa = DimTarefa.objects.create(
                         codigo_tarefa=uuid.uuid4().hex[:6].upper(),
                         projeto=projeto,
-                        titulo=fake.sentence(nb_words=4)[:256],
+                        titulo=f"{random.choice(['Analisar', 'Desenvolver', 'Testar', 'Projetar', 'Revisar', 'Homologar'])} {random.choice(['módulo', 'sistema', 'interface', 'integração', 'componente', 'circuito'])} {fake.bothify(text='??-##').upper()}"[:256],
                         responsavel=responsavel_tarefa,
-                        estimativa=random.randint(10, 200),
+                        estimativa=estimativa_horas,
                         data_inicio=get_or_create_dim_data(task_start),
                         data_fim_prevista=get_or_create_dim_data(task_end),
                         status=t_status,
@@ -327,12 +335,12 @@ class Command(BaseCommand):
                                             # Advance date for the next proportional release
                                             consumption_date = random_date(consumption_date + timedelta(days=1), proj_end)
 
-                self.stdout.write(f'    -> Projeto "{projeto.nome_projeto[:30]}...": '
-                                  f'{count_tarefas} Tarefas ({count_fatos_tarefa} interações), '
+                self.stdout.write(f'    -> Projeto "{projeto.nome_projeto[:30]}..." [ID: {projeto.codigo_projeto}] ({projeto.status}, {project_duration_days} dias): '
+                                  f'{count_tarefas} Tarefas ({count_fatos_tarefa} fatos tarefa), {scaled_users} usuários, '
                                   f'{count_solicitacoes} Solic., {count_pedidos} Pedidos, {count_empenhos} Empenhos.')
         
             elapsed = time.time() - global_start
-            self.stdout.write(f'  - [{p_idx+1}/{num_programs}] Programa "{programa.nome_programa}" gerado em {elapsed:.2f} segundos.')
+            self.stdout.write(f'  - [{p_idx+1}/{num_programs}] Programa "{programa.nome_programa}" [ID: {programa.codigo_programa}] gerado em {elapsed:.2f} segundos.')
             
         final_elapsed = time.time() - global_start
         self.stdout.write(self.style.SUCCESS(f'Seed dinâmico concluído em {final_elapsed:.2f} segundos! '
