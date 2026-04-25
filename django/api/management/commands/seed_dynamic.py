@@ -195,14 +195,22 @@ class Command(BaseCommand):
                 self._generate_pedidos_material(projeto, material, cat, solicitacao, solic_date, proj_end, is_concluido, global_fornecedores, fake, counts)
 
     def _generate_materiais_para_projeto(self, projeto, proj_start, proj_end, proj_status, duration_ratio, global_fornecedores, global_materiais, fake, counts, categorias_globais):
-        num_cats_to_pick = random.randint(1, len(categorias_globais))
+        # Calcula a quantidade de categorias e materiais com base na duração do projeto (duration_ratio em meses)
+        max_cats_by_duration = max(1, min(len(categorias_globais), int(duration_ratio / 5)))
+        min_cats = max(1, max_cats_by_duration // 2)
+        num_cats_to_pick = random.randint(min_cats, max_cats_by_duration)
+        
         picked_cats = random.sample(categorias_globais, num_cats_to_pick)
         
         for cat in picked_cats:
             if not global_materiais[cat]:
                 continue
             
-            num_mat_in_cat = random.randint(min(3, len(global_materiais[cat])), min(15, len(global_materiais[cat])))
+            max_mats_by_duration = max(2, min(15, int(duration_ratio / 2)))
+            min_mats = max(1, max_mats_by_duration // 3)
+            
+            mats_available = len(global_materiais[cat])
+            num_mat_in_cat = random.randint(min(min_mats, mats_available), min(max_mats_by_duration, mats_available))
             chosen_mats = random.sample(global_materiais[cat], num_mat_in_cat)
             
             for material in chosen_mats:
