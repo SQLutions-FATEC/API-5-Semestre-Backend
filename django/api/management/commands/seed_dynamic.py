@@ -75,7 +75,7 @@ class Command(BaseCommand):
                 cidade=fake.city()[:256],
                 estado=fake.state_abbr(),
                 categoria=cat,
-                status='Ativo'
+                status='ATIVO'
             )
             global_fornecedores[cat].append(f)
         return global_fornecedores
@@ -90,7 +90,7 @@ class Command(BaseCommand):
                 categoria=cat,
                 fabricante=fake.company()[:256],
                 custo_estimado=round(random.uniform(5.0, 500.0), 2),
-                status='Ativo'
+                status='ATIVO'
             )
             global_materiais[cat].append(m)
         return global_materiais
@@ -144,11 +144,11 @@ class Command(BaseCommand):
             global_fornecedores[cat].append(fornecedor)
 
         if is_concluido:
-            pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
+            pedido_status = random.choices(['ENTREGUE', 'CANCELADO'], weights=[95, 5], k=1)[0]
         elif entrega_prev_date <= today:
-            pedido_status = random.choices(['Entregue', 'Cancelado'], weights=[95, 5], k=1)[0]
+            pedido_status = random.choices(['ENTREGUE', 'CANCELADO'], weights=[95, 5], k=1)[0]
         else:
-            pedido_status = random.choices(['Aberto', 'Cancelado', 'Entregue', 'Enviado'], weights=[15, 5, 55, 25], k=1)[0]
+            pedido_status = random.choices(['ABERTO', 'CANCELADO', 'ENTREGUE', 'ENVIADO'], weights=[15, 5, 55, 25], k=1)[0]
         
         pedido = FatoCompra.objects.create(
             numero_pedido=uuid.uuid4().hex[:6].upper(),
@@ -161,24 +161,24 @@ class Command(BaseCommand):
         )
         counts['pedidos'] += 1
 
-        if pedido_status == 'Entregue':
+        if pedido_status == 'ENTREGUE':
             self._generate_empenhos_material(projeto, material, solicitacao.quantidade, pedido_date, entrega_prev_date, proj_end, counts)
 
     def _generate_solicitacoes_material(self, projeto, material, cat, proj_start, proj_end, proj_status, duration_ratio, global_fornecedores, fake, counts):
         max_batches = max(2, int(duration_ratio / 6))
         num_batches = random.randint(1, max_batches)
-        is_planejamento = proj_status == 'Planejamento'
+        is_planejamento = proj_status == 'PLANEJAMENTO'
         is_concluido = proj_status == STATUS_CONCLUIDO
         
         for _ in range(num_batches):
             solic_date = self._random_date(proj_start, proj_end)
             
             if is_planejamento:
-                solicitacao_status = random.choices(['Pendente', 'Cancelada', 'Rejeitada'], weights=[80, 15, 5], k=1)[0]
+                solicitacao_status = random.choices(['PENDENTE', 'CANCELADA', 'REJEITADA'], weights=[80, 15, 5], k=1)[0]
             elif is_concluido:
-                solicitacao_status = random.choices(['Aprovada', 'Cancelada', 'Rejeitada'], weights=[90, 5, 5], k=1)[0]
+                solicitacao_status = random.choices(['APROVADA', 'CANCELADA', 'REJEITADA'], weights=[90, 5, 5], k=1)[0]
             else:
-                solicitacao_status = random.choices(['Pendente', 'Cancelada', 'Rejeitada', 'Aprovada'], weights=[20, 5, 5, 70], k=1)[0]
+                solicitacao_status = random.choices(['PENDENTE', 'CANCELADA', 'REJEITADA', 'APROVADA'], weights=[20, 5, 5, 70], k=1)[0]
             
             solicitacao = DimSolicitacao.objects.create(
                 numero_solicitacao=uuid.uuid4().hex[:6].upper(),
@@ -186,12 +186,12 @@ class Command(BaseCommand):
                 material=material,
                 quantidade=random.randint(1, 1000),
                 data_solicitacao=self._get_or_create_dim_data(solic_date),
-                prioridade=random.choice(['Baixa', 'Média', 'Alta', 'Crítica']),
+                prioridade=random.choice(['BAIXA', 'MEDIA', 'ALTA', 'CRITICA']),
                 status=solicitacao_status
             )
             counts['solicitacoes'] += 1
         
-            if solicitacao_status == 'Aprovada':
+            if solicitacao_status == 'APROVADA':
                 self._generate_pedidos_material(projeto, material, cat, solicitacao, solic_date, proj_end, is_concluido, global_fornecedores, fake, counts)
 
     def _generate_materiais_para_projeto(self, projeto, proj_start, proj_end, proj_status, duration_ratio, global_fornecedores, global_materiais, fake, counts, categorias_globais):
@@ -238,7 +238,7 @@ class Command(BaseCommand):
 
     def _generate_tarefas(self, projeto, proj_start, proj_end, proj_status, scaled_tasks, project_users, fake, counts):
         is_concluido = proj_status == STATUS_CONCLUIDO
-        is_planejamento = proj_status == 'Planejamento'
+        is_planejamento = proj_status == 'PLANEJAMENTO'
         status_tarefa_choices = [STATUS_NAO_INICIADA, STATUS_EM_ANDAMENTO, STATUS_CONCLUIDO]
 
         for _ in range(scaled_tasks):
@@ -297,11 +297,11 @@ class Command(BaseCommand):
 
         today = timezone.now().date()
         if proj_start > today:
-            proj_status = 'Planejamento'
+            proj_status = 'PLANEJAMENTO'
         elif proj_end < today:
-            proj_status = random.choice([STATUS_CONCLUIDO, STATUS_EM_ANDAMENTO, 'Suspenso'])
+            proj_status = random.choice([STATUS_CONCLUIDO, STATUS_EM_ANDAMENTO, 'SUSPENSO'])
         else:
-            proj_status = random.choice([STATUS_EM_ANDAMENTO, 'Suspenso'])
+            proj_status = random.choice([STATUS_EM_ANDAMENTO, 'SUSPENSO'])
 
         projeto = DimProjeto.objects.create(
             codigo_projeto=uuid.uuid4().hex[:6].upper(),
