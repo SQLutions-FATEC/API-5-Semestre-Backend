@@ -370,7 +370,8 @@ class Command(BaseCommand):
         num_fornecedores_total = max(10, total_projects // 2)
         global_fornecedores = self._create_fornecedores(num_fornecedores_total, fake, categorias_globais)
 
-        num_materiais_total = max(50, total_projects * 10)
+        # Limite temporário enquanto não temos uma resposta do cliente
+        num_materiais_total = 10 #max(50, total_projects * 10)
         global_materiais = self._create_materiais(num_materiais_total, fake, categorias_globais)
 
         for p_idx in range(options['programs']):
