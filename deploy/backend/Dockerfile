@@ -31,7 +31,13 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Copia o código da sua aplicação
 COPY . .
 
+# Dá permissão de execução ao entrypoint
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
+
+# Script de inicialização
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Executa o projeto 
 CMD ["gunicorn", "api.wsgi:application", "--bind", "0.0.0.0:8000"]

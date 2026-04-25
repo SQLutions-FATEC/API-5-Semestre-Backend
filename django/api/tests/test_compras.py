@@ -102,14 +102,14 @@ class EvolucaoGastosProjetoViewTest(TestCase):
         )
         
         self.projeto_com_dados = DimProjeto.objects.create(
-            codigo_projeto="PRJ01_EVO", nome_projeto="Proj 1 Evo",
+            codigo_projeto="PEVO01", nome_projeto="Proj 1 Evo",
             programa=self.programa, responsavel="Resp",
             custo_hora=Decimal('100.00'),
             data_inicio=self.data_jan, data_fim_prevista=self.data_mar, status="Ativo"
         )
 
         self.projeto_vazio = DimProjeto.objects.create(
-            codigo_projeto="PRJ02_EVO", nome_projeto="Proj 2 Evo",
+            codigo_projeto="PEVO02", nome_projeto="Proj 2 Evo",
             programa=self.programa, responsavel="Resp",
             custo_hora=Decimal('50.00'),
             data_inicio=self.data_jan, data_fim_prevista=self.data_mar, status="Ativo"
@@ -130,21 +130,21 @@ class EvolucaoGastosProjetoViewTest(TestCase):
         
         # Valid expense in January
         FatoCompra.objects.create(
-            numero_pedido="PED_EVO_01", valor_total=Decimal('150.00'), status="ENTREGUE",
+            numero_pedido="PEV01", valor_total=Decimal('150.00'), status="ENTREGUE",
             solicitacao=self.solicitacao, fornecedor=self.fornecedor,
             data_pedido=self.data_jan, data_previsao_entrega=self.data_mar
         )
 
         # Excluded status in January
         FatoCompra.objects.create(
-            numero_pedido="PED_EVO_02", valor_total=Decimal('300.00'), status="CANCELADO",
+            numero_pedido="PEV02", valor_total=Decimal('300.00'), status="CANCELADO",
             solicitacao=self.solicitacao, fornecedor=self.fornecedor,
             data_pedido=self.data_jan, data_previsao_entrega=self.data_mar
         )
 
         # Valid expense in March
         FatoCompra.objects.create(
-            numero_pedido="PED_EVO_03", valor_total=Decimal('200.00'), status="ENVIADO",
+            numero_pedido="PEV03", valor_total=Decimal('200.00'), status="ENVIADO",
             solicitacao=self.solicitacao, fornecedor=self.fornecedor,
             data_pedido=self.data_mar, data_previsao_entrega=self.data_mar
         )
@@ -204,7 +204,7 @@ class EvolucaoGastosProjetoViewTest(TestCase):
             quantidade=2, data_solicitacao=data_old, prioridade="Alta", status="Ativo"
         )
         FatoCompra.objects.create(
-            numero_pedido="PED_OLD", valor_total=Decimal('50.00'), status="ENTREGUE",
+            numero_pedido="PEOLD", valor_total=Decimal('50.00'), status="ENTREGUE",
             solicitacao=solicitacao_old, fornecedor=self.fornecedor,
             data_pedido=data_old, data_previsao_entrega=self.data_mar
         )
