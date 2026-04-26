@@ -139,13 +139,11 @@ class Command(BaseCommand):
                 cidade=fake.city()[:256],
                 estado=fake.state_abbr(),
                 categoria=cat,
-                status='Ativo'
+                status='ATIVO'
             )
             global_fornecedores[cat].append(fornecedor)
 
         if is_concluido:
-            pedido_status = random.choices(['ENTREGUE', 'CANCELADO'], weights=[95, 5], k=1)[0]
-        elif entrega_prev_date <= today:
             pedido_status = random.choices(['ENTREGUE', 'CANCELADO'], weights=[95, 5], k=1)[0]
         else:
             pedido_status = random.choices(['ABERTO', 'CANCELADO', 'ENTREGUE', 'ENVIADO'], weights=[15, 5, 55, 25], k=1)[0]
