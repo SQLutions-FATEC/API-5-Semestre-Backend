@@ -17,6 +17,30 @@ logger = logging.getLogger(__name__)
 STATUS_EM_ANDAMENTO = 'EM ANDAMENTO'
 STATUS_CONCLUIDO = 'CONCLUIDO'
 STATUS_NAO_INICIADA = 'NAO INICIADA'
+STATUS_ATIVO = 'ATIVO'
+
+STATUS_PLANEJAMENTO = 'PLANEJAMENTO'
+STATUS_SUSPENSO = 'SUSPENSO'
+
+PEDIDO_STATUS_ENTREGUE = 'ENTREGUE'
+PEDIDO_STATUS_CANCELADO = 'CANCELADO'
+PEDIDO_STATUS_ABERTO = 'ABERTO'
+PEDIDO_STATUS_ENVIADO = 'ENVIADO'
+
+SOLICITACAO_STATUS_PENDENTE = 'PENDENTE'
+SOLICITACAO_STATUS_CANCELADA = 'CANCELADA'
+SOLICITACAO_STATUS_REJEITADA = 'REJEITADA'
+SOLICITACAO_STATUS_APROVADA = 'APROVADA'
+
+PRIORIDADE_BAIXA = 'BAIXA'
+PRIORIDADE_MEDIA = 'MEDIA'
+PRIORIDADE_ALTA = 'ALTA'
+PRIORIDADE_CRITICA = 'CRITICA'
+
+CATEGORIAS_GLOBAIS = ['Componentes Eletrônicos', 'Componentes Mecânicos', 'Placas de Circuito Impresso', 'Materiais de Solda', 'Sensores', 'Comunicação', 'Mecatrônica']
+MATERIAL_TIPOS = ['Módulo', 'Componente', 'Peça', 'Conjunto', 'Estrutura']
+TAREFA_ACOES = ['Analisar', 'Desenvolver', 'Testar', 'Projetar', 'Revisar', 'Homologar']
+TAREFA_OBJETOS = ['módulo', 'sistema', 'interface', 'integração', 'componente', 'circuito']
 
 class Command(BaseCommand):
     help = 'Popula o DW com dados dinâmicos utilizando Faker, respeitando regras de negócio.'
@@ -75,7 +99,7 @@ class Command(BaseCommand):
                 cidade=fake.city()[:256],
                 estado=fake.state_abbr(),
                 categoria=cat,
-                status='ATIVO'
+                status=STATUS_ATIVO
             )
             global_fornecedores[cat].append(f)
         return global_fornecedores
@@ -86,11 +110,11 @@ class Command(BaseCommand):
             cat = random.choice(categorias_globais)
             m = DimMaterial.objects.create(
                 codigo_material=uuid.uuid4().hex[:6].upper(),
-                descricao=f"{random.choice(['Módulo', 'Componente', 'Peça', 'Conjunto', 'Estrutura'])} de {cat} - {fake.bothify(text='???-####').upper()}"[:256],
+                descricao=f"{random.choice(MATERIAL_TIPOS)} de {cat} - {fake.bothify(text='???-####').upper()}"[:256],
                 categoria=cat,
                 fabricante=fake.company()[:256],
                 custo_estimado=round(random.uniform(5.0, 500.0), 2),
-                status='ATIVO'
+                status=STATUS_ATIVO
             )
             global_materiais[cat].append(m)
         return global_materiais
@@ -139,14 +163,14 @@ class Command(BaseCommand):
                 cidade=fake.city()[:256],
                 estado=fake.state_abbr(),
                 categoria=cat,
-                status='ATIVO'
+                status=STATUS_ATIVO
             )
             global_fornecedores[cat].append(fornecedor)
 
         if is_concluido:
-            pedido_status = random.choices(['ENTREGUE', 'CANCELADO'], weights=[95, 5], k=1)[0]
+            pedido_status = random.choices([PEDIDO_STATUS_ENTREGUE, PEDIDO_STATUS_CANCELADO], weights=[95, 5], k=1)[0]
         else:
-            pedido_status = random.choices(['ABERTO', 'CANCELADO', 'ENTREGUE', 'ENVIADO'], weights=[15, 5, 55, 25], k=1)[0]
+            pedido_status = random.choices([PEDIDO_STATUS_ABERTO, PEDIDO_STATUS_CANCELADO, PEDIDO_STATUS_ENTREGUE, PEDIDO_STATUS_ENVIADO], weights=[15, 5, 55, 25], k=1)[0]
         
         pedido = FatoCompra.objects.create(
             numero_pedido=uuid.uuid4().hex[:6].upper(),
@@ -159,24 +183,24 @@ class Command(BaseCommand):
         )
         counts['pedidos'] += 1
 
-        if pedido_status == 'ENTREGUE':
+        if pedido_status == PEDIDO_STATUS_ENTREGUE:
             self._generate_empenhos_material(projeto, material, solicitacao.quantidade, pedido_date, entrega_prev_date, proj_end, counts)
 
     def _generate_solicitacoes_material(self, projeto, material, cat, proj_start, proj_end, proj_status, duration_ratio, global_fornecedores, fake, counts):
         max_batches = max(2, int(duration_ratio / 6))
         num_batches = random.randint(1, max_batches)
-        is_planejamento = proj_status == 'PLANEJAMENTO'
+        is_planejamento = proj_status == STATUS_PLANEJAMENTO
         is_concluido = proj_status == STATUS_CONCLUIDO
         
         for _ in range(num_batches):
             solic_date = self._random_date(proj_start, proj_end)
             
             if is_planejamento:
-                solicitacao_status = random.choices(['PENDENTE', 'CANCELADA', 'REJEITADA'], weights=[80, 15, 5], k=1)[0]
+                solicitacao_status = random.choices([SOLICITACAO_STATUS_PENDENTE, SOLICITACAO_STATUS_CANCELADA, SOLICITACAO_STATUS_REJEITADA], weights=[80, 15, 5], k=1)[0]
             elif is_concluido:
-                solicitacao_status = random.choices(['APROVADA', 'CANCELADA', 'REJEITADA'], weights=[90, 5, 5], k=1)[0]
+                solicitacao_status = random.choices([SOLICITACAO_STATUS_APROVADA, SOLICITACAO_STATUS_CANCELADA, SOLICITACAO_STATUS_REJEITADA], weights=[90, 5, 5], k=1)[0]
             else:
-                solicitacao_status = random.choices(['PENDENTE', 'CANCELADA', 'REJEITADA', 'APROVADA'], weights=[20, 5, 5, 70], k=1)[0]
+                solicitacao_status = random.choices([SOLICITACAO_STATUS_PENDENTE, SOLICITACAO_STATUS_CANCELADA, SOLICITACAO_STATUS_REJEITADA, SOLICITACAO_STATUS_APROVADA], weights=[20, 5, 5, 70], k=1)[0]
             
             solicitacao = DimSolicitacao.objects.create(
                 numero_solicitacao=uuid.uuid4().hex[:6].upper(),
@@ -184,12 +208,12 @@ class Command(BaseCommand):
                 material=material,
                 quantidade=random.randint(1, 1000),
                 data_solicitacao=self._get_or_create_dim_data(solic_date),
-                prioridade=random.choice(['BAIXA', 'MEDIA', 'ALTA', 'CRITICA']),
+                prioridade=random.choice([PRIORIDADE_BAIXA, PRIORIDADE_MEDIA, PRIORIDADE_ALTA, PRIORIDADE_CRITICA]),
                 status=solicitacao_status
             )
             counts['solicitacoes'] += 1
         
-            if solicitacao_status == 'APROVADA':
+            if solicitacao_status == SOLICITACAO_STATUS_APROVADA:
                 self._generate_pedidos_material(projeto, material, cat, solicitacao, solic_date, proj_end, is_concluido, global_fornecedores, fake, counts)
 
     def _generate_materiais_para_projeto(self, projeto, proj_start, proj_end, proj_status, duration_ratio, global_fornecedores, global_materiais, fake, counts, categorias_globais):
@@ -244,7 +268,7 @@ class Command(BaseCommand):
 
     def _generate_tarefas(self, projeto, proj_start, proj_end, proj_status, scaled_tasks, project_users, fake, counts):
         is_concluido = proj_status == STATUS_CONCLUIDO
-        is_planejamento = proj_status == 'PLANEJAMENTO'
+        is_planejamento = proj_status == STATUS_PLANEJAMENTO
         status_tarefa_choices = [STATUS_NAO_INICIADA, STATUS_EM_ANDAMENTO, STATUS_CONCLUIDO]
 
         for _ in range(scaled_tasks):
@@ -270,7 +294,7 @@ class Command(BaseCommand):
             tarefa = DimTarefa.objects.create(
                 codigo_tarefa=uuid.uuid4().hex[:6].upper(),
                 projeto=projeto,
-                titulo=f"{random.choice(['Analisar', 'Desenvolver', 'Testar', 'Projetar', 'Revisar', 'Homologar'])} {random.choice(['módulo', 'sistema', 'interface', 'integração', 'componente', 'circuito'])} {fake.bothify(text='??-##').upper()}"[:256],
+                titulo=f"{random.choice(TAREFA_ACOES)} {random.choice(TAREFA_OBJETOS)} {fake.bothify(text='??-##').upper()}"[:256],
                 responsavel=responsavel_tarefa,
                 estimativa=estimativa_horas,
                 data_inicio=self._get_or_create_dim_data(task_start),
@@ -303,11 +327,11 @@ class Command(BaseCommand):
 
         today = timezone.now().date()
         if proj_start > today:
-            proj_status = 'PLANEJAMENTO'
+            proj_status = STATUS_PLANEJAMENTO
         elif proj_end < today:
-            proj_status = random.choice([STATUS_CONCLUIDO, STATUS_EM_ANDAMENTO, 'SUSPENSO'])
+            proj_status = random.choice([STATUS_CONCLUIDO, STATUS_EM_ANDAMENTO, STATUS_SUSPENSO])
         else:
-            proj_status = random.choice([STATUS_EM_ANDAMENTO, 'SUSPENSO'])
+            proj_status = random.choice([STATUS_EM_ANDAMENTO, STATUS_SUSPENSO])
 
         projeto = DimProjeto.objects.create(
             codigo_projeto=uuid.uuid4().hex[:6].upper(),
@@ -361,7 +385,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Iniciando seed dinâmico...'))
         fake = Faker('pt_BR')
 
-        categorias_globais = ['Componentes Eletrônicos', 'Componentes Mecânicos', 'Placas de Circuito Impresso', 'Materiais de Solda', 'Sensores', 'Comunicação', 'Mecatrônica']
+        categorias_globais = CATEGORIAS_GLOBAIS
 
         total_projects = options['programs'] * options['projects']
         
