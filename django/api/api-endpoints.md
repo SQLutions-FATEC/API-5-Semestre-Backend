@@ -1,3 +1,60 @@
+## Rota Listagem de Projetos por Programa
+
+Retorna todos os projetos vinculados a um programa específico. Esta rota diferente da outra nao tem filtro apenas retorna todos os projetos relacionados a x programa.
+
+### **Endpoint**
+`GET /api/<programa_cod>/projetos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_cod` | `String` | O código identificador único do programa. | `PROG10` |
+
+### **Resposta de Sucesso: `200 OK`**
+
+Retornado quando o programa é encontrado com sucesso.
+
+**Formato da Resposta (JSON):**
+```json
+[
+    {
+        "nome_projeto": "Projeto 1",
+        "codigo_projeto": "PRJ001",
+        "gerente_tecnico": "João Silva",
+        "gerente_projeto": "Maria Santos"
+    },
+    {
+        "nome_projeto": "Projeto 2",
+        "codigo_projeto": "PRJ002",
+        "gerente_tecnico": "João Silva",
+        "gerente_projeto": "Maria Santos"
+    }
+]
+```
+
+### **Campos de Resposta**
+
+| Campo | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `nome_projeto` | `String` | Nome descritivo do projeto. |
+| `codigo_projeto` | `String` | Código identificador único do projeto. |
+| `gerente_tecnico` | `String` | Nome do gerente técnico responsável pelo programa. |
+| `gerente_projeto` | `String` | Nome do gerente de projeto responsável pelo programa. |
+
+### **Resposta de Erro: `404 Not Found`**
+
+Retornado quando o `programa_cod` fornecido não existe.
+
+**Exemplo de Resposta:**
+```json
+{
+    "erro": "Programa não encontrado"
+}
+```
+
+---
+
 ## Rota Dashboard de Projeto
 
 Retorna um consolidado de dados (dashboard) de um projeto específico, incluindo informações gerais, dados financeiros calculados dinamicamente (custo de materiais e horas trabalhadas) e detalhes do programa ao qual o projeto pertence.
