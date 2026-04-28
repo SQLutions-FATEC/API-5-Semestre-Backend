@@ -28,7 +28,8 @@ from .views import (
     listagem_solicitacoes,
     evolucao_gastos_api,
     busca_projetos,
-    detalhamento_gastos_projeto_api
+    detalhamento_gastos_projeto_api,
+    projeto_sem_filtro
 )
 
 urlpatterns = [
@@ -38,6 +39,7 @@ urlpatterns = [
     path('api/projetos/<str:codigo_projeto>/compras/', compras_projeto_api, name='compras_projeto'),
     path('api/projetos/<str:codigo_projeto>/gastos/evolucao/', evolucao_gastos_api, name='evolucao-gastos'),
     path('api/empenhos-programa/', empenhos_programa, name='empenhos-programa'),
+    path('api/<str:programa_cod>/projetos/', projeto_sem_filtro, name='projeto-sem-filtro'),
     path('api/programas/busca/', programa_api, name='programa-projetos'),
      path(
         'api/projetos/tarefas/<str:codigo_projeto>',

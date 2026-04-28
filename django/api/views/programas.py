@@ -53,3 +53,21 @@ def busca_projetos(request, programa_cod):
         })
         
     return JsonResponse(resultados, safe=False)
+
+
+
+@require_GET
+def projeto_sem_filtro(request, programa_cod): 
+    projetos_query = DimProjeto.objects.filter(programa__codigo_programa=programa_cod)
+            
+    resultados = []
+    for projeto in projetos_query:
+        resultados.append({
+            'nome_projeto': projeto.nome_projeto,
+            'codigo_projeto': projeto.codigo_projeto,
+            'status': projeto.status,
+            'responsavel': projeto.responsavel
+        })
+        
+    return JsonResponse(resultados, safe=False)
+
