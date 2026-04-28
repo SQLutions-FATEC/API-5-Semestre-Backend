@@ -85,3 +85,15 @@ class FatoCompra(models.Model):
     fornecedor = ForeignKey(DimFornecedor, on_delete=CASCADE)
     data_pedido = ForeignKey(DimData, on_delete=CASCADE, related_name='compra_data_pedido')
     data_previsao_entrega = ForeignKey(DimData, on_delete=CASCADE, related_name='compra_data_previsao_entrega')
+
+class DimLocalizacao(models.Model):
+    id_localizacao = CharField()
+    localizacao = CharField()
+
+class FatoEstoqueSaldo(models.Model):
+    material = ForeignKey(DimMaterial, on_delete=CASCADE)
+    projeto = ForeignKey(DimProjeto, on_delete=CASCADE)
+    localizacao = ForeignKey(DimLocalizacao, on_delete=CASCADE)
+    quantidade_disponivel = IntegerField()
+    valor_total = DecimalField(max_digits=12, decimal_places=2)
+    data_ultima_atualizacao = ForeignKey(DimData, on_delete=CASCADE)
