@@ -17,7 +17,7 @@ class GastosProjetoApiTest(TestCase):
         )
 
         self.proj = DimProjeto.objects.create(
-            codigo_projeto="PRJ-Gasto",
+            codigo_projeto="PRJGST",
             nome_projeto="Projeto Teste Gasto",
             programa=self.prog,
             custo_hora=100,
