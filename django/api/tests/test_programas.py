@@ -212,3 +212,93 @@ class BuscaProjetosViewTest(TestCase):
         
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['codigo_projeto'], 'PRJ33')
+
+
+class ProjetoSemFiltroViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.data = DimData.objects.create(dia=1, mes=1, ano=2024)
+
+        self.programa = DimPrograma.objects.create(
+            codigo_programa='PROG10',
+            nome_programa='Programa 10',
+            gerente_programa='Gerente 10',
+            gerente_tecnico='Tecnico 10',
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Ativo',
+        )
+        
+        self.programa_outro = DimPrograma.objects.create(
+            codigo_programa='PROG11',
+            nome_programa='Programa 11',
+            gerente_programa='Gerente 11',
+            gerente_tecnico='Tecnico 11',
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Planejado',
+        )
+
+        DimProjeto.objects.create(
+            codigo_projeto='PRJ10',
+            nome_projeto='Projeto Alpha',
+            programa=self.programa,
+            responsavel='Resp 10',
+            custo_hora=Decimal('100.00'),
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Ativo',
+        )
+        DimProjeto.objects.create(
+            codigo_projeto='PRJ11',
+            nome_projeto='Projeto Beta',
+            programa=self.programa,
+            responsavel='Resp 11',
+            custo_hora=Decimal('80.00'),
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Concluido',
+        )
+        DimProjeto.objects.create(
+            codigo_projeto='PRJ33',
+            nome_projeto='Projeto Alpha Dois',
+            programa=self.programa_outro,
+            responsavel='Resp 33',
+            custo_hora=Decimal('90.00'),
+            data_inicio=self.data,
+            data_fim_prevista=self.data,
+            status='Ativo',
+        )
+
+    def test_projeto_sem_filtro_retorna_todos_projetos(self):
+        response = self.client.get('/api/PROG10/projetos/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]['codigo_projeto'], 'PRJ10')
+        self.assertEqual(data[0]['nome_projeto'], 'Projeto Alpha')
+        self.assertEqual(data[0]['status'], 'Ativo')
+        self.assertEqual(data[0]['responsavel'], 'Resp 10')
+
+    def test_projeto_sem_filtro_segundo_projeto(self):
+        response = self.client.get('/api/PROG10/projetos/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[1]['codigo_projeto'], 'PRJ11')
+        self.assertEqual(data[1]['nome_projeto'], 'Projeto Beta')
+        self.assertEqual(data[1]['status'], 'Concluido')
+        self.assertEqual(data[1]['responsavel'], 'Resp 11')
+
+    def test_projeto_sem_filtro_limita_ao_programa(self):
+        response = self.client.get('/api/PROG11/projetos/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]['codigo_projeto'], 'PRJ33')
+        self.assertEqual(data[0]['nome_projeto'], 'Projeto Alpha Dois')
+        self.assertEqual(data[0]['responsavel'], 'Resp 33')
