@@ -170,15 +170,13 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
             }     
         ],
         "solicitacoes_para_projetos": {
-            {
-                "pedido" : {
-                    "numero_pedido": "PED001",
-                    "status" : "Concluída",
-                    "valor_total" : 27070.4,
-                    "data_pedido" : "2024-12-35",
-                    "data_previsao_entrega" : "2025-04-30",
-                    "solicitacao_numero" : "SC0038"
-                }
+            "pedido" : {
+                "numero_pedido": "PED001",
+                "status" : "Concluída",
+                "valor_total" : 27070.4,
+                "data_pedido" : "2024-12-35",
+                "data_previsao_entrega" : "2025-04-30",
+                "solicitacao_numero" : "SC0038"
             }
         }
     }
@@ -188,6 +186,8 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
 ### **Resposta de Erro: `404 Not Found`**
 
 Retornada quando o `codigo_projeto` informado nao existe.
+
+---
 
 ## Rota Analítica de Empenho de Projeto
 
@@ -298,7 +298,7 @@ Retorna a listagem de todos os pedidos de compra vinculados a um projeto especí
 ### **Regras de Negócio e Cálculos**
 
 * **Dias Previstos de Entrega:** Calculado individualmente para cada pedido através da diferença entre a data de previsão e a data de emissão: (Data Previsão - Data Pedido).
-* **Tempo Médio de Entrega:** Média aritmética simples de todos os `dias_previstos_entrega` dos pedidos vinculados ao projeto.
+* **Tempo Médio de Entrega:** Média aritmética simples de todos `dias_previstos_entrega` dos pedidos vinculados ao projeto.
 * **Otimização de Query:** Utiliza `Select Related` para buscar dimensões de Fornecedor, Datas e Solicitações em uma única consulta.
 
 ### **Respostas**
@@ -333,7 +333,6 @@ Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas
         }
     ]
 }
-
 ```
 
 #### Erro: `404 Not Found`
@@ -415,7 +414,9 @@ Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha 
     "detail": "Erro interno no servidor. Por favor, tente novamente mais tarde."
 }
 ```
+
 ---
+
 ## Rota Analítica de Solicitações (Estatísticas)
 
 Retorna as estatísticas e indicadores de topo (cards de resumo) para a tela de solicitações de um projeto específico. O endpoint consolida o volume de requisições pendentes e destaca os itens críticos e urgentes que exigem atenção imediata, calculando o tempo de espera desde a abertura.
@@ -444,25 +445,23 @@ Retornado quando o projeto é encontrado e as estatísticas são processadas cor
 **Exemplo de Resposta (JSON):**
 ```json
 {
-    {
-        "projeto": "PRJ003",
-        "estatisticas": {
-            "total_pendentes": 12,
-            "urgentes_criticas": [
-                {
-                    "numero_solicitacao": "SOL-998",
-                    "prioridade": "URGENTE",
-                    "status": "Aberto",
-                    "dias_desde_criacao": 5
-                },
-                {
-                    "numero_solicitacao": "SOL-1005",
-                    "prioridade": "ALTA",
-                    "status": "Aberto",
-                    "dias_desde_criacao": 2
-                }
-            ]
-        }
+    "projeto": "PRJ003",
+    "estatisticas": {
+        "total_pendentes": 12,
+        "urgentes_criticas": [
+            {
+                "numero_solicitacao": "SOL-998",
+                "prioridade": "URGENTE",
+                "status": "Aberto",
+                "dias_desde_criacao": 5
+            },
+            {
+                "numero_solicitacao": "SOL-1005",
+                "prioridade": "ALTA",
+                "status": "Aberto",
+                "dias_desde_criacao": 2
+            }
+        ]
     }
 }
 ```
@@ -540,7 +539,7 @@ Retornado caso o código do projeto fornecido na URL não seja localizado na bas
 }
 ```
 
-
+---
 
 ## Rota Programas e Projetos
 
@@ -552,7 +551,7 @@ Retorna todos os programas com codigo,nome,status e gerente, juntamente com todo
 
 ### **Parâmetros de Rota (Path Parameters)**
 
-Sem parãmetros para essa rota
+Sem parâmetros para essa rota
 
 ### **Parâmetros de Query (Query Parameters)**
 
@@ -580,19 +579,20 @@ Retorna uma lista de programas junto com os projetos vinculados a cada programa.
       "nome_programa": "MANSUP-ER",
       "status": "EM ANDAMENTO",
       "gerente": "Mariana Fernandes",
-      "gerente_tecnico": "Bruno Oliveira",
+      "gerente_tecnico": "Bruno Oliveira"
     },
     {
       "codigo_programa": "MAX12AC",
       "nome_programa": "MAX 1.2 AC",
       "status": "EM ANDAMENTO",
       "gerente": "Ana Paula Ribeiro",
-      "gerente_tecnico": "Gabriel Carvalho",
+      "gerente_tecnico": "Gabriel Carvalho"
     }
   ]
 }
 ```
 
+#### Erro: `404 Not Found`
 **Exemplo de Resposta (JSON padrão do Django):**
 
 ```json
@@ -623,7 +623,7 @@ Retorna uma lista de projetos vinculados a um programa específico, permitindo a
 | `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos projetos. Se omitido, retorna os projetos do programa limitador. | `Projeto` |
 
 ### **Regras de Negócio e Cálculos**
-* **Busca Textual Textual:** O filtro se aplica localmente sobre os campos `nome_projeto` e `codigo_projeto` de forma agnóstica à caixa (case-insensitive).
+* **Busca Textual:** O filtro se aplica localmente sobre os campos `nome_projeto` e `codigo_projeto` de forma agnóstica à caixa (case-insensitive).
 * **Limitação:** Não é permitida a busca em projetos que não pertençam ativamente ao programa informado.
 
 ### **Respostas**
@@ -753,4 +753,3 @@ Retorna a listagem detalhada de todas as solicitações (requisições de materi
     "detail": "Not found."
 }
 ```
-
