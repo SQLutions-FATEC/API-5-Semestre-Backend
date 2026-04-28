@@ -1,10 +1,11 @@
 from django.core.management.base import BaseCommand
 from api.models import (
     DimPrograma, DimProjeto, DimTarefa, DimMaterial,
-    DimFornecedor, DimSolicitacao, FatoTarefa, FatoEmpenho, FatoCompra
+    DimFornecedor, DimSolicitacao, FatoTarefa, FatoEmpenho, FatoCompra,
+    DimLocalizacao, FatoEstoqueSaldo
 )
 
-from etl.transformations.transformers import standardize_strings, handle_nulls, calculate_project_metrics
+from etl.transformations.transformers import standardize_strings, handle_nulls, calculate_project_metrics, calculate_estoque_saldo
 
 from etl.extractors.extractors import (
     ProgramasExtractor,
@@ -15,7 +16,8 @@ from etl.extractors.extractors import (
     FornecedoresExtractor,
     SolicitacoesCompraExtractor,
     PedidosCompraExtractor,
-    EmpenhoMateriaisExtractor
+    EmpenhoMateriaisExtractor,
+    EstoqueMateriaisExtractor
 )
 from etl.loaders.loader import (
     load_programas,
@@ -26,7 +28,9 @@ from etl.loaders.loader import (
     load_solicitacoes,
     load_fato_tarefa,
     load_fato_empenho,
-    load_fato_compra
+    load_fato_compra,
+    load_localizacoes,
+    load_fato_estoque_saldo
     )
 from etl.validators.integrity import validate
 from etl.utils.logger import get_logger
@@ -87,6 +91,39 @@ class Command(BaseCommand):
                 logger.error(f"[{nome}] Falha: {e}")
                 self.stdout.write(self.style.ERROR(f" -> Erro ao processar {nome}: {e}"))
                 erros.append(nome)
+
+        # --- ESTOQUE / SALDO
+        try:
+            self.stdout.write(self.style.NOTICE("\nProcessando Estoque e Saldo..."))
+
+            # 1. Extração
+            self.stdout.write(" -> Extraindo dados de estoque, solicitações, materiais e pedidos...")
+            df_estoque = EstoqueMateriaisExtractor().extract()
+            df_solicitacoes = SolicitacoesCompraExtractor().extract()
+            df_materiais = MateriaisExtractor().extract()
+            df_pedidos = PedidosCompraExtractor().extract()
+
+            # 2. Transformação 
+            self.stdout.write(" -> Calculando saldo de estoque...")
+            df_estoque_transformado = calculate_estoque_saldo(df_estoque, df_solicitacoes, df_materiais, df_pedidos)
+
+            # 3. Carga
+            self.stdout.write(" -> Carregando localizações no Data Warehouse...")
+            load_localizacoes(df_estoque_transformado)
+            total_loc = DimLocalizacao.objects.count()
+            validate("Localizações", len(df_estoque_transformado['localizacao'].unique()), total_loc)
+            self.stdout.write(self.style.SUCCESS(f" -> Localizações sincronizadas com sucesso!"))
+
+            self.stdout.write(" -> Carregando saldo de estoque no Data Warehouse...")
+            load_fato_estoque_saldo(df_estoque_transformado)
+            total_saldo = FatoEstoqueSaldo.objects.count()
+            validate("Estoque Saldo", len(df_estoque_transformado), total_saldo)
+            self.stdout.write(self.style.SUCCESS(f" -> Estoque Saldo sincronizado com sucesso!"))
+
+        except Exception as e:
+            logger.error(f"[Estoque/Saldo] Falha: {e}")
+            self.stdout.write(self.style.ERROR(f" -> Erro ao processar Estoque/Saldo: {e}"))
+            erros.append("Estoque/Saldo")
 
         logger.info(SEPARATOR)
         self.stdout.write("\n" + SEPARATOR)
