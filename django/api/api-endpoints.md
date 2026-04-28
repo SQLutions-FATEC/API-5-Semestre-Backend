@@ -36,7 +36,8 @@ Retornado quando o projeto é encontrado com sucesso.
     "financeiro": {
         "total_horas_trabalhadas": 26.44,
         "custo_total_materiais": 27070.40,
-        "custo_total_projeto": 30166.26
+        "custo_total_projeto": 30166.26,
+        "horas_totais_estimadas": 40
     },
     "programa": {
         "codigo": "MAX12AC",
@@ -166,8 +167,18 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
                 "status": "OBSOLETO",
                 "vinculado_ao_projeto": true,
                 "pedido_recente": false
+            }     
+        ],
+        "solicitacoes_para_projetos": {
+            "pedido" : {
+                "numero_pedido": "PED001",
+                "status" : "Concluída",
+                "valor_total" : 27070.4,
+                "data_pedido" : "2024-12-35",
+                "data_previsao_entrega" : "2025-04-30",
+                "solicitacao_numero" : "SC0038"
             }
-        ]
+        }
     }
 }
 ```
@@ -175,6 +186,8 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
 ### **Resposta de Erro: `404 Not Found`**
 
 Retornada quando o `codigo_projeto` informado nao existe.
+
+---
 
 ## Rota Analítica de Empenho de Projeto
 
@@ -285,7 +298,7 @@ Retorna a listagem de todos os pedidos de compra vinculados a um projeto especí
 ### **Regras de Negócio e Cálculos**
 
 * **Dias Previstos de Entrega:** Calculado individualmente para cada pedido através da diferença entre a data de previsão e a data de emissão: (Data Previsão - Data Pedido).
-* **Tempo Médio de Entrega:** Média aritmética simples de todos os `dias_previstos_entrega` dos pedidos vinculados ao projeto.
+* **Tempo Médio de Entrega:** Média aritmética simples de todos `dias_previstos_entrega` dos pedidos vinculados ao projeto.
 * **Otimização de Query:** Utiliza `Select Related` para buscar dimensões de Fornecedor, Datas e Solicitações em uma única consulta.
 
 ### **Respostas**
@@ -320,7 +333,6 @@ Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas
         }
     ]
 }
-
 ```
 
 #### Erro: `404 Not Found`
@@ -350,7 +362,7 @@ Retornado caso a requisição utilize um método diferente de GET (ex: POST, PUT
 Retorna uma listagem detalhada dos empenhos de materiais realizados, permitindo a filtragem por um programa específico ou por categoria de material. O endpoint também fornece o cálculo do valor total empenhado com base no custo estimado dos materiais.
 
 ### **Endpoint**
-`GET /api/empenhos/`
+`GET /api/empenhos-programa/`
 
 ### **Parâmetros de Rota (Path Parameters)**
 
@@ -402,13 +414,15 @@ Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha 
     "detail": "Erro interno no servidor. Por favor, tente novamente mais tarde."
 }
 ```
+
 ---
+
 ## Rota Analítica de Solicitações (Estatísticas)
 
 Retorna as estatísticas e indicadores de topo (cards de resumo) para a tela de solicitações de um projeto específico. O endpoint consolida o volume de requisições pendentes e destaca os itens críticos e urgentes que exigem atenção imediata, calculando o tempo de espera desde a abertura.
 
 ### **Endpoint**
-`GET /api/empenhos/`
+`GET /api/projetos/<codigo_projeto>/solicitacoes/stats/`
 
 ### **Parâmetros de Rota (Path Parameters)**
 
@@ -461,6 +475,175 @@ Retornado caso o código do projeto fornecido na URL não seja localizado na bas
     "detail": "Não encontrado."
 }
 ```
+
+---
+
+## Rota Evolução de Gastos do Projeto
+
+Retorna a evolução do total de gastos (compras) de um projeto específico ao longo dos meses, agregando por mês e ano dados para o consumo em gráficos temporais.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/gastos/evolucao/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `debug` | `Boolean` | (Opcional) Quando `true`, encapsula a resposta original em um nó `"resultado"` e adiciona um nó `"debug"` com o total geral e a quebra de quantidade de compras por todos os possíveis status para auxiliar análises de payload vazio. | `true` |
+
+### **Regras de Negócio e Cálculos**
+* **Filtros de Status:** Estão inclusos na soma da tabela fato de compra apenas os pedidos com status "ENVIADO", "ENTREGUE" ou "PARCIALMENTE ENTREGUE".
+* **Agrupamento Mensal:** Sumarização do `valor_total` dos pedidos, agrupada mês/ano associados à `data_pedido`.
+* **Tratamento de Meses Vazios:** O backend constrói uma lista contígua garantindo o preenchimento com `total_gasto` igual a `0.0` para meses intermédios em que não houve faturamento, garantindo a integridade do gráfico no lado cliente.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retorna uma lista de objetos contendo o mês/ano correspondente e o valor gasto.
+
+**Exemplo de Resposta (JSON):**
+```json
+[
+    {
+        "data": "2024-01",
+        "total_gasto": 0.0
+    },
+    {
+        "data": "2024-02",
+        "total_gasto": 1500.50
+    },
+    {
+        "data": "2024-03",
+        "total_gasto": 0.0
+    },
+    {
+        "data": "2024-04",
+        "total_gasto": 3200.00
+    }
+]
+```
+
+#### Erro: `404 Not Found`
+Retornado caso o código do projeto fornecido na URL não seja localizado na base de dados (`DimProjeto`).
+
+**Exemplo de Resposta (JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+
+---
+
+## Rota Programas e Projetos
+
+Retorna todos os programas com codigo,nome,status e gerente, juntamente com todos os projetos com o codigo do projeto, nome do projeto e seu status.
+
+### **Endpoint**
+
+`GET /api/programas/busca/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+Sem parâmetros para essa rota
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos programas. Se omitido, retorna todos os programas. | `Programa` |
+
+### **Regras de Negócio e Cálculos**
+
+* **Programas:** Os programas estão listados com código,nome,status,gerente e gerente técnico.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+Retorna uma lista de programas junto com os projetos vinculados a cada programa.
+
+**Exemplo de Resposta (JSON):**
+
+```json
+{
+  "programas": [
+    {
+      "codigo_programa": "MANSUP-ER",
+      "nome_programa": "MANSUP-ER",
+      "status": "EM ANDAMENTO",
+      "gerente": "Mariana Fernandes",
+      "gerente_tecnico": "Bruno Oliveira"
+    },
+    {
+      "codigo_programa": "MAX12AC",
+      "nome_programa": "MAX 1.2 AC",
+      "status": "EM ANDAMENTO",
+      "gerente": "Ana Paula Ribeiro",
+      "gerente_tecnico": "Gabriel Carvalho"
+    }
+  ]
+}
+```
+
+#### Erro: `404 Not Found`
+**Exemplo de Resposta (JSON padrão do Django):**
+
+```json
+{
+  "detail": "Not found."
+}
+```
+
+---
+
+## Rota Busca Global de Projetos por Programa
+
+Retorna uma lista de projetos vinculados a um programa específico, permitindo a busca textual (case-insensitive) tanto pelo código quanto pelo nome do projeto.
+
+### **Endpoint**
+`GET /api/<programa_cod>/projetos/busca/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_cod` | `String` | Código identificador do programa ao qual os projetos estão vinculados. | `MAX12AC` |
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos projetos. Se omitido, retorna os projetos do programa limitador. | `Projeto` |
+
+### **Regras de Negócio e Cálculos**
+* **Busca Textual:** O filtro se aplica localmente sobre os campos `nome_projeto` e `codigo_projeto` de forma agnóstica à caixa (case-insensitive).
+* **Limitação:** Não é permitida a busca em projetos que não pertençam ativamente ao programa informado.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retorna uma lista de dicionários contendo os atributos nome, código, status e responsável dos respectivos projetos enquadrados na restrição de pesquisa.
+
+**Exemplo de Resposta (JSON):**
+```json
+[
+    {
+        "nome_projeto": "Placa Regulador Switching 3",
+        "codigo_projeto": "PRJ089",
+        "status": "EM ANDAMENTO",
+        "responsavel": "Ana Paula Ribeiro"
+    }
+]
+```
+
+---
 
 ## Rota Detalhamento de Gastos do Projeto
 
@@ -524,3 +707,49 @@ Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dad
 ```
 
 ---
+
+## Rota Detalhamento de Solicitações do Projeto
+
+Retorna a listagem detalhada de todas as solicitações (requisições de material) vinculadas a um projeto específico, incluindo informações sobre materiais, valores estimados e os pedidos de compra associados.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/solicitacoes/detalhes/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Valor Total Estimado:** Calculado multiplicando a `quantidade` solicitada pelo `custo_estimado` do material (`Quantidade` x `Custo Unitário Estimado`).
+* **Número do Pedido:** Referência ao número do pedido de compra vinculado à solicitação, quando disponível.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto": "PRJ003",
+    "solicitacoes": [
+        {
+            "numero_solicitacao": "SC0028",
+            "numero_pedido": "PC0020",
+            "nome_material": "FPGA Spartan-7 XC7S25",
+            "data_solicitacao": "2022-07-03",
+            "valor_total_estimado": 3894.8,
+            "status": "CANCELADA"
+        }
+    ]
+}
+```
+
+#### Erro: `404 Not Found`
+**Exemplo de Resposta (JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
