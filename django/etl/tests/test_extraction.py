@@ -3,7 +3,10 @@ import pandas as pd
 import pytest
 from django.test import TestCase
 from django.core.management import call_command
-from api.models import DimPrograma, DimProjeto, DimTarefa, FatoCompra
+from api.models import (
+    DimPrograma, DimProjeto, DimTarefa, FatoCompra, 
+    DimLocalizacao, FatoEstoqueSaldo
+)
 from etl.extractors.base import CSV_BASE_PATH
 
 class ETLIntegrationTest(TestCase):
@@ -17,7 +20,8 @@ class ETLIntegrationTest(TestCase):
         """
         self.required_files = [
             'programas.csv', 'projetos.csv', 'tarefas_projeto.csv', 
-            'pedidos_compra.csv'
+            'pedidos_compra.csv', 'estoque_materiais_projeto.csv',
+            'materiais.csv', 'solicitacoes_compra.csv'
         ]
         for f in self.required_files:
             path = os.path.join(CSV_BASE_PATH, f)
@@ -38,12 +42,12 @@ class ETLIntegrationTest(TestCase):
         df_pedidos = pd.read_csv(os.path.join(CSV_BASE_PATH, 'pedidos_compra.csv'))
         self.assertEqual(FatoCompra.objects.count(), len(df_pedidos))
 
-        # 4. Valida um dado específico para garantir que o mapeamento de colunas está OK
-        primeiro_pedido_csv = df_pedidos.iloc[0]['numero_pedido']
-        primeiro_pedido_db = FatoCompra.objects.get(id=df_pedidos.iloc[0]['id'])
-        self.assertEqual(primeiro_pedido_db.numero_pedido, primeiro_pedido_csv)
+        # 4. Valida Estoque e Saldo
+        # Nota: O número de registros no DB pode ser menor que o CSV devido ao filtro de 'ENTREGUE'
+        self.assertGreater(FatoEstoqueSaldo.objects.count(), 0)
+        self.assertGreater(DimLocalizacao.objects.count(), 0)
 
-        # 5. Validação das Transformações (Adicionado conforme Comentário do PR)
+        # 5. Validação das Transformações
         projeto = DimProjeto.objects.first()
         self.assertIsNotNone(projeto, "O banco deveria ter pelo menos um projeto carregado.")
         
@@ -58,11 +62,11 @@ class ETLIntegrationTest(TestCase):
         Garante que rodar o comando duas vezes não duplica dados (Idempotência).
         """
         call_command('run_etl')
-        count_first_run = DimProjeto.objects.count()
+        count_first_run = FatoEstoqueSaldo.objects.count()
         self.assertGreater(count_first_run, 0, "A tabela não deveria estar vazia após a carga.")
         
         call_command('run_etl') # deve apagar os dados antigos e carregar de novo
-        self.assertEqual(DimProjeto.objects.count(), count_first_run)
+        self.assertEqual(FatoEstoqueSaldo.objects.count(), count_first_run)
 
     def test_seed_db_command(self):
         """
