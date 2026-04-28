@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0005_dimprojeto_is_atrasado_dimprojeto_lead_time_dias_and_more'),
+        ('api', '0005_alter_dimfornecedor_status_alter_dimprograma_status_and_more'),
     ]
 
     operations = [
