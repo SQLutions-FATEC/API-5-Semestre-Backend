@@ -29,7 +29,8 @@ from .views import (
     evolucao_gastos_api,
     busca_projetos,
     detalhamento_gastos_projeto_api,
-    projeto_sem_filtro
+    projeto_sem_filtro,
+    otimizacao_sobras_api
 )
 
 urlpatterns = [
@@ -71,4 +72,7 @@ urlpatterns = [
         detalhamento_gastos_projeto_api,
         name='projeto-gastos-detalhes',
     ),
+    path('api/projetos/<str:codigo_projeto>/estoque/sobras/',
+         otimizacao_sobras_api,
+         name='projeto-estoque-sobras'),
 ]
