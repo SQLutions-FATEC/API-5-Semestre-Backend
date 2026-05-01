@@ -810,3 +810,62 @@ Retorna a listagem detalhada de todas as solicitações (requisições de materi
     "detail": "Not found."
 }
 ```
+## Rota Otimização de Estoque e Sobras
+
+Retorna as oportunidades de economia de um projeto cruzando suas solicitações em aberto com o estoque ocioso (sobras) deixado por projetos concluídos ou suspensos do mesmo programa.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/estoque/sobras/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | O código identificador único do projeto alvo no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Sobras Detectadas:** Retorna saldo positivo das tabelas fato apenas de projetos que pertencem ao mesmo programa do projeto alvo e cujo status seja estritamente "CONCLUÍDO" ou "SUSPENSO".
+* **Potencial de Economia:** Calculado pegando a intersecção entre a quantidade solicitada no projeto alvo e a total disponível na sobra, multiplicado pelo custo estimado do material.
+* **Conflito de Compras:** Compara pedidos de compra em andamento com o estoque de outros projetos (de qualquer status). 
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto_alvo": {
+        "codigo": "PRJ003",
+        "nome": "UNIDADE TESTE AUTOMATICO"
+    },
+    "alertas_estoque_ocioso": [
+        {
+            "codigo_material": "MAT101",
+            "descricao": "Capacitor 100uF",
+            "quantidade_solicitada_atual": 100,
+            "sobras_detectadas": [
+                {
+                    "projeto_origem_codigo": "PRJ001",
+                    "projeto_origem_nome": "PROJETO ENCERRADO ALPHA",
+                    "quantidade_disponivel": 150,
+                    "status_projeto_origem": "CONCLUIDO",
+                    "localizacao_fisica": "Almoxarifado Central"
+                }
+            ],
+            "potencial_economia_estimada": 600.0
+        }
+    ],
+    "conflitos_compra_aberta": [
+        {
+            "material": "Parafuso M4",
+            "pedido_compra_atual": "PED007",
+            "quantidade_no_pedido": 500,
+            "alerta": "Existe estoque disponível em outros projetos que supre esta necessidade sem nova compra.",
+            "disponivel_outras_fontes": 1200
+        }
+    ],
+    "valor_total_material": 14000.0
+}

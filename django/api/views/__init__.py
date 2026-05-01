@@ -7,6 +7,7 @@ from .solicitacoesStats import request_analytics_api
 from .solicitacoesLista import listagem_solicitacoes
 from .programas import programa_api, busca_projetos, projeto_sem_filtro
 from .gastos import detalhamento_gastos_projeto_api
+from .sobras import otimizacao_sobras_api
 
 __all__ = [
     'projeto_dashboard_api',
@@ -21,5 +22,6 @@ __all__ = [
     'programa_api',
     'busca_projetos',
     'detalhamento_gastos_projeto_api',
-    'projeto_sem_filtro'
+    'projeto_sem_filtro',
+    'otimizacao_sobras_api'
 ]
