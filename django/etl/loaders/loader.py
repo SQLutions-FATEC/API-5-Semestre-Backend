@@ -2,7 +2,8 @@ import pandas as pd
 from datetime import datetime
 from api.models import (
     DimData, DimPrograma, DimProjeto, DimTarefa, DimMaterial,
-    DimFornecedor, DimSolicitacao, FatoTarefa, FatoEmpenho, FatoCompra
+    DimFornecedor, DimSolicitacao, FatoTarefa, FatoEmpenho, FatoCompra,
+    DimLocalizacao, FatoEstoqueSaldo
 )
 from etl.utils.logger import get_logger
 
@@ -238,3 +239,48 @@ def load_fato_compra(df: pd.DataFrame):
     ]
     FatoCompra.objects.bulk_create(objs)
     logger.info(f"[Loader] FatoCompra carregado: {len(objs)} registros.")
+
+
+def load_localizacoes(df: pd.DataFrame):
+    logger.info("[Loader] Carregando DimLocalizacao...")
+    DimLocalizacao.objects.all().delete()
+
+    # Extrai localizações únicas do CSV de estoque
+    locais_unicos = df['localizacao'].dropna().unique()
+    objs = [
+        DimLocalizacao(
+            id_localizacao=f"LOC{str(i+1).zfill(3)}",
+            localizacao=local
+        ) for i, local in enumerate(sorted(locais_unicos))
+    ]
+    DimLocalizacao.objects.bulk_create(objs)
+    logger.info(f"[Loader] DimLocalizacao carregado: {len(objs)} registros.")
+
+
+def load_fato_estoque_saldo(df: pd.DataFrame):
+    logger.info("[Loader] Carregando FatoEstoqueSaldo...")
+    df = filter_valid_ids(df, DimMaterial, 'material_id')
+    df = filter_valid_ids(df, DimProjeto, 'projeto_id')
+
+    FatoEstoqueSaldo.objects.all().delete()
+
+    loc_cache = {loc.localizacao: loc for loc in DimLocalizacao.objects.all()}
+    date_cache = get_date_cache(df, ['data_ultima_atualizacao'])
+
+    objs = []
+    for _, row in df.iterrows():
+        loc_obj = loc_cache.get(row['localizacao'])
+        if not loc_obj:
+            continue
+
+        objs.append(FatoEstoqueSaldo(
+            material_id=row['material_id'],
+            projeto_id=row['projeto_id'],
+            localizacao=loc_obj,
+            quantidade_disponivel=row['quantidade_disponivel'],
+            valor_total=row['valor_total'],
+            data_ultima_atualizacao=date_cache.get(row['data_ultima_atualizacao'])
+        ))
+
+    FatoEstoqueSaldo.objects.bulk_create(objs)
+    logger.info(f"[Loader] FatoEstoqueSaldo carregado: {len(objs)} registros.")

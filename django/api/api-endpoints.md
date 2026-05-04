@@ -1,3 +1,60 @@
+## Rota Listagem de Projetos por Programa
+
+Retorna todos os projetos vinculados a um programa específico. Esta rota diferente da outra nao tem filtro apenas retorna todos os projetos relacionados a x programa.
+
+### **Endpoint**
+`GET /api/<programa_cod>/projetos/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_cod` | `String` | O código identificador único do programa. | `PROG10` |
+
+### **Resposta de Sucesso: `200 OK`**
+
+Retornado quando o programa é encontrado com sucesso.
+
+**Formato da Resposta (JSON):**
+```json
+[
+    {
+        "nome_projeto": "Projeto 1",
+        "codigo_projeto": "PRJ001",
+        "gerente_tecnico": "João Silva",
+        "gerente_projeto": "Maria Santos"
+    },
+    {
+        "nome_projeto": "Projeto 2",
+        "codigo_projeto": "PRJ002",
+        "gerente_tecnico": "João Silva",
+        "gerente_projeto": "Maria Santos"
+    }
+]
+```
+
+### **Campos de Resposta**
+
+| Campo | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `nome_projeto` | `String` | Nome descritivo do projeto. |
+| `codigo_projeto` | `String` | Código identificador único do projeto. |
+| `gerente_tecnico` | `String` | Nome do gerente técnico responsável pelo programa. |
+| `gerente_projeto` | `String` | Nome do gerente de projeto responsável pelo programa. |
+
+### **Resposta de Erro: `404 Not Found`**
+
+Retornado quando o `programa_cod` fornecido não existe.
+
+**Exemplo de Resposta:**
+```json
+{
+    "erro": "Programa não encontrado"
+}
+```
+
+---
+
 ## Rota Dashboard de Projeto
 
 Retorna um consolidado de dados (dashboard) de um projeto específico, incluindo informações gerais, dados financeiros calculados dinamicamente (custo de materiais e horas trabalhadas) e detalhes do programa ao qual o projeto pertence.
@@ -36,7 +93,8 @@ Retornado quando o projeto é encontrado com sucesso.
     "financeiro": {
         "total_horas_trabalhadas": 26.44,
         "custo_total_materiais": 27070.40,
-        "custo_total_projeto": 30166.26
+        "custo_total_projeto": 30166.26,
+        "horas_totais_estimadas": 40
     },
     "programa": {
         "codigo": "MAX12AC",
@@ -166,8 +224,18 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
                 "status": "OBSOLETO",
                 "vinculado_ao_projeto": true,
                 "pedido_recente": false
+            }     
+        ],
+        "solicitacoes_para_projetos": {
+            "pedido" : {
+                "numero_pedido": "PED001",
+                "status" : "Concluída",
+                "valor_total" : 27070.4,
+                "data_pedido" : "2024-12-35",
+                "data_previsao_entrega" : "2025-04-30",
+                "solicitacao_numero" : "SC0038"
             }
-        ]
+        }
     }
 }
 ```
@@ -175,6 +243,8 @@ Retorna alertas automaticos para apoiar a decisao do gestor com foco em atrasos,
 ### **Resposta de Erro: `404 Not Found`**
 
 Retornada quando o `codigo_projeto` informado nao existe.
+
+---
 
 ## Rota Analítica de Empenho de Projeto
 
@@ -285,7 +355,7 @@ Retorna a listagem de todos os pedidos de compra vinculados a um projeto especí
 ### **Regras de Negócio e Cálculos**
 
 * **Dias Previstos de Entrega:** Calculado individualmente para cada pedido através da diferença entre a data de previsão e a data de emissão: (Data Previsão - Data Pedido).
-* **Tempo Médio de Entrega:** Média aritmética simples de todos os `dias_previstos_entrega` dos pedidos vinculados ao projeto.
+* **Tempo Médio de Entrega:** Média aritmética simples de todos `dias_previstos_entrega` dos pedidos vinculados ao projeto.
 * **Otimização de Query:** Utiliza `Select Related` para buscar dimensões de Fornecedor, Datas e Solicitações em uma única consulta.
 
 ### **Respostas**
@@ -320,7 +390,6 @@ Retornado quando o projeto é encontrado, mesmo que não haja compras vinculadas
         }
     ]
 }
-
 ```
 
 #### Erro: `404 Not Found`
@@ -350,7 +419,7 @@ Retornado caso a requisição utilize um método diferente de GET (ex: POST, PUT
 Retorna uma listagem detalhada dos empenhos de materiais realizados, permitindo a filtragem por um programa específico ou por categoria de material. O endpoint também fornece o cálculo do valor total empenhado com base no custo estimado dos materiais.
 
 ### **Endpoint**
-`GET /api/empenhos/`
+`GET /api/empenhos-programa/`
 
 ### **Parâmetros de Rota (Path Parameters)**
 
@@ -404,3 +473,399 @@ Retornado caso ocorra algum erro inesperado no processamento dos dados ou falha 
 ```
 
 ---
+
+## Rota Analítica de Solicitações (Estatísticas)
+
+Retorna as estatísticas e indicadores de topo (cards de resumo) para a tela de solicitações de um projeto específico. O endpoint consolida o volume de requisições pendentes e destaca os itens críticos e urgentes que exigem atenção imediata, calculando o tempo de espera desde a abertura.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/solicitacoes/stats/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | (Obrigatório) Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Total de Pendentes (`total_pendentes`):** Contagem absoluta de solicitações vinculadas ao projeto que se encontram com o status exato de "ABERTO".
+* **Urgentes e Críticas (`urgentes_criticas`):** Contagem absoluta de solicitações vinculadas ao projeto que se encontram com o status exato de "ABERTO".
+* **Dias Pendentes (`dias_pendentes`):** Campo inserido dinamicamente no backend, calculado pela diferença em dias entre a data em que o servidor processa a requisição e a data de criação da solicitação (`Data Atual` - `data_solicitacao`).
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado quando o projeto é encontrado e as estatísticas são processadas corretamente. O objeto é estruturado para consumo direto nos cards do front-end.
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto": "PRJ003",
+    "estatisticas": {
+        "total_pendentes": 12,
+        "urgentes_criticas": [
+            {
+                "numero_solicitacao": "SOL-998",
+                "prioridade": "URGENTE",
+                "status": "Aberto",
+                "dias_desde_criacao": 5
+            },
+            {
+                "numero_solicitacao": "SOL-1005",
+                "prioridade": "ALTA",
+                "status": "Aberto",
+                "dias_desde_criacao": 2
+            }
+        ]
+    }
+}
+```
+
+#### Erro: `404 Not Found`
+Retornado caso o código do projeto fornecido na URL não seja localizado na base de dados (`DimProjeto`).
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Não encontrado."
+}
+```
+
+---
+
+## Rota Evolução de Gastos do Projeto
+
+Retorna a evolução do total de gastos (compras) de um projeto específico ao longo dos meses, agregando por mês e ano dados para o consumo em gráficos temporais.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/gastos/evolucao/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `debug` | `Boolean` | (Opcional) Quando `true`, encapsula a resposta original em um nó `"resultado"` e adiciona um nó `"debug"` com o total geral e a quebra de quantidade de compras por todos os possíveis status para auxiliar análises de payload vazio. | `true` |
+
+### **Regras de Negócio e Cálculos**
+* **Filtros de Status:** Estão inclusos na soma da tabela fato de compra apenas os pedidos com status "ENVIADO", "ENTREGUE" ou "PARCIALMENTE ENTREGUE".
+* **Agrupamento Mensal:** Sumarização do `valor_total` dos pedidos, agrupada mês/ano associados à `data_pedido`.
+* **Tratamento de Meses Vazios:** O backend constrói uma lista contígua garantindo o preenchimento com `total_gasto` igual a `0.0` para meses intermédios em que não houve faturamento, garantindo a integridade do gráfico no lado cliente.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retorna uma lista de objetos contendo o mês/ano correspondente e o valor gasto.
+
+**Exemplo de Resposta (JSON):**
+```json
+[
+    {
+        "data": "2024-01",
+        "total_gasto": 0.0
+    },
+    {
+        "data": "2024-02",
+        "total_gasto": 1500.50
+    },
+    {
+        "data": "2024-03",
+        "total_gasto": 0.0
+    },
+    {
+        "data": "2024-04",
+        "total_gasto": 3200.00
+    }
+]
+```
+
+#### Erro: `404 Not Found`
+Retornado caso o código do projeto fornecido na URL não seja localizado na base de dados (`DimProjeto`).
+
+**Exemplo de Resposta (JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+
+---
+
+## Rota Programas e Projetos
+
+Retorna todos os programas com codigo,nome,status e gerente, juntamente com todos os projetos com o codigo do projeto, nome do projeto e seu status.
+
+### **Endpoint**
+
+`GET /api/programas/busca/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+Sem parâmetros para essa rota
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos programas. Se omitido, retorna todos os programas. | `Programa` |
+
+### **Regras de Negócio e Cálculos**
+
+* **Programas:** Os programas estão listados com código,nome,status,gerente e gerente técnico.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+Retorna uma lista de programas junto com os projetos vinculados a cada programa.
+
+**Exemplo de Resposta (JSON):**
+
+```json
+{
+  "programas": [
+    {
+      "codigo_programa": "MANSUP-ER",
+      "nome_programa": "MANSUP-ER",
+      "status": "EM ANDAMENTO",
+      "gerente": "Mariana Fernandes",
+      "gerente_tecnico": "Bruno Oliveira"
+    },
+    {
+      "codigo_programa": "MAX12AC",
+      "nome_programa": "MAX 1.2 AC",
+      "status": "EM ANDAMENTO",
+      "gerente": "Ana Paula Ribeiro",
+      "gerente_tecnico": "Gabriel Carvalho"
+    }
+  ]
+}
+```
+
+#### Erro: `404 Not Found`
+**Exemplo de Resposta (JSON padrão do Django):**
+
+```json
+{
+  "detail": "Not found."
+}
+```
+
+---
+
+## Rota Busca Global de Projetos por Programa
+
+Retorna uma lista de projetos vinculados a um programa específico, permitindo a busca textual (case-insensitive) tanto pelo código quanto pelo nome do projeto.
+
+### **Endpoint**
+`GET /api/<programa_cod>/projetos/busca/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `programa_cod` | `String` | Código identificador do programa ao qual os projetos estão vinculados. | `MAX12AC` |
+
+### **Parâmetros de Query (Query Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `q` | `String` | (Opcional) Termo de busca textual para filtrar o nome ou código dos projetos. Se omitido, retorna os projetos do programa limitador. | `Projeto` |
+
+### **Regras de Negócio e Cálculos**
+* **Busca Textual:** O filtro se aplica localmente sobre os campos `nome_projeto` e `codigo_projeto` de forma agnóstica à caixa (case-insensitive).
+* **Limitação:** Não é permitida a busca em projetos que não pertençam ativamente ao programa informado.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retorna uma lista de dicionários contendo os atributos nome, código, status e responsável dos respectivos projetos enquadrados na restrição de pesquisa.
+
+**Exemplo de Resposta (JSON):**
+```json
+[
+    {
+        "nome_projeto": "Placa Regulador Switching 3",
+        "codigo_projeto": "PRJ089",
+        "status": "EM ANDAMENTO",
+        "responsavel": "Ana Paula Ribeiro"
+    }
+]
+```
+
+---
+
+## Rota Detalhamento de Gastos do Projeto
+
+Retorna o detalhamento financeiro consolidado de um projeto específico, incluindo o valor total gasto e uma lista detalhada de todos os pedidos de compra associados às solicitações do projeto.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/gastos/detalhes/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | O código identificador único do projeto no banco de dados. | `PRJ-Gasto` |
+
+### **Regras de Negócio e Cálculos**
+* **Gasto Total Consolidado:** Soma (agregação) do campo `valor_total` de todos os pedidos de compra (`FatoCompra`) vinculados ao projeto através das solicitações.
+* **Lista de Pedidos:** Listagem detalhada das compras, ordenada pelo maior valor, incluindo material, fornecedor e o status atual do pedido. A query é otimizada (`select_related`) para buscar dados do fornecedor e material em uma única consulta.
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+Retornado quando o projeto é encontrado com sucesso na base de dados. Retorna a listagem e o gasto total, mesmo que os pedidos estejam zerados (neste caso, `0.0`).
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto": {
+        "codigo": "PRJ-Gasto",
+        "nome": "Projeto Teste Gasto"
+    },
+    "gasto_total_consolidado": 2000.0,
+    "pedidos": [
+        {
+            "numero_pedido": "PED-01",
+            "material_nome": "Material X",
+            "fornecedor_nome": "Fornecedor Y",
+            "valor_total_pedido": 1500.0,
+            "status": "Concluido"
+        },
+        {
+            "numero_pedido": "PED-02",
+            "material_nome": "Material X",
+            "fornecedor_nome": "Fornecedor Y",
+            "valor_total_pedido": 500.0,
+            "status": "Pendente"
+        }
+    ]
+}
+```
+
+#### Erro: `404 Not Found`
+Retornado quando o `codigo_projeto` fornecido na URL não existe no banco de dados.
+
+**Exemplo de Resposta (HTML/JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+
+---
+
+## Rota Detalhamento de Solicitações do Projeto
+
+Retorna a listagem detalhada de todas as solicitações (requisições de material) vinculadas a um projeto específico, incluindo informações sobre materiais, valores estimados e os pedidos de compra associados.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/solicitacoes/detalhes/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | Código identificador único do projeto no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Valor Total Estimado:** Calculado multiplicando a `quantidade` solicitada pelo `custo_estimado` do material (`Quantidade` x `Custo Unitário Estimado`).
+* **Número do Pedido:** Referência ao número do pedido de compra vinculado à solicitação, quando disponível.
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto": "PRJ003",
+    "solicitacoes": [
+        {
+            "numero_solicitacao": "SC0028",
+            "numero_pedido": "PC0020",
+            "nome_material": "FPGA Spartan-7 XC7S25",
+            "data_solicitacao": "2022-07-03",
+            "valor_total_estimado": 3894.8,
+            "status": "CANCELADA"
+        }
+    ]
+}
+```
+
+#### Erro: `404 Not Found`
+**Exemplo de Resposta (JSON padrão do Django):**
+```json
+{
+    "detail": "Not found."
+}
+```
+## Rota Otimização de Estoque e Sobras
+
+Retorna as oportunidades de economia de um projeto cruzando suas solicitações em aberto com o estoque ocioso (sobras) deixado por projetos concluídos ou suspensos do mesmo programa.
+
+### **Endpoint**
+`GET /api/projetos/<codigo_projeto>/estoque/sobras/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `codigo_projeto` | `String` | O código identificador único do projeto alvo no banco de dados. | `PRJ003` |
+
+### **Regras de Negócio e Cálculos**
+* **Sobras Detectadas:** Retorna saldo positivo das tabelas fato apenas de projetos que pertencem ao mesmo programa do projeto alvo e cujo status seja estritamente "CONCLUÍDO" ou "SUSPENSO".
+* **Potencial de Economia:** Calculado pegando a intersecção entre a quantidade solicitada no projeto alvo e a total disponível na sobra, multiplicado pelo custo estimado do material.
+* **Conflito de Compras:** Compara pedidos de compra em andamento com o estoque de outros projetos (de qualquer status). 
+
+---
+
+### **Respostas**
+
+#### Sucesso: `200 OK`
+
+**Exemplo de Resposta (JSON):**
+```json
+{
+    "projeto_alvo": {
+        "codigo": "PRJ003",
+        "nome": "UNIDADE TESTE AUTOMATICO"
+    },
+    "alertas_estoque_ocioso": [
+        {
+            "codigo_material": "MAT101",
+            "descricao": "Capacitor 100uF",
+            "quantidade_solicitada_atual": 100,
+            "sobras_detectadas": [
+                {
+                    "projeto_origem_codigo": "PRJ001",
+                    "projeto_origem_nome": "PROJETO ENCERRADO ALPHA",
+                    "quantidade_disponivel": 150,
+                    "status_projeto_origem": "CONCLUIDO",
+                    "localizacao_fisica": "Almoxarifado Central"
+                }
+            ],
+            "potencial_economia_estimada": 600.0
+        }
+    ],
+    "conflitos_compra_aberta": [
+        {
+            "material": "Parafuso M4",
+            "pedido_compra_atual": "PED007",
+            "quantidade_no_pedido": 500,
+            "alerta": "Existe estoque disponível em outros projetos que supre esta necessidade sem nova compra.",
+            "disponivel_outras_fontes": 1200
+        }
+    ],
+    "valor_total_material": 14000.0
+}

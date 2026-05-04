@@ -10,6 +10,25 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = 'Popula o Banco de Dados DW com dados mockados hardcoded para testes do frontend.'
 
+    #constantes para evitar duplicação de strings (Sonar S1192)
+    STATUS_CONCLUIDO = 'Concluído'
+    STATUS_CONCLUIDA = 'Concluída'
+    STATUS_EM_ANDAMENTO = 'Em andamento'
+    STATUS_NAO_INICIADA = 'Não iniciada'
+    STATUS_APROVADA = 'Aprovada'
+    STATUS_CANCELADA = 'Cancelada'
+    STATUS_PENDENTE = 'Pendente'
+    
+    CAT_MATERIAIS_SOLDA = 'Materiais de Solda'
+    PRIORIDADE_ALTA = 'Alta'
+    PRIORIDADE_MEDIA = 'Média'
+    PRIORIDADE_BAIXA = 'Baixa'
+
+    RESP_JOAO = 'João Pedro Alves'
+    RESP_VINICIUS = 'Vinícius Moreira'
+    RESP_PATRICIA = 'Patrícia Lima'
+    RESP_BRUNO = 'Bruno Oliveira'
+
     def handle(self, *args, **kwargs):
         dim_data_rows = [
             (1, 10, 1, 2022),
@@ -56,33 +75,33 @@ class Command(BaseCommand):
         ]
 
         dim_programa_rows = [
-            (1, 'MANSUP', 'MANSUP', 'Carlos Eduardo Martins', 'Rafael Carvalho', 1, 2, 'Concluído'),
-            (2, 'MANSUP-ER', 'MANSUP-ER', 'Mariana Fernandes', 'Bruno Oliveira', 15, 16, 'Em andamento'),
-            (3, 'MAX12AC', 'MAX 1.2 AC', 'Ana Paula Ribeiro', 'Gustavo Ribeiro', 29, 30, 'Em andamento')
+            (1, 'MANSUP', 'MANSUP', 'Carlos Eduardo Martins', 'Rafael Carvalho', 1, 2, self.STATUS_CONCLUIDO),
+            (2, 'MANSUP-ER', 'MANSUP-ER', 'Mariana Fernandes', self.RESP_BRUNO, 15, 16, self.STATUS_EM_ANDAMENTO),
+            (3, 'MAX12AC', 'MAX 1.2 AC', 'Ana Paula Ribeiro', 'Gustavo Ribeiro', 29, 30, self.STATUS_EM_ANDAMENTO)
         ]
 
         dim_projeto_rows = [
-            (3, 'PRJ003', 'Unidade Teste Automático', 1, 'João Pedro Alves', 117.09, 3, 5, 'Suspenso'),
-            (4, 'PRJ004', 'Conversor DC-DC Isolado', 1, 'Vinícius Moreira', 140.2, 4, 5, 'Em andamento'),
-            (9, 'PRJ009', 'Controlador Motor Brushless', 1, 'Patrícia Lima', 95.85, 1, 5, 'Concluído'),
+            (3, 'PRJ003', 'Unidade Teste Automático', 1, self.RESP_JOAO, 117.09, 3, 5, 'Suspenso'),
+            (4, 'PRJ004', 'Conversor DC-DC Isolado', 1, self.RESP_VINICIUS, 140.2, 4, 5, self.STATUS_EM_ANDAMENTO),
+            (9, 'PRJ009', 'Controlador Motor Brushless', 1, self.RESP_PATRICIA, 95.85, 1, 5, self.STATUS_CONCLUIDO),
             (16, 'PRJ016', 'Interface SPI ADC', 2, 'Ana Carolina Duarte', 81.82, 17, 18, 'Planejamento'),
-            (36, 'PRJ036', 'Conversor USB-Serial', 1, 'Vinícius Moreira', 139.6, 4, 5, 'Planejamento'),
-            (42, 'PRJ042', 'Módulo de Telemetria', 1, 'Patrícia Lima', 110.50, 11, 5, 'Em andamento'),
-            (55, 'PRJ055', 'Sistema de Resfriamento Líquido', 1, 'Carlos Eduardo', 125.0, 12, 5, 'Concluído'),
-            (84, 'PRJ084', 'Conversor USB-Serial 3', 3, 'Lucas Pereira', 128.52, 31, 32, 'Em andamento')
+            (36, 'PRJ036', 'Conversor USB-Serial', 1, self.RESP_VINICIUS, 139.6, 4, 5, 'Planejamento'),
+            (42, 'PRJ042', 'Módulo de Telemetria', 1, self.RESP_PATRICIA, 110.50, 11, 5, self.STATUS_EM_ANDAMENTO),
+            (55, 'PRJ055', 'Sistema de Resfriamento Líquido', 1, 'Carlos Eduardo', 125.0, 12, 5, self.STATUS_CONCLUIDO),
+            (84, 'PRJ084', 'Conversor USB-Serial 3', 3, 'Lucas Pereira', 128.52, 31, 32, self.STATUS_EM_ANDAMENTO)
         ]
 
         dim_tarefa_rows = [
-            (1, 'TAR001', 3, 'Levantamento de Requisitos', 'João Pedro Alves', 40, 3, 5, 'Concluído'),
-            (2, 'TAR002', 4, 'Desenho de Arquitetura', 'Vinícius Moreira', 80, 4, 5, 'Em andamento'),
-            (9, 'TSK009', 3, 'Prototipação da placa', 'Marcelo Cardoso', 46, 4, 5, 'Em andamento'),
-            (36, 'TSK036', 36, 'Documentação técnica', 'Tatiane Duarte', 72, 5, 5, 'Não iniciada'),
-            (42, 'TSK042', 42, 'Design do circuito RF', 'Patrícia Lima', 120, 11, 5, 'Em andamento'),
-            (43, 'TSK043', 42, 'Testes de antena', 'João Pedro Alves', 40, 13, 2, 'Não iniciada'),
-            (48, 'TSK048', 16, 'Teste de compatibilidade', 'João Pedro Alves', 113, 19, 20, 'Em andamento'),
-            (50, 'TSK050', 84, 'Revisão de BOM', 'Carla Souza', 174, 33, 34, 'Em andamento'),
-            (55, 'TSK055', 55, 'Especificação de bombas', 'Carlos Eduardo', 30, 12, 5, 'Concluído'),
-            (88, 'TSK088', 16, 'Validação EMC', 'Felipe Rocha', 136, 21, 22, 'Não iniciada')
+            (1, 'TAR001', 3, 'Levantamento de Requisitos', self.RESP_JOAO, 40, 3, 5, self.STATUS_CONCLUIDO),
+            (2, 'TAR002', 4, 'Desenho de Arquitetura', self.RESP_VINICIUS, 80, 4, 5, self.STATUS_EM_ANDAMENTO),
+            (9, 'TSK009', 3, 'Prototipação da placa', 'Marcelo Cardoso', 46, 4, 5, self.STATUS_EM_ANDAMENTO),
+            (36, 'TSK036', 36, 'Documentação técnica', 'Tatiane Duarte', 72, 5, 5, self.STATUS_NAO_INICIADA),
+            (42, 'TSK042', 42, 'Design do circuito RF', self.RESP_PATRICIA, 120, 11, 5, self.STATUS_EM_ANDAMENTO),
+            (43, 'TSK043', 42, 'Testes de antena', self.RESP_JOAO, 40, 13, 2, self.STATUS_NAO_INICIADA),
+            (48, 'TSK048', 16, 'Teste de compatibilidade', self.RESP_JOAO, 113, 19, 20, self.STATUS_EM_ANDAMENTO),
+            (50, 'TSK050', 84, 'Revisão de BOM', 'Carla Souza', 174, 33, 34, self.STATUS_EM_ANDAMENTO),
+            (55, 'TSK055', 55, 'Especificação de bombas', 'Carlos Eduardo', 30, 12, 5, self.STATUS_CONCLUIDO),
+            (88, 'TSK088', 16, 'Validação EMC', 'Felipe Rocha', 136, 21, 22, self.STATUS_NAO_INICIADA)
         ]
 
         dim_material_rows = [
@@ -99,122 +118,75 @@ class Command(BaseCommand):
         ]
 
         dim_fornecedor_rows = [
-            (1, 'FOR001', 'RTech Distribuidora 1 Ltda', 'Jundiaí', 'SP', 'Materiais de Solda', 'Ativo'),
+            (1, 'FOR001', 'RTech Distribuidora 1 Ltda', 'Jundiaí', 'SP', self.CAT_MATERIAIS_SOLDA, 'Ativo'),
             (2, 'FOR002', 'Circuitech Distribuidora 2 Ltda', 'Santos', 'SP', 'Componentes Mecânicos', 'Ativo'),
             (3, 'FOR003', 'NovaTech Supply 3 Ltda', 'São Paulo', 'SP', 'Placas de Circuito Impresso', 'Ativo'),
             (4, 'FOR004', 'ElectroTech Global Solutions', 'Campinas', 'SP', 'Componentes Eletrônicos', 'Ativo'),
-            (42, 'FOR042', 'ZetaComp Brasil 42 Ltda', 'Campinas', 'SP', 'Materiais de Solda', 'Ativo'),
-            (73, 'FOR073', 'Circuitech Distribuidora 73 Ltda', 'Jundiaí', 'SP', 'Materiais de Solda', 'Ativo')
+            (42, 'FOR042', 'ZetaComp Brasil 42 Ltda', 'Campinas', 'SP', self.CAT_MATERIAIS_SOLDA, 'Ativo'),
+            (73, 'FOR073', 'Circuitech Distribuidora 73 Ltda', 'Jundiaí', 'SP', self.CAT_MATERIAIS_SOLDA, 'Ativo')
         ]
 
         dim_solicitacao_rows = [
-            (1, 'SC0001', 3, 47, 470, 9, 'Alta', 'Cancelada'),    # 2024-11-03 -> ID 9
-            (3, 'SC0003', 9, 43, 286, 7, 'Crítica', 'Rejeitada'),   # 2024-05-18 -> ID 7
-            (6, 'SC0006', 84, 90, 201, 38, 'Média', 'Pendente'),    # 2025-02-16 -> ID 38
-            (11, 'SC0011', 4, 20, 152, 6, 'Baixa', 'Pendente'),     # 2024-10-15 -> ID 6
-            (38, 'SC0038', 3, 1, 280, 8, 'Alta', 'Aprovada'),       # 2024-12-25 -> ID 8
-            (42, 'SC0042', 42, 92, 100, 13, 'Média', 'Aprovada'),   # 2025-01-20 -> ID 13
-            (55, 'SC0055', 55, 88, 50, 12, 'Baixa', 'Concluída'),   # 2023-08-15 -> Not in DimData! Used ID 12 (10/08/2023) as closest fallback
-            (60, 'SC0060', 9, 55, 200, 14, 'Alta', 'Aprovada'),     # 2025-02-02 -> ID 14
-            (62, 'SC0062', 16, 18, 232, 23, 'Média', 'Cancelada')   # 2024-07-23 -> ID 23
+            (1, 'SC0001', 3, 47, 470, 9, self.PRIORIDADE_ALTA, self.STATUS_CANCELADA),
+            (3, 'SC0003', 9, 43, 286, 7, 'Crítica', 'Rejeitada'),
+            (6, 'SC0006', 84, 90, 201, 38, self.PRIORIDADE_MEDIA, self.STATUS_PENDENTE),
+            (11, 'SC0011', 4, 20, 152, 6, self.PRIORIDADE_BAIXA, self.STATUS_PENDENTE),
+            (38, 'SC0038', 3, 1, 280, 8, self.PRIORIDADE_ALTA, self.STATUS_APROVADA),
+            (42, 'SC0042', 42, 92, 100, 13, self.PRIORIDADE_MEDIA, self.STATUS_APROVADA),
+            (55, 'SC0055', 55, 88, 50, 12, self.PRIORIDADE_BAIXA, self.STATUS_CONCLUIDA),
+            (60, 'SC0060', 9, 55, 200, 14, self.PRIORIDADE_ALTA, self.STATUS_APROVADA),
+            (62, 'SC0062', 16, 18, 232, 23, self.PRIORIDADE_MEDIA, self.STATUS_CANCELADA)
         ]
 
         fato_tarefa_rows = [
-            (1, 'João Pedro Alves', 20.5, 1, 3),
-            (2, 'Vinícius Moreira', 30.0, 2, 4),
-            (3, 'Marcelo Cardoso', 5.94, 9, 3),
-            (4, 'Tatiane Duarte', 7.86, 36, 10),
-            (5, 'Patrícia Lima', 45.0, 42, 11),
-            (6, 'Ricardo Teixeira', 7.12, 88, 26),
-            (7, 'Patrícia Lima', 10.0, 42, 13),
-            (36, 'Carla Souza', 2.17, 50, 35),
-            (48, 'Diego Santana', 6.79, 48, 24),
-            (86, 'Bruno Oliveira', 8.91, 50, 36),
-            (87, 'Bruno Oliveira', 0.92, 48, 25),
-            (93, 'Roberto Nogueira', 4.48, 50, 37)
+            (1, self.RESP_JOAO, 20.5, 1, 3), (2, self.RESP_VINICIUS, 30.0, 2, 4),
+            (3, 'Marcelo Cardoso', 5.94, 9, 3), (4, 'Tatiane Duarte', 7.86, 36, 10),
+            (5, self.RESP_PATRICIA, 45.0, 42, 11), (6, 'Ricardo Teixeira', 7.12, 88, 26),
+            (7, self.RESP_PATRICIA, 10.0, 42, 13), (36, 'Carla Souza', 2.17, 50, 35),
+            (48, 'Diego Santana', 6.79, 48, 24), (86, self.RESP_BRUNO, 8.91, 50, 36),
+            (87, self.RESP_BRUNO, 0.92, 48, 25), (93, 'Roberto Nogueira', 4.48, 50, 37)
         ]
 
         fato_empenho_rows = [
-            (1, 470, 3, 47, 9),
-            (2, 286, 9, 43, 7),
-            (3, 152, 4, 20, 6),
-            (4, 100, 42, 92, 13),
-            (5, 50, 55, 88, 12),
-            (6, 200, 9, 55, 14),
-            (7, 232, 16, 18, 23),
-            (60, 49, 84, 39, 39)
+            (1, 470, 3, 47, 9), (2, 286, 9, 43, 7), (3, 152, 4, 20, 6),
+            (4, 100, 42, 92, 13), (5, 50, 55, 88, 12), (6, 200, 9, 55, 14),
+            (7, 232, 16, 18, 23), (60, 49, 84, 39, 39)
         ]
 
         fato_compra_rows = [
-            (1, 'PED001', 27070.40, 'Concluída', 38, 1, 8, 5),
-            (2, 'PED002', 10892.32, 'Pendente', 11, 2, 6, 5),
-            (3, 'PED003', 34305.70, 'Cancelada', 3, 3, 7, 5),
-            (4, 'PED004', 8020.00, 'Pendente', 42, 4, 13, 5),
-            (5, 'PED005', 7275.00, 'Concluída', 55, 2, 12, 5),
-            (6, 'PED006', 50000.00, 'Aprovada', 60, 4, 14, 5),
+            (1, 'PED001', 27070.40, self.STATUS_CONCLUIDA, 38, 1, 8, 5),
+            (2, 'PED002', 10892.32, self.STATUS_PENDENTE, 11, 2, 6, 5),
+            (3, 'PED003', 34305.70, self.STATUS_CANCELADA, 3, 3, 7, 5),
+            (4, 'PED004', 8020.00, self.STATUS_PENDENTE, 42, 4, 13, 5),
+            (5, 'PED005', 7275.00, self.STATUS_CONCLUIDA, 55, 2, 12, 5),
+            (6, 'PED006', 50000.00, self.STATUS_APROVADA, 60, 4, 14, 5),
             (7, 'PC0037', 319.73, 'Entregue', 62, 42, 27, 28),
             (84, 'PC0084', 18570.12, 'Aberto', 6, 73, 40, 41)
         ]
 
-        self.stdout.write(self.style.WARNING('Iniciando script de seed com dados mockados hardcoded para o DW...'))
+        self.stdout.write(self.style.WARNING('Iniciando script de seed com dados mockados...'))
 
-        # Clear existing data using Django ORM
-        DimData.objects.all().delete()
-        DimPrograma.objects.all().delete()
-        DimProjeto.objects.all().delete()
-        DimTarefa.objects.all().delete()
-        DimMaterial.objects.all().delete()
-        DimFornecedor.objects.all().delete()
-        DimSolicitacao.objects.all().delete()
-        FatoTarefa.objects.all().delete()
-        FatoEmpenho.objects.all().delete()
-        FatoCompra.objects.all().delete()
+        #deletar dados existentes
+        models = [FatoCompra, FatoEmpenho, FatoTarefa, DimSolicitacao, DimFornecedor, 
+                  DimMaterial, DimTarefa, DimProjeto, DimPrograma, DimData]
+        for model in models:
+            model.objects.all().delete()
 
-        def bulk_insert_with_model(model_class, data, fields):
-            """Insert data using Django models instead of raw SQL."""
-            if not data:
-                return
-            objects = []
-            for row in data:
-                obj_data = {fields[i]: row[i] for i in range(len(fields))}
-                objects.append(model_class(**obj_data))
+        def bulk_insert(model_class, data, fields):
+            if not data: return
+            objects = [model_class(**{fields[i]: row[i] for i in range(len(fields))}) for row in data]
             model_class.objects.bulk_create(objects)
 
-        # Insert data using Django models
-        bulk_insert_with_model(DimData, dim_data_rows, ['id', 'dia', 'mes', 'ano'])
-        
-        bulk_insert_with_model(DimPrograma, dim_programa_rows, 
-                              ['id', 'codigo_programa', 'nome_programa', 'gerente_programa', 
-                               'gerente_tecnico', 'data_inicio_id', 'data_fim_prevista_id', 'status'])
-        
-        bulk_insert_with_model(DimProjeto, dim_projeto_rows,
-                              ['id', 'codigo_projeto', 'nome_projeto', 'programa_id', 
-                               'responsavel', 'custo_hora', 'data_inicio_id', 'data_fim_prevista_id', 'status'])
-        
-        bulk_insert_with_model(DimTarefa, dim_tarefa_rows,
-                              ['id', 'codigo_tarefa', 'projeto_id', 'titulo', 'responsavel', 
-                               'estimativa', 'data_inicio_id', 'data_fim_prevista_id', 'status'])
-        
-        bulk_insert_with_model(DimMaterial, dim_material_rows,
-                              ['id', 'codigo_material', 'descricao', 'categoria', 
-                               'fabricante', 'custo_estimado', 'status'])
-        
-        bulk_insert_with_model(DimFornecedor, dim_fornecedor_rows,
-                              ['id', 'codigo_fornecedor', 'razao_social', 'cidade', 
-                               'estado', 'categoria', 'status'])
-        
-        bulk_insert_with_model(DimSolicitacao, dim_solicitacao_rows,
-                              ['id', 'numero_solicitacao', 'projeto_id', 'material_id', 
-                               'quantidade', 'data_solicitacao_id', 'prioridade', 'status'])
-        
-        bulk_insert_with_model(FatoTarefa, fato_tarefa_rows,
-                              ['id', 'usuario', 'horas_trabalhadas', 'tarefa_id', 'data_id'])
-        
-        bulk_insert_with_model(FatoEmpenho, fato_empenho_rows,
-                              ['id', 'quantidade_empenhada', 'projeto_id', 'material_id', 'data_empenho_id'])
-        
-        bulk_insert_with_model(FatoCompra, fato_compra_rows,
-                              ['id', 'numero_pedido', 'valor_total', 'status', 'solicitacao_id', 
-                               'fornecedor_id', 'data_pedido_id', 'data_previsao_entrega_id'])
+        #inserções
+        bulk_insert(DimData, dim_data_rows, ['id', 'dia', 'mes', 'ano'])
+        bulk_insert(DimPrograma, dim_programa_rows, ['id', 'codigo_programa', 'nome_programa', 'gerente_programa', 'gerente_tecnico', 'data_inicio_id', 'data_fim_prevista_id', 'status'])
+        bulk_insert(DimProjeto, dim_projeto_rows, ['id', 'codigo_projeto', 'nome_projeto', 'programa_id', 'responsavel', 'custo_hora', 'data_inicio_id', 'data_fim_prevista_id', 'status'])
+        bulk_insert(DimTarefa, dim_tarefa_rows, ['id', 'codigo_tarefa', 'projeto_id', 'titulo', 'responsavel', 'estimativa', 'data_inicio_id', 'data_fim_prevista_id', 'status'])
+        bulk_insert(DimMaterial, dim_material_rows, ['id', 'codigo_material', 'descricao', 'categoria', 'fabricante', 'custo_estimado', 'status'])
+        bulk_insert(DimFornecedor, dim_fornecedor_rows, ['id', 'codigo_fornecedor', 'razao_social', 'cidade', 'estado', 'categoria', 'status'])
+        bulk_insert(DimSolicitacao, dim_solicitacao_rows, ['id', 'numero_solicitacao', 'projeto_id', 'material_id', 'quantidade', 'data_solicitacao_id', 'prioridade', 'status'])
+        bulk_insert(FatoTarefa, fato_tarefa_rows, ['id', 'usuario', 'horas_trabalhadas', 'tarefa_id', 'data_id'])
+        bulk_insert(FatoEmpenho, fato_empenho_rows, ['id', 'quantidade_empenhada', 'projeto_id', 'material_id', 'data_empenho_id'])
+        bulk_insert(FatoCompra, fato_compra_rows, ['id', 'numero_pedido', 'valor_total', 'status', 'solicitacao_id', 'fornecedor_id', 'data_pedido_id', 'data_previsao_entrega_id'])
 
-        self.stdout.write(self.style.SUCCESS('Dados DW inseridos com sucesso! Relacionamentos de chaves estritamente mantidos.'))
+        self.stdout.write(self.style.SUCCESS('Dados DW inseridos com sucesso!'))

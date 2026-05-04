@@ -44,8 +44,10 @@ Para garantir a padronização e a utilidade dos dados para relatórios, o pipel
 | **Tarefas** | `tarefas_projeto.csv` | `DimTarefa` | Lead Time, Flag de Atraso |
 | **Suprimentos** | `materiais.csv` | `DimMaterial` | - |
 | **Parceiros** | `fornecedores.csv` | `DimFornecedor` | - |
+| **Localização** | `estoque_materiais_projeto.csv` | `DimLocalizacao` | - |
 | **Processos** | `tempo_tarefas.csv` | `FatoTarefa` | Horas Trabalhadas |
 | **Financeiro** | `pedidos_compra.csv` | `FatoCompra` | Valor Total |
+| **Estoque/Saldo** | `estoque_materiais_projeto.csv` | `FatoEstoqueSaldo` | Qtd Disponível, Valor Total, Data Última Atualização |
 
 ## 6. Estrutura de Diretórios
 ```plaintext
@@ -103,7 +105,7 @@ Para disparar o processo completo:
     O terminal exibirá o progresso de cada etapa ("Extraindo...", "Carregando..."). Ao final, será exibida a mensagem de sucesso ou um relatório de erros caso ocorram falhas de integridade.
 
 ## 9. Processo de Carga e Idempotência
-O carregamento das tabelas fato (`FatoTarefa`, `FatoEmpenho` e `FatoCompra`) e dimensões é a etapa final do pipeline analítico.
+O carregamento das tabelas fato (`FatoTarefa`, `FatoEmpenho`, `FatoCompra` e `FatoEstoqueSaldo`) e dimensões é a etapa final do pipeline analítico.
 
 * **Otimização com Bulk Insert:** Para garantir alta performance, o carregamento utiliza o método `bulk_create` do Django ORM, persistindo os dados em listas de objetos em memória em uma única transação por entidade.
 * **Garantia de Integridade e Idempotência:** O pipeline realiza uma limpeza prévia (`.delete()`) de registros antigos antes de cada carga. Isso garante que o Data Warehouse possa ser sincronizado múltiplas vezes sem duplicar dados, refletindo sempre o estado mais recente dos arquivos CSV.
