@@ -11,14 +11,14 @@ services:
     env_file:
       - .env
     environment:
-      - DB_NAME=${POSTGRES_DB}
-      - DB_USER=${POSTGRES_USER}
-      - DB_PASSWORD=${POSTGRES_PASSWORD}
-      - DB_HOST=custom-postgres
-      - DB_PORT=5432
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST=custom-mysql
+      - DB_PORT=3306
       - RUN_SEED=${RUN_SEED:-false}
     depends_on:
-      custom-postgres:
+      custom-mysql:
         condition: service_healthy
     volumes:
       - ../django:/app
@@ -42,26 +42,26 @@ services:
       - backend
 
   # -------------------- Database --------------------
-  custom-postgres:
+  custom-mysql:
     build:
-      context: ./postgres
-    container_name: psql-db
+      context: ./mysql
+    container_name: mysql-db
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
     healthcheck:
-      # O pg_isready vai usar as variáveis de ambiente para testar a conexão real
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
-  pgdata:
+  mysqldata:
 
 
