@@ -87,8 +87,8 @@ class FatoCompra(models.Model):
     data_previsao_entrega = ForeignKey(DimData, on_delete=CASCADE, related_name='compra_data_previsao_entrega')
 
 class DimLocalizacao(models.Model):
-    id_localizacao = CharField()
-    localizacao = CharField()
+    id_localizacao = CharField(max_length=6)
+    localizacao = CharField(max_length=30)
 
 class FatoEstoqueSaldo(models.Model):
     material = ForeignKey(DimMaterial, on_delete=CASCADE)
