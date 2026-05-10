@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "lint:backend": "flake8 .",
+    "format:backend": "black .",
+    "fix:backend": "black . && flake8 ."
+  }
+}

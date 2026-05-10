@@ -1,0 +1,18 @@
+[run]
+# Tell coverage where your code is
+source = .
+
+# Exclude files we don't want to test
+omit =
+    */migrations/*
+    */manage.py
+    */settings.py
+    */asgi.py
+    */wsgi.py
+    */models.py
+    */admin.py
+    */apps.py
+
+[xml]
+# SonarCloud expects this specific file name
+output = coverage.xml
