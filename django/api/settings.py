@@ -80,15 +80,13 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', 'api_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'api_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', 'custom-postgres'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
-        # 'OPTIONS': {
-        #     'options': '-c search_path=schema_api,public'
-        # },
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQL_DATABASE', 'api_db'),
+        'USER': os.environ.get('MYSQL_USER', 'api_user'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST', 'custom-mysql'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
+        'CONN_MAX_AGE': 60,
     }
 }
 
