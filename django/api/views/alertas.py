@@ -122,7 +122,7 @@ def projeto_alertas_api(request, codigo_projeto):
         for material in materiais_obsoletos_qs
     ]
     
-    solicitacoes_aprovadas_recentes = (
+    solicitacoes_aprovadas_recentes_ids = list(
         DimSolicitacao.objects
         .filter(projeto=projeto, status__iexact='Aprovada')
         .order_by(
@@ -130,12 +130,12 @@ def projeto_alertas_api(request, codigo_projeto):
             '-data_solicitacao__mes',
             '-data_solicitacao__dia',
             '-id',
-        )[:3]
+        ).values_list('id', flat=True)[:3]
     )
 
     compras_recentes = (
         FatoCompra.objects
-        .filter(solicitacao__in=solicitacoes_aprovadas_recentes)
+        .filter(solicitacao__id__in=solicitacoes_aprovadas_recentes_ids)
         .select_related('solicitacao__data_solicitacao', 'data_pedido', 'data_previsao_entrega')
         .order_by(
             '-solicitacao__data_solicitacao__ano',
