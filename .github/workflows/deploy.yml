@@ -1,0 +1,40 @@
+name: Deploy Automático para AWS
+
+# 1ª ALTERAÇÃO: A pipeline vai rodar quando houver PUSH na develop-3
+on:
+  push:
+    branches:
+      - develop-3
+
+jobs:
+  deploy:
+    name: Atualizar EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Executar comandos via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/ubuntu/API-5-Semestre-Backend
+            
+            # 2ª ALTERAÇÃO: Diz para o servidor puxar a branch develop-3
+            git pull origin develop-3
+            
+            # Liga o ambiente virtual
+            source venv/bin/activate
+            
+            # Entra na pasta do Django
+            cd django
+            
+            # (Opcional) Instala bibliotecas novas se o requirements.txt mudou
+            # pip install -r /api/requirements.txt
+            
+            # Atualiza o banco de dados caso haja novos models
+            python3 manage.py migrate
+            
+            # Reinicia o motor para o código novo valer na porta 8000
+            sudo systemctl restart gunicorn
