@@ -31,7 +31,6 @@ class DimTarefa(models.Model):
     codigo_tarefa = CharField(max_length=6)
     projeto = ForeignKey(DimProjeto, on_delete=CASCADE)
     titulo = CharField(max_length=256)
-    titulo = CharField(max_length=256)
     responsavel = CharField(max_length=256)
     estimativa = IntegerField()
     data_inicio = ForeignKey(DimData, on_delete=CASCADE, related_name='tarefa_data_inicio')
