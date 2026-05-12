@@ -1,6 +1,6 @@
 name: Deploy Automático para AWS
 
-# 1ª ALTERAÇÃO: A pipeline vai rodar quando houver PUSH na develop-3
+# A pipeline vai rodar quando houver PUSH na develop-3
 on:
   push:
     branches:
@@ -21,17 +21,17 @@ jobs:
           script: |
             cd /home/ubuntu/API-5-Semestre-Backend
             
-            # 2ª ALTERAÇÃO: Diz para o servidor puxar a branch develop-3
-            git pull origin develop-3
+            # Atualiza a lista de mudanças do GitHub
+            git fetch --all
+            
+            # Força o servidor a espelhar a branch develop-3 (evita conflitos)
+            git reset --hard origin/develop-3
             
             # Liga o ambiente virtual
             source venv/bin/activate
             
             # Entra na pasta do Django
             cd django
-            
-            # (Opcional) Instala bibliotecas novas se o requirements.txt mudou
-            # pip install -r /api/requirements.txt
             
             # Atualiza o banco de dados caso haja novos models
             python3 manage.py migrate
