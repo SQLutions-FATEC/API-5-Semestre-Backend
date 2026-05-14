@@ -2,8 +2,7 @@
 set -e
 
 echo "Applying database migrations..."
-python manage.py makemigrations
-python manage.py migrate
+python manage.py smart_migrate
 
 if [[ "$RUN_SEED" = "true" ]] || [[ "$RUN_SEED" = "True" ]] || [[ "$RUN_SEED" = "1" ]] || [[ "$RUN_SEED" = "TRUE" ]]; then
     echo "Checking if database is empty..."
