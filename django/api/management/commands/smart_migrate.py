@@ -23,7 +23,7 @@ class Command(BaseCommand):
             # Garante que a pasta sql seja um pacote Python válido
             if os.path.exists(sql_dir):
                 if not os.path.exists(init_file):
-                    with open(init_file, 'w') as f:
+                    with open(init_file, 'w') as _:
                         pass
                     
                 self.stdout.write("Configurando o Django para usar a migração 'from scratch'...")
