@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # -------------------- Backend (Django + Gunicorn) --------------------
+  backend:
+    build:
+      context: ../django            # Volta uma pasta e entra no código do Django
+      dockerfile: ./backend/Dockerfile # O Dockerfile está na pasta backend (relativo ao deploy/)
+    container_name: django-prod
+    restart: always
+    # Comando de produção rodando o Gunicorn (Mude api.wsgi se sua pasta principal tiver outro nome)
+    command: gunicorn api.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    expose:
+      - "8000" 
+    env_file:
+      - .env
+    environment:
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST=${RDS_ENDPOINT}     # Endpoint do seu banco na nuvem
+      - DB_PORT=3306
+    volumes:
+      - static_volume:/app/staticfiles 
+      - media_volume:/app/media
+
+  # -------------------- Proxy Reverso (Nginx) --------------------
+  nginx:
+    image: nginx:latest
+    container_name: nginx-prod
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      # Puxa o conf da pasta ./nginx que acabamos de criar
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - backend
+
+volumes:
+  static_volume:
+  media_volume:
