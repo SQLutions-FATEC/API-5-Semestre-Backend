@@ -39,10 +39,10 @@ class Command(BaseCommand):
                 
             instance.setUp()
             
-            self.stdout.write(f"Iniciando exportação...")
+            self.stdout.write("Iniciando exportação...")
             call_command('generate_fixture', fixture_name)
                 
-            self.stdout.write(self.style.SUCCESS(f'✅ Comando concluído!'))
+            self.stdout.write(self.style.SUCCESS('✅ Comando concluído!'))
             
         finally:
             self.stdout.write("Destruindo banco de dados de teste...")
