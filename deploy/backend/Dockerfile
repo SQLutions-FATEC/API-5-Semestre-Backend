@@ -35,6 +35,10 @@ RUN apt-get update && apt-get install -y default-libmysqlclient-dev && rm -rf /v
 # Copia o código da sua aplicação
 COPY . .
 
+# ---> ADICIONE ESTA LINHA <---
+# Garante que as pastas existam antes do Nginx tentar acessá-las
+RUN mkdir -p /app/staticfiles /app/media
+
 # Dá permissão de execução ao entrypoint
 RUN chmod +x entrypoint.sh
 
