@@ -5,7 +5,7 @@ services:
   backend:
     build:
       context: ../django            # Volta uma pasta e entra no código do Django
-      dockerfile: ./backend/Dockerfile # O Dockerfile está na pasta backend (relativo ao deploy/)
+      dockerfile: ../deploy/backend/Dockerfile
     container_name: django-prod
     restart: always
     # Comando de produção rodando o Gunicorn
