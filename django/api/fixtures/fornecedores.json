@@ -1,0 +1,175 @@
+[
+{
+    "model": "api.dimdata",
+    "pk": 1,
+    "fields": {
+        "dia": 15,
+        "mes": 5,
+        "ano": 2024
+    }
+},
+{
+    "model": "api.dimdata",
+    "pk": 2,
+    "fields": {
+        "dia": 14,
+        "mes": 5,
+        "ano": 2024
+    }
+},
+{
+    "model": "api.dimdata",
+    "pk": 3,
+    "fields": {
+        "dia": 16,
+        "mes": 5,
+        "ano": 2024
+    }
+},
+{
+    "model": "api.dimprograma",
+    "pk": 1,
+    "fields": {
+        "codigo_programa": "P1",
+        "nome_programa": "Prog 1",
+        "gerente_programa": "",
+        "gerente_tecnico": "",
+        "data_inicio": 2,
+        "data_fim_prevista": 3,
+        "status": ""
+    }
+},
+{
+    "model": "api.dimprojeto",
+    "pk": 1,
+    "fields": {
+        "codigo_projeto": "PRJA",
+        "nome_projeto": "Projeto A",
+        "programa": 1,
+        "responsavel": "",
+        "custo_hora": "10.00",
+        "data_inicio": 2,
+        "data_fim_prevista": 3,
+        "status": "",
+        "lead_time_dias": 0,
+        "is_atrasado": false
+    }
+},
+{
+    "model": "api.dimprojeto",
+    "pk": 2,
+    "fields": {
+        "codigo_projeto": "PRJB",
+        "nome_projeto": "Projeto B",
+        "programa": 1,
+        "responsavel": "",
+        "custo_hora": "10.00",
+        "data_inicio": 2,
+        "data_fim_prevista": 3,
+        "status": "",
+        "lead_time_dias": 0,
+        "is_atrasado": false
+    }
+},
+{
+    "model": "api.dimmaterial",
+    "pk": 1,
+    "fields": {
+        "codigo_material": "M1",
+        "descricao": "Mat 1",
+        "categoria": "",
+        "fabricante": "",
+        "custo_estimado": "10.00",
+        "status": ""
+    }
+},
+{
+    "model": "api.dimfornecedor",
+    "pk": 1,
+    "fields": {
+        "codigo_fornecedor": "F1",
+        "razao_social": "Forn 1",
+        "cidade": "",
+        "estado": "",
+        "categoria": "",
+        "status": ""
+    }
+},
+{
+    "model": "api.dimfornecedor",
+    "pk": 2,
+    "fields": {
+        "codigo_fornecedor": "F2",
+        "razao_social": "Forn 2",
+        "cidade": "",
+        "estado": "",
+        "categoria": "",
+        "status": ""
+    }
+},
+{
+    "model": "api.dimsolicitacao",
+    "pk": 1,
+    "fields": {
+        "numero_solicitacao": "S1",
+        "projeto": 1,
+        "material": 1,
+        "quantidade": 1,
+        "data_solicitacao": 2,
+        "prioridade": "",
+        "status": ""
+    }
+},
+{
+    "model": "api.dimsolicitacao",
+    "pk": 2,
+    "fields": {
+        "numero_solicitacao": "S2",
+        "projeto": 2,
+        "material": 1,
+        "quantidade": 1,
+        "data_solicitacao": 2,
+        "prioridade": "",
+        "status": ""
+    }
+},
+{
+    "model": "api.fatocompra",
+    "pk": 1,
+    "fields": {
+        "numero_pedido": "PED1",
+        "valor_total": "100.00",
+        "status": "aberto",
+        "solicitacao": 1,
+        "fornecedor": 1,
+        "data_pedido": 2,
+        "data_previsao_entrega": 2
+    }
+},
+{
+    "model": "api.fatocompra",
+    "pk": 2,
+    "fields": {
+        "numero_pedido": "PED2",
+        "valor_total": "200.00",
+        "status": "aberto",
+        "solicitacao": 2,
+        "fornecedor": 1,
+        "data_pedido": 2,
+        "data_previsao_entrega": 3
+    }
+},
+{
+    "model": "api.fatocompra",
+    "pk": 3,
+    "fields": {
+        "numero_pedido": "PED3",
+        "valor_total": "300.00",
+        "status": "entregue",
+        "solicitacao": 1,
+        "fornecedor": 1,
+        "data_pedido": 2,
+        "data_previsao_entrega": 2
+    }
+}
+]
