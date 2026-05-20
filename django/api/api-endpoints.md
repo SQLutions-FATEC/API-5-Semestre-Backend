@@ -869,3 +869,70 @@ Retorna as oportunidades de economia de um projeto cruzando suas solicitações 
     ],
     "valor_total_material": 14000.0
 }
+```
+---
+
+## Rota Listagem de Fornecedores
+
+Retorna a lista de fornecedores disponíveis no sistema. Permite a aplicação de filtros combinados via Query Params para refinar a busca. Caso nenhum filtro seja enviado, retorna todos os fornecedores cadastrados.
+
+### **Endpoint**
+`GET /api/fornecedores/`
+
+### **Parâmetros de Rota (Path Parameters)**
+
+| Parâmetro | Tipo | Descrição | Exemplo |
+| :--- | :--- | :--- | :--- |
+| `fornecedor_nome` | `String` | Filtra parcialmente pelo nome ou razão social do fornecedor. | `RTech` |
+| `fornecedor_cidade` | `String` | Filtra pela cidade onde o fornecedor está localizado. | `Jundiaí` |
+| `programa_nome` | `String` | Filtra fornecedores vinculados a um programa específico através do histórico de compras. | `Programa Alfa` |
+| `projeto_nome` | `String` | Filtra fornecedores vinculados a um projeto específico através do histórico de compras. | `Projeto X` |
+| `categoria` | `String` | Filtra pelo nome ou código da categoria de materiais fornecidos. | `Solda` |
+
+### **Resposta de Sucesso: `200 OK`**
+
+Retornado quando o programa é encontrado com sucesso.
+
+**Formato da Resposta (JSON):**
+```json
+[
+    {
+        "id_fornecedor": 1,
+        "codigo_fornecedor": "F001",
+        "razao_social": "RTech Distribuidora 1 Ltda",
+        "cidade": "Jundiaí",
+        "categoria": "Materiais de Solda",
+        "status": "Ativo"
+    },
+    {
+        "id_fornecedor": 2,
+        "codigo_fornecedor": "F002",
+        "razao_social": "Tech Corp Eletrônicos",
+        "cidade": "São Paulo",
+        "categoria": "Eletrônica",
+        "status": "Inativo"
+    }
+]
+```
+
+### **Campos de Resposta**
+
+| Campo | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `id_fornecedor` | `Integer` | ID interno do fornecedor no banco de dados. |
+| `codigo_fornecedor` | `String` | Código identificador único utilizado pelo negócio. |
+| `razao_social` | `String` | Nome oficial ou razão social da empresa fornecedora. |
+| `cidade` | `String` | Município onde o fornecedor está localizado. |
+| `categoria` | `String` | Categoria principal dos materiais fornecidos. |
+| `status` | `String` | Status operacional atual do fornecedor (ex: Ativo, Inativo). |
+
+### **Resposta de Sucesso Vazia: `200 OK`**
+
+Retornado um array vazio caso os filtros aplicados não encontrem nenhuma correspondência.
+
+**Exemplo de Resposta:**
+```json
+    []
+```
+
+---
