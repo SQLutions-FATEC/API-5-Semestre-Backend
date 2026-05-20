@@ -30,6 +30,7 @@ from .views import (
     detalhamento_gastos_projeto_api,
     projeto_sem_filtro,
     otimizacao_sobras_api,
+    fornecedor_api,
     fornecedor_pedidos_api
 )
 
@@ -74,6 +75,9 @@ urlpatterns = [
     path('api/projetos/<str:codigo_projeto>/estoque/sobras/',
          otimizacao_sobras_api,
          name='projeto-estoque-sobras'),
+    path('api/fornecedores/<str:id_fornecedor>/',
+            fornecedor_api,
+            name='fornecedor-detalhe'),
     path('api/fornecedores/<str:id_fornecedor>/pedidos/',
          fornecedor_pedidos_api,
          name='fornecedor-pedidos'),
