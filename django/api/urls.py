@@ -30,7 +30,8 @@ from .views import (
     detalhamento_gastos_projeto_api,
     projeto_sem_filtro,
     otimizacao_sobras_api,
-    fornecedor_pedidos_api
+    fornecedor_pedidos_api,
+    listagem_fornecedores
 )
 
 urlpatterns = [
@@ -77,4 +78,5 @@ urlpatterns = [
     path('api/fornecedores/<str:id_fornecedor>/pedidos/',
          fornecedor_pedidos_api,
          name='fornecedor-pedidos'),
+    path('api/fornecedores/', listagem_fornecedores, name='api-listagem-fornecedores'),
 ]
