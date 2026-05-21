@@ -25,5 +25,5 @@ __all__ = [
     'detalhamento_gastos_projeto_api',
     'projeto_sem_filtro',
     'otimizacao_sobras_api',
-    'fornecedor_pedidos_api'
+    'fornecedor_pedidos_api',
 ]
