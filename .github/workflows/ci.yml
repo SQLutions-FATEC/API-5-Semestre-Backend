@@ -35,7 +35,7 @@ jobs:
           pip install flake8 pytest-django
 
       - name: Análise Estática (Linter)
-        run: flake8 . --exclude=migrations
+        run: flake8 . --config=../.flake8
 
       - name: Testes Unitários (Sem Banco)
         # Executa testes ignorando os que dependem de banco de dados
