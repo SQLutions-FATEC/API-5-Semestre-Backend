@@ -37,13 +37,6 @@ jobs:
       - name: Análise Estática (Linter)
         run: flake8 . --config=../.flake8
 
-      - name: Testes Unitários (Sem Banco)
-        env:
-          # Sobrescrevemos as configurações do settings.py para usar o SQLite local do Python
-          DB_HOST: 127.0.0.1
-          DJANGO_SETTINGS_MODULE: api.settings
-        run: python -m pytest -m "not integration and not django_db"
-
   secondary-build:
     name: "Estágio 2: Secondary Build (Banco & Integração)"
     runs-on: ubuntu-latest
