@@ -1,11 +1,7 @@
-from decimal import Decimal
 from datetime import date
 from unittest.mock import patch
 from django.test import TestCase, Client
-from api.models import (
-    DimData, DimPrograma, DimProjeto, 
-    DimMaterial, DimSolicitacao, FatoCompra, DimFornecedor
-)
+from api.models import DimFornecedor
 
 class FornecedoresPedidosApiTest(TestCase):
     fixtures = ['fornecedores.json']
@@ -62,4 +58,32 @@ class FornecedoresPedidosApiTest(TestCase):
 
     def test_fornecedor_pedidos_wrong_method(self):
         response = self.client.post(f'/api/fornecedores/{self.fornecedor.codigo_fornecedor}/pedidos/')
+        self.assertEqual(response.status_code, 405)
+
+
+class FornecedorApiTest(TestCase):
+    fixtures = ['fornecedores.json']
+
+    def setUp(self):
+        self.client = Client()
+        self.fornecedor = DimFornecedor.objects.get(codigo_fornecedor="F1")
+
+    def test_fornecedor_api_success(self):
+        response = self.client.get(f'/api/fornecedores/{self.fornecedor.codigo_fornecedor}/')
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertEqual(data["id_fornecedor"], self.fornecedor.pk)
+        self.assertEqual(data["codigo_fornecedor"], "F1")
+        self.assertEqual(data["cidade"], "")
+        self.assertEqual(data["estado"], "")
+        self.assertEqual(data["categoria"], "")
+        self.assertEqual(data["status"], "")
+
+    def test_fornecedor_api_not_found(self):
+        response = self.client.get('/api/fornecedores/INVALIDO/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_fornecedor_api_wrong_method(self):
+        response = self.client.post(f'/api/fornecedores/{self.fornecedor.codigo_fornecedor}/')
         self.assertEqual(response.status_code, 405)
