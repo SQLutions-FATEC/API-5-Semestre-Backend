@@ -3,7 +3,7 @@ name: Deploy Automático
 on:
   push:
     branches:
-      - develop-3
+      - 128-DevOps-add-tests-before-deploy
 
 jobs:
   # -------------------------------------------------------------
@@ -93,8 +93,8 @@ jobs:
             # Atualiza a lista de mudanças do GitHub
             git fetch --all
             
-            # Força o servidor a espelhar a branch develop-3 (evita conflitos)
-            git reset --hard origin/develop-3
+            # Força o servidor a espelhar a branch 128-DevOps-add-tests-before-deploy (evita conflitos)
+            git reset --hard origin/128-DevOps-add-tests-before-deploy
             
             # Entra na pasta deploy onde criamos o docker-compose de produção
             cd deploy
