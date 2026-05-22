@@ -1,10 +1,9 @@
 name: Deploy Automático 
 
-# A pipeline vai rodar quando houver PUSH na develop-3
 on:
   push:
     branches:
-      - 128-DevOps-add-tests-before-deploy
+      - develop-3
 
 jobs:
   # -------------------------------------------------------------
@@ -76,7 +75,7 @@ jobs:
   deploy:
     name: Atualizar EC2
     runs-on: ubuntu-latest
-    needs: test-and-sonar # <-- Trava de segurança crucial!
+    needs: test-and-sonar 
 
     steps:
       - name: Executar comandos via SSH
@@ -92,8 +91,8 @@ jobs:
             # Atualiza a lista de mudanças do GitHub
             git fetch --all
             
-            # Força o servidor a espelhar a branch 128-DevOps-add-tests-before-deploy (evita conflitos)
-            git reset --hard origin/128-DevOps-add-tests-before-deploy
+            # Força o servidor a espelhar a branch develop-3 (evita conflitos)
+            git reset --hard origin/develop-3
             
             # Entra na pasta deploy onde criamos o docker-compose de produção
             cd deploy
