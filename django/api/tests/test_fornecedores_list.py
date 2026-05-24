@@ -9,12 +9,43 @@ class ListagemFornecedoresIntegrationTest(TestCase):
         self.client = Client()
         self.url = reverse('api-listagem-fornecedores') 
 
-        self.programa_alfa = DimPrograma.objects.create(nome_programa='Programa Alfa')
-        self.programa_beta = DimPrograma.objects.create(nome_programa='Programa Beta')
+        # 1. Criação das Dimensões base para satisfazer as Foreign Keys (NOT NULL)
+        # Atenção: Ajuste os campos (como ano, mes, dia) caso sua model de DimData exija outros campos.
+        self.data_mock = DimData.objects.create(
+            id=20260524, 
+            ano=2026, 
+            mes=5, 
+            dia=24
+        )
+        
+        self.material_mock = DimMaterial.objects.create(
+            codigo_material='M001',
+            descricao='Material Genérico de Teste',
+            status='Ativo'
+        )
 
-        self.projeto_x = DimProjeto.objects.create(nome_projeto='Projeto X', programa=self.programa_alfa)
-        self.projeto_y = DimProjeto.objects.create(nome_projeto='Projeto Y', programa=self.programa_beta)
+        # 2. Criação de Programas e Projetos (agora recebendo a data obrigatória)
+        self.programa_alfa = DimPrograma.objects.create(
+            nome_programa='Programa Alfa',
+            data_inicio=self.data_mock  # <-- Conserto do erro aqui
+        )
+        self.programa_beta = DimPrograma.objects.create(
+            nome_programa='Programa Beta',
+            data_inicio=self.data_mock
+        )
 
+        self.projeto_x = DimProjeto.objects.create(
+            nome_projeto='Projeto X', 
+            programa=self.programa_alfa,
+            # Se DimProjeto também exigir datas obrigatórias, adicione aqui:
+            # data_inicio=self.data_mock 
+        )
+        self.projeto_y = DimProjeto.objects.create(
+            nome_projeto='Projeto Y', 
+            programa=self.programa_beta
+        )
+
+        # 3. Criação de Fornecedores
         self.fornecedor_1 = DimFornecedor.objects.create(
             codigo_fornecedor='F001',
             razao_social='RTech Distribuidora 1 Ltda',
@@ -32,11 +63,31 @@ class ListagemFornecedoresIntegrationTest(TestCase):
             status='Inativo'
         )
 
-        self.solicitacao_1 = DimSolicitacao.objects.create(projeto=self.projeto_x)
-        self.solicitacao_2 = DimSolicitacao.objects.create(projeto=self.projeto_y)
+        # 4. Criação de Solicitações e Vínculos com Compras
+        # Passando a data e material para satisfazer possíveis constraints da Fato e da Solicitação
+        self.solicitacao_1 = DimSolicitacao.objects.create(
+            projeto=self.projeto_x,
+            material=self.material_mock,
+            data_solicitacao=self.data_mock
+        )
+        self.solicitacao_2 = DimSolicitacao.objects.create(
+            projeto=self.projeto_y,
+            material=self.material_mock,
+            data_solicitacao=self.data_mock
+        )
 
-        FatoCompra.objects.create(solicitacao=self.solicitacao_1, fornecedor=self.fornecedor_1)
-        FatoCompra.objects.create(solicitacao=self.solicitacao_2, fornecedor=self.fornecedor_2)
+        FatoCompra.objects.create(
+            solicitacao=self.solicitacao_1, 
+            fornecedor=self.fornecedor_1,
+            data_pedido=self.data_mock,
+            data_previsao_entrega=self.data_mock
+        )
+        FatoCompra.objects.create(
+            solicitacao=self.solicitacao_2, 
+            fornecedor=self.fornecedor_2,
+            data_pedido=self.data_mock,
+            data_previsao_entrega=self.data_mock
+        )
 
     def test_listagem_sem_filtros_retorna_todos_fornecedores(self):
         """Garante que a rota pura retorna 100% dos registros"""
