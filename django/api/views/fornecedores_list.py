@@ -20,10 +20,7 @@ def listagem_fornecedores(request):
         fornecedores = fornecedores.filter(cidade__icontains=cidade)
         
     if categoria:
-        fornecedores = fornecedores.filter(
-            Q(categoria__icontains=categoria) | 
-            Q(codigo_categoria__icontains=categoria)
-        )
+        fornecedores = fornecedores.filter(categoria__icontains=categoria)
 
     if projeto:
         fornecedores = fornecedores.filter(
