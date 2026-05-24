@@ -10,80 +10,110 @@ class ListagemFornecedoresIntegrationTest(TestCase):
         self.client = Client()
         self.url = reverse('api-listagem-fornecedores') 
 
-        # 1. Criação das Dimensões base para satisfazer as Foreign Keys (NOT NULL)
-        # Atenção: Ajuste os campos (como ano, mes, dia) caso sua model de DimData exija outros campos.
         self.data_mock = DimData.objects.create(
-            id=20260524, 
-            ano=2026, 
+            dia=24, 
             mes=5, 
-            dia=24
+            ano=2026
         )
         
         self.material_mock = DimMaterial.objects.create(
             codigo_material='M001',
             descricao='Material Genérico de Teste',
+            categoria='Componentes',
+            fabricante='SIATT',
+            custo_estimado=100.00,
             status='Ativo'
         )
 
-        # 2. Criação de Programas e Projetos (agora recebendo a data obrigatória)
         self.programa_alfa = DimPrograma.objects.create(
+            codigo_programa='PRG001',
             nome_programa='Programa Alfa',
-            data_inicio=self.data_mock  # <-- Conserto do erro aqui
+            gerente_programa='João',
+            gerente_tecnico='Maria',
+            data_inicio=self.data_mock,
+            data_fim_prevista=self.data_mock,
+            status='Ativo'
         )
         self.programa_beta = DimPrograma.objects.create(
+            codigo_programa='PRG002',
             nome_programa='Programa Beta',
-            data_inicio=self.data_mock
+            gerente_programa='Pedro',
+            gerente_tecnico='Ana',
+            data_inicio=self.data_mock,
+            data_fim_prevista=self.data_mock,
+            status='Ativo'
         )
 
         self.projeto_x = DimProjeto.objects.create(
+            codigo_projeto='PRJ001',
             nome_projeto='Projeto X', 
             programa=self.programa_alfa,
-            # Se DimProjeto também exigir datas obrigatórias, adicione aqui:
-            # data_inicio=self.data_mock 
+            responsavel='Carlos',
+            custo_hora=150.00,
+            data_inicio=self.data_mock,
+            data_fim_prevista=self.data_mock,
+            status='Ativo'
         )
         self.projeto_y = DimProjeto.objects.create(
+            codigo_projeto='PRJ002',
             nome_projeto='Projeto Y', 
-            programa=self.programa_beta
+            programa=self.programa_beta,
+            responsavel='Julia',
+            custo_hora=200.00,
+            data_inicio=self.data_mock,
+            data_fim_prevista=self.data_mock,
+            status='Ativo'
         )
 
-        # 3. Criação de Fornecedores
         self.fornecedor_1 = DimFornecedor.objects.create(
             codigo_fornecedor='F001',
             razao_social='RTech Distribuidora 1 Ltda',
             cidade='Jundiaí',
+            estado='SP',
             categoria='Materiais de Solda',
-            codigo_categoria='CAT01',
             status='Ativo'
         )
         self.fornecedor_2 = DimFornecedor.objects.create(
             codigo_fornecedor='F002',
             razao_social='Tech Corp Eletrônicos',
             cidade='São Paulo',
+            estado='SP',
             categoria='Eletrônica',
-            codigo_categoria='CAT02',
             status='Inativo'
         )
 
-        # 4. Criação de Solicitações e Vínculos com Compras
-        # Passando a data e material para satisfazer possíveis constraints da Fato e da Solicitação
         self.solicitacao_1 = DimSolicitacao.objects.create(
+            numero_solicitacao='SOL001',
             projeto=self.projeto_x,
             material=self.material_mock,
-            data_solicitacao=self.data_mock
+            quantidade=50,
+            data_solicitacao=self.data_mock,
+            prioridade='Alta',
+            status='Aprovada'
         )
         self.solicitacao_2 = DimSolicitacao.objects.create(
+            numero_solicitacao='SOL002',
             projeto=self.projeto_y,
             material=self.material_mock,
-            data_solicitacao=self.data_mock
+            quantidade=100,
+            data_solicitacao=self.data_mock,
+            prioridade='Média',
+            status='Aprovada'
         )
 
         FatoCompra.objects.create(
+            numero_pedido='PED001',
+            valor_total=5000.00,
+            status='Concluído',
             solicitacao=self.solicitacao_1, 
             fornecedor=self.fornecedor_1,
             data_pedido=self.data_mock,
             data_previsao_entrega=self.data_mock
         )
         FatoCompra.objects.create(
+            numero_pedido='PED002',
+            valor_total=10000.00,
+            status='Pendente',
             solicitacao=self.solicitacao_2, 
             fornecedor=self.fornecedor_2,
             data_pedido=self.data_mock,
@@ -116,20 +146,14 @@ class ListagemFornecedoresIntegrationTest(TestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['cidade'], 'São Paulo')
 
-    def test_filtro_por_categoria_nome_e_codigo(self):
-        """Filtro deve funcionar tanto passando o nome quanto o código da categoria (Q objects)"""
-        # Testando pelo nome
+    def test_filtro_por_categoria(self):
+        """Filtro de busca pela categoria do material fornecido"""
         res_nome = self.client.get(self.url, {'categoria': 'Materiais de Solda'})
         self.assertEqual(len(res_nome.json()), 1)
         self.assertEqual(res_nome.json()[0]['razao_social'], 'RTech Distribuidora 1 Ltda')
 
-        # Testando pelo código
-        res_codigo = self.client.get(self.url, {'categoria': 'CAT02'})
-        self.assertEqual(len(res_codigo.json()), 1)
-        self.assertEqual(res_codigo.json()[0]['razao_social'], 'Tech Corp Eletrônicos')
-
     def test_filtro_relacional_por_projeto(self):
-        """Filtro que exige os JOINs (select_related/filter) até a tabela DimProjeto"""
+        """Filtro que exige os JOINs até a tabela DimProjeto"""
         response = self.client.get(self.url, {'projeto_nome': 'Projeto Y'})
         data = response.json()
         
@@ -162,7 +186,7 @@ class ListagemFornecedoresIntegrationTest(TestCase):
         """Garante que a combinação impossível retorna array vazio em vez de erro"""
         response = self.client.get(self.url, {
             'fornecedor_cidade': 'Jundiaí',
-            'projeto_nome': 'Projeto Y' # Projeto Y não é de Jundiaí
+            'projeto_nome': 'Projeto Y'
         })
         data = response.json()
         
