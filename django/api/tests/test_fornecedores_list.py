@@ -1,7 +1,8 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from api.models import (
-    DimFornecedor, DimPrograma, DimProjeto, DimSolicitacao, FatoCompra
+    DimFornecedor, DimPrograma, DimProjeto, DimSolicitacao, FatoCompra,
+    DimData, DimMaterial
 )
 
 class ListagemFornecedoresIntegrationTest(TestCase):
