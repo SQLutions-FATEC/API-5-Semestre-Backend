@@ -1,6 +1,7 @@
 import pandas as pd
 
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from etl.extractors.csv_extractor import extrair_csv
@@ -8,7 +9,7 @@ from etl.validators.csv_validator import validar_csv
 from etl.transformations.csv_transformer import transformar_csv
 from etl.loaders.csv_loader import carregar_csv
 
-
+@csrf_exempt
 @require_POST
 def importar_dados_api(request):
 
