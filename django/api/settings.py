@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', '*').s
 INSTALLED_APPS = [
     'django_seed',
     'corsheaders',
+    'rest_framework',
     'api',
     'etl',
 ]
