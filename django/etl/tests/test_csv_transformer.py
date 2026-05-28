@@ -13,7 +13,10 @@ class CsvTransformerTest(TestCase):
             "custo_hora": ["150"]
         })
 
-        resultado = transformar_csv(df, "projeto")
+        resultado = transformar_csv(
+            df,
+            "projeto"
+        )
 
         self.assertEqual(
             resultado["custo_hora"][0],
@@ -31,5 +34,5 @@ class CsvTransformerTest(TestCase):
 
         self.assertEqual(
             str(context.exception),
-            "Erro: Os dados imoportados estão no formato incorreto. Verifique o arquivo e tente novamente."
+            "Erro: Os dados importados estão no formato incorreto. Verifique o arquivo e tente novamente."
         )
