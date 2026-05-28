@@ -26,7 +26,7 @@ class CsvTransformerTest(TestCase):
             "custo_hora": ["abc"]
         })
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             transformar_csv(df, "projeto")
 
         self.assertEqual(

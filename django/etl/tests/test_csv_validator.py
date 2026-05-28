@@ -29,7 +29,7 @@ class CsvValidatorTest(TestCase):
             "b": [2]
         })
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             validar_csv(df)
 
         self.assertEqual(
@@ -48,7 +48,7 @@ class CsvValidatorTest(TestCase):
             "status": ["ATIVO"]
         })
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(ValueError) as context:
             validar_csv(df)
 
         self.assertEqual(

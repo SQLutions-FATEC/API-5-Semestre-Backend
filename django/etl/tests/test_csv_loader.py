@@ -2,7 +2,6 @@ import pandas as pd
 
 from django.test import TestCase
 from etl.loaders.csv_loader import carregar_csv
-from datetime import date
 from api.models import (
     DimPrograma,
     DimData,
@@ -65,7 +64,7 @@ class CsvLoaderTest(TestCase):
             "status": ["ATIVO"]
         })
 
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(LookupError) as context:
             carregar_csv(df, "projeto")
 
         self.assertIn(
