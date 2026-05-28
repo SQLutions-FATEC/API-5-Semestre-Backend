@@ -14,25 +14,34 @@ class CsvLoaderTest(TestCase):
 
     def setUp(self):
 
-        self.data = DimData.objects.create(
+        self.data_inicio = DimData.objects.create(
             dia=1,
             mes=1,
-            ano=2024,
+            ano=2026
+        )
+
+        self.data_fim = DimData.objects.create(
+            dia=31,
+            mes=12,
+            ano=2026
         )
 
         self.programa = DimPrograma.objects.create(
-            codigo_programa="PR001",
-            nome_programa="Programa Teste"
+            codigo_programa="TESTE",
+            nome_programa="Programa Teste",
+            gerente_programa="Gerente A",
+            gerente_tecnico="Gerente Técnico A",
+            data_inicio=self.data_inicio,
+            data_fim_prevista=self.data_fim,
+            status="EM ANDAMENTO"
         )
-
-        self.data = DimData.objects.create()
 
     def test_carregar_projeto(self):
 
         df = pd.DataFrame({
             "codigo_projeto": ["P001"],
             "nome_projeto": ["Projeto Teste"],
-            "codigo_programa": ["PR001"],
+            "codigo_programa": ["TESTE"],
             "responsavel": ["João"],
             "custo_hora": [100],
             "status": ["ATIVO"]
