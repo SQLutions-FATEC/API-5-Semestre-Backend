@@ -6,7 +6,6 @@ from api.models import (
     DimData
 )
 
-
 def carregar_csv(df, tipo_csv):
 
     with transaction.atomic():
@@ -18,19 +17,27 @@ def carregar_csv(df, tipo_csv):
 
 def carregar_projetos(df):
 
+    data = DimData.objects.first()
+
+    if not data:
+
+        raise LookupError(
+            "Nenhuma data cadastrada no sistema."
+        )
+
     for _, row in df.iterrows():
 
-        programa = DimPrograma.objects.filter(
-            codigo_programa=row["codigo_programa"]
-        ).first()
+        try:
 
-        if not programa:
-
-            raise Exception(
-                f"Código de programa não foi localizado: {row['codigo_programa']}"
+            programa = DimPrograma.objects.get(
+                id=int(row["programa_id"])
             )
 
-        data = DimData.objects.first()
+        except DimPrograma.DoesNotExist:
+
+            raise LookupError(
+                f"Código de programa não foi localizado: {row['programa_id']}"
+            )
 
         DimProjeto.objects.create(
             codigo_projeto=row["codigo_projeto"],
@@ -41,4 +48,4 @@ def carregar_projetos(df):
             status=row["status"],
             data_inicio=data,
             data_fim_prevista=data
-        )
+        )   

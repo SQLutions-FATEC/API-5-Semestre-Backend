@@ -1,5 +1,3 @@
-import pandas as pd
-
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -12,9 +10,6 @@ from etl.loaders.csv_loader import carregar_csv
 @csrf_exempt
 @require_POST
 def importar_dados_api(request):
-
-    print(request.FILES)
-    print(request.POST)
 
     arquivo = request.FILES.get("file")
 
@@ -38,19 +33,15 @@ def importar_dados_api(request):
 
     try:
 
-        # EXTRACT
         df = extrair_csv(arquivo)
 
-        # VALIDATE
         tipo_csv = validar_csv(df)
 
-        # TRANSFORM
         df_transformado = transformar_csv(
             df,
             tipo_csv
         )
 
-        # LOAD
         carregar_csv(
             df_transformado,
             tipo_csv
@@ -63,7 +54,7 @@ def importar_dados_api(request):
             status=200
         )
 
-    except Exception as e:
+    except ValueError as e:
 
         return JsonResponse(
             {

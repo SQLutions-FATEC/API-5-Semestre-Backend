@@ -1,6 +1,6 @@
 MAPEAMENTO_CSV = {
 
-    ("nome_projeto", 6): "projeto",
+    ("codigo_projeto", 9): "projeto",
 
     ("descricao", 5): "material",
 
@@ -9,6 +9,12 @@ MAPEAMENTO_CSV = {
 
 
 def validar_csv(df):
+
+    if len(df.columns) < 2:
+
+        raise ValueError(
+            "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
+        )
 
     segunda_coluna = df.columns[1].lower()
 
@@ -23,13 +29,13 @@ def validar_csv(df):
 
     if not tipo_csv:
 
-        raise Exception(
+        raise ValueError(
             "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
         )
 
     if df.isnull().values.any():
 
-        raise Exception(
+        raise ValueError(
             "Erro: Existem dados vazios no arquivo .CSV. Verifique o arquivo e tente novamente."
         )
 
