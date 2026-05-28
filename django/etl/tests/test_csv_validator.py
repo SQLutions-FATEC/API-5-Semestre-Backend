@@ -34,7 +34,7 @@ class CsvValidatorTest(TestCase):
 
         self.assertEqual(
             str(context.exception),
-            "CSV não reconhecido"
+            "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
         )
 
     def test_csv_com_dados_vazios(self):
@@ -53,5 +53,5 @@ class CsvValidatorTest(TestCase):
 
         self.assertEqual(
             str(context.exception),
-            "Erro na importação: Existem dados vazios"
+            "Erro: Existem dados vazios no arquivo .CSV. Verifique o arquivo e tente novamente."
         )

@@ -31,5 +31,5 @@ class CsvTransformerTest(TestCase):
 
         self.assertEqual(
             str(context.exception),
-            "Erro na importação: Os dados estão no formato incorreto"
+            "Erro: Os dados imoportados estão no formato incorreto. Verifique o arquivo e tente novamente."
         )

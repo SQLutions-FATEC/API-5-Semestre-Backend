@@ -69,6 +69,6 @@ class CsvLoaderTest(TestCase):
             carregar_csv(df, "projeto")
 
         self.assertIn(
-            "Programa não encontrado",
+            "Código de programa não foi localizado: INVALIDO",
             str(context.exception)
         )
