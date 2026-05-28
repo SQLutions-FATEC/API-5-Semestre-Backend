@@ -10,7 +10,7 @@ def extrair_csv(arquivo):
         if df.empty:
 
             raise Exception(
-                "CSV vazio"
+                "Arquivo .CSV vazio. Verifique o arquivo e tente novamente."
             )
 
         return df
@@ -18,5 +18,5 @@ def extrair_csv(arquivo):
     except Exception:
 
         raise Exception(
-            "Erro ao ler arquivo CSV"
+            "Erro ao ler arquivo CSV. Verifique o arquivo e tente novamente."
         )

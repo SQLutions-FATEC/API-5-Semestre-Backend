@@ -24,13 +24,13 @@ def validar_csv(df):
     if not tipo_csv:
 
         raise Exception(
-            "CSV não reconhecido"
+            "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
         )
 
     if df.isnull().values.any():
 
         raise Exception(
-            "Erro na importação: Existem dados vazios"
+            "Erro: Existem dados vazios no arquivo .CSV. Verifique o arquivo e tente novamente."
         )
 
     return tipo_csv

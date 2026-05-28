@@ -16,5 +16,5 @@ def transformar_csv(df, tipo_csv):
     except Exception:
 
         raise Exception(
-            "Erro na importação: Os dados estão no formato incorreto"
+            "Erro: Os dados imoportados estão no formato incorreto. Verifique o arquivo e tente novamente."
         )

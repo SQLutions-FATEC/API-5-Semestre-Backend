@@ -27,7 +27,7 @@ def carregar_projetos(df):
         if not programa:
 
             raise Exception(
-                f"Programa não encontrado: {row['codigo_programa']}"
+                f"Código de programa não foi localizado: {row['codigo_programa']}"
             )
 
         data = DimData.objects.first()
