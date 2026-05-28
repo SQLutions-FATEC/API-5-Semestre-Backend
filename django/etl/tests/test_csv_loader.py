@@ -15,10 +15,9 @@ class CsvLoaderTest(TestCase):
     def setUp(self):
 
         self.data = DimData.objects.create(
-            data=date.today(),
-            ano=2026,
-            mes=5,
-            dia=27
+            dia=1,
+            mes=1,
+            ano=2024,
         )
 
         self.programa = DimPrograma.objects.create(
