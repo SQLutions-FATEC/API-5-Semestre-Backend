@@ -1,9 +1,8 @@
 import pandas as pd
 
 from django.test import TestCase
-
 from etl.loaders.csv_loader import carregar_csv
-
+from datetime import date
 from api.models import (
     DimPrograma,
     DimData,
@@ -14,6 +13,13 @@ from api.models import (
 class CsvLoaderTest(TestCase):
 
     def setUp(self):
+
+        self.data = DimData.objects.create(
+            data=date.today(),
+            ano=2026,
+            mes=5,
+            dia=27
+        )
 
         self.programa = DimPrograma.objects.create(
             codigo_programa="PR001",
