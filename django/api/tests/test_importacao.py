@@ -33,9 +33,8 @@ class ImportacaoApiTest(TestCase):
 
     def test_upload_csv(self):
 
-        csv_content = (
-            "codigo_projeto,nome_projeto,codigo_programa,responsavel,custo_hora,status\n"
-            "P001,Projeto Teste,PR001,Joao,100,ATIVO"
+        csv_content = ( """nome_projeto,descricao,status,programa_id,data_inicio,data_fim
+Projeto A,Descricao A,Ativo,1,2025-01-01,2025-12-31"""
         )
 
         arquivo = SimpleUploadedFile(
