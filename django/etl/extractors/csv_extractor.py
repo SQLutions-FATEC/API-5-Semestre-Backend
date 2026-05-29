@@ -1,17 +1,26 @@
-import os
 import pandas as pd
 
 LIMITE_BYTES = 5 * 1024 * 1024
 
 
 def extrair_csv(arquivo):
+    
+    if not hasattr(arquivo, "read"):
+        raise ValueError("Tipo de arquivo inválido.")
 
-    tamanho = arquivo.size if hasattr(arquivo, "size") else os.path.getsize(arquivo)
+    tamanho = getattr(arquivo, "size", None)
+
+    if tamanho is None:
+        pos = arquivo.tell()
+        arquivo.seek(0, 2) 
+        tamanho = arquivo.tell()
+        arquivo.seek(pos) 
 
     if tamanho > LIMITE_BYTES:
         raise ValueError("Arquivo muito grande")
 
     try:
+        arquivo.seek(0)
         df = pd.read_csv(arquivo)
 
     except pd.errors.ParserError:
