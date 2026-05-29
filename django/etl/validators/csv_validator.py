@@ -1,10 +1,8 @@
 MAPEAMENTO_CSV = {
-
-    ("codigo_projeto", 9): "projeto",
-
-    ("descricao", 5): "material",
-
-    ("razao_social", 5): "fornecedor",
+    "codigo_projeto": "projeto",
+    "descricao": "material",
+    "razao_social": "fornecedor",
+    "nome_programa": "programa",
 }
 
 
@@ -16,16 +14,16 @@ def validar_csv(df):
             "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
         )
 
-    segunda_coluna = df.columns[1].lower()
+    colunas = [col.lower().strip() for col in df.columns]
 
-    numero_colunas = len(df.columns)
+    tipo_csv = None
 
-    chave = (
-        segunda_coluna,
-        numero_colunas
-    )
+    for coluna in colunas:
 
-    tipo_csv = MAPEAMENTO_CSV.get(chave)
+        if coluna in MAPEAMENTO_CSV:
+
+            tipo_csv = MAPEAMENTO_CSV[coluna]
+            break
 
     if not tipo_csv:
 
