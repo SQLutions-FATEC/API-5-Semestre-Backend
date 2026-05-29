@@ -19,11 +19,7 @@ def obter_ou_criar_data(data_str):
         return None
 
     try:
-
-        data = datetime.strptime(
-            str(data_str),
-            "%Y-%m-%d"
-        )
+        data = datetime.strptime(str(data_str), "%Y-%m-%d")
 
         data_obj, _ = DimData.objects.get_or_create(
             ano=data.year,
@@ -34,9 +30,7 @@ def obter_ou_criar_data(data_str):
         return data_obj
 
     except Exception as e:
-
         print(f"Erro ao processar data {data_str}: {e}")
-
         return None
 
 
@@ -48,20 +42,16 @@ def carregar_projetos(df):
             id=int(row["programa_id"])
         )
 
-        data_inicio = obter_ou_criar_data(
-            row["data_inicio"]
-        )
-
-        data_fim = obter_ou_criar_data(
-            row["data_fim"]
-        )
+        data_inicio = obter_ou_criar_data(row.get("data_inicio"))
+        data_fim = obter_ou_criar_data(row.get("data_fim"))
 
         DimProjeto.objects.create(
             nome_projeto=row["nome_projeto"],
             status=row["status"],
             programa=programa,
             data_inicio=data_inicio,
-            data_fim_prevista=data_fim
+            data_fim_prevista=data_fim,
+            custo_hora=row.get("custo_hora", 0)
         )
 
     print("Projetos carregados com sucesso.")
