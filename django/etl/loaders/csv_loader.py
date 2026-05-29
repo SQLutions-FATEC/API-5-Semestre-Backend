@@ -1,51 +1,68 @@
-from django.db import transaction
+from datetime import datetime
 
 from api.models import (
-    DimProjeto,
     DimPrograma,
-    DimData
+    DimData,
+    DimProjeto
 )
 
-def carregar_csv(df, tipo_csv):
 
-    with transaction.atomic():
+def carregar_csv(df, tipo):
 
-        if tipo_csv == "projeto":
+    if tipo == "projetos":
+        carregar_projetos(df)
 
-            carregar_projetos(df)
+
+def obter_ou_criar_data(data_str):
+
+    if not data_str:
+        return None
+
+    try:
+
+        data = datetime.strptime(
+            str(data_str),
+            "%Y-%m-%d"
+        )
+
+        data_obj, _ = DimData.objects.get_or_create(
+            ano=data.year,
+            mes=data.month,
+            dia=data.day
+        )
+
+        return data_obj
+
+    except Exception as e:
+
+        print(f"Erro ao processar data {data_str}: {e}")
+
+        return None
 
 
 def carregar_projetos(df):
 
-    data = DimData.objects.first()
-
-    if not data:
-
-        raise LookupError(
-            "Nenhuma data cadastrada no sistema."
-        )
-
     for _, row in df.iterrows():
 
-        try:
+        programa = DimPrograma.objects.get(
+            id=int(row["programa_id"])
+        )
 
-            programa = DimPrograma.objects.get(
-                id=int(row["programa_id"])
-            )
+        data_inicio = obter_ou_criar_data(
+            row["data_inicio"]
+        )
 
-        except DimPrograma.DoesNotExist:
-
-            raise LookupError(
-                f"Código de programa não foi localizado: {row['programa_id']}"
-            )
+        data_fim = obter_ou_criar_data(
+            row["data_fim"]
+        )
 
         DimProjeto.objects.create(
-            codigo_projeto=row["codigo_projeto"],
             nome_projeto=row["nome_projeto"],
-            programa=programa,
-            responsavel=row["responsavel"],
-            custo_hora=row["custo_hora"],
+            descricao=row["descricao"],
             status=row["status"],
-            data_inicio=data,
-            data_fim_prevista=data
-        )   
+            programa=programa,
+            data_inicio=data_inicio,
+            data_fim_prevista=data_fim
+        )
+
+    print("Projetos carregados com sucesso.")

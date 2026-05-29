@@ -13,6 +13,14 @@ def transformar_csv(df, tipo_csv):
                 df["custo_hora"]
             )
 
+            df["data_inicio"] = pd.to_datetime(
+                df["data_inicio"]
+            ).dt.date
+
+            df["data_fim_prevista"] = pd.to_datetime(
+                df["data_fim_prevista"]
+            ).dt.date
+
         return df
 
     except ValueError:
