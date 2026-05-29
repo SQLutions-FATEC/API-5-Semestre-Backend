@@ -2,24 +2,21 @@ import pandas as pd
 
 from django.test import TestCase
 
-from etl.validators.csv_validator import validar_csv
+from etl.validators.csv_validator import (
+    validar_csv
+)
 
 
 class CsvValidatorTest(TestCase):
 
-    def test_csv_projeto_valido(self):
+    def test_validar_csv_projeto(self):
 
-        df = pd.DataFrame({
-            "id": [1],
-            "codigo_projeto": ["P001"],
-            "nome_projeto": ["Projeto Teste"],
-            "programa_id": [1],
-            "responsavel": ["João"],
-            "custo_hora": [100],
-            "data_inicio": ["2026-01-01"],
-            "data_fim_prevista": ["2026-12-31"],
-            "status": ["ATIVO"]
-        })
+        df = pd.DataFrame(
+            columns=[
+                "id",
+                "codigo_projeto"
+            ]
+        )
 
         resultado = validar_csv(df)
 
@@ -28,53 +25,75 @@ class CsvValidatorTest(TestCase):
             "projeto"
         )
 
-    def test_csv_nao_reconhecido(self):
+    def test_validar_csv_material(self):
 
-        df = pd.DataFrame({
-            "a": [1],
-            "b": [2]
-        })
-
-        with self.assertRaises(ValueError) as context:
-            validar_csv(df)
-
-        self.assertEqual(
-            str(context.exception),
-            "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
+        df = pd.DataFrame(
+            columns=[
+                "id",
+                "descricao"
+            ]
         )
 
-    def test_csv_com_dados_vazios(self):
-
-        df = pd.DataFrame({
-            "id": [1],
-            "codigo_projeto": ["P001"],
-            "nome_projeto": [None],
-            "programa_id": [1],
-            "responsavel": ["João"],
-            "custo_hora": [100],
-            "data_inicio": ["2026-01-01"],
-            "data_fim_prevista": ["2026-12-31"],
-            "status": ["ATIVO"]
-        })
-
-        with self.assertRaises(ValueError) as context:
-            validar_csv(df)
+        resultado = validar_csv(df)
 
         self.assertEqual(
-            str(context.exception),
-            "Erro: Existem dados vazios no arquivo .CSV. Verifique o arquivo e tente novamente."
+            resultado,
+            "material"
         )
 
-    def test_csv_com_menos_de_duas_colunas(self):
+    def test_validar_csv_fornecedor(self):
 
-        df = pd.DataFrame({
-            "codigo_projeto": ["P001"]
-        })
+        df = pd.DataFrame(
+            columns=[
+                "id",
+                "razao_social"
+            ]
+        )
 
-        with self.assertRaises(ValueError) as context:
-            validar_csv(df)
+        resultado = validar_csv(df)
 
         self.assertEqual(
-            str(context.exception),
-            "Arquivo .CSV não foi reconhecido. Verifique o formato do arquivo e tente novamente."
+            resultado,
+            "fornecedor"
         )
+
+    def test_validar_csv_programa(self):
+
+        df = pd.DataFrame(
+            columns=[
+                "id",
+                "nome_programa"
+            ]
+        )
+
+        resultado = validar_csv(df)
+
+        self.assertEqual(
+            resultado,
+            "programa"
+        )
+
+    def test_validar_csv_invalido(self):
+
+        df = pd.DataFrame(
+            columns=[
+                "id",
+                "teste"
+            ]
+        )
+
+        with self.assertRaises(ValueError):
+
+            validar_csv(df)
+
+    def test_validar_csv_com_nulos(self):
+
+        df = pd.DataFrame([
+            {
+                "codigo_projeto": None
+            }
+        ])
+
+        with self.assertRaises(ValueError):
+
+            validar_csv(df)

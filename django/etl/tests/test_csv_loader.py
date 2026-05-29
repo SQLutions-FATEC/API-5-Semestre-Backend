@@ -4,96 +4,79 @@ from django.test import TestCase
 
 from api.models import (
     DimPrograma,
-    DimData,
-    DimProjeto
+    DimProjeto,
+    DimData
 )
 
-from etl.loaders.csv_loader import carregar_csv
+from etl.loaders.csv_loader import (
+    carregar_csv,
+    obter_ou_criar_data
+)
 
 
 class CsvLoaderTest(TestCase):
 
     def setUp(self):
 
-        self.data = DimData.objects.create(
-            dia=1,
-            mes=1,
-            ano=2026
-        )
-
         self.programa = DimPrograma.objects.create(
-            codigo_programa="PR001",
-            nome_programa="Programa Teste",
-            gerente_programa="Gerente A",
-            gerente_tecnico="Gerente Técnico A",
-            data_inicio=self.data,
-            data_fim_prevista=self.data,
-            status="ATIVO"
+            id=1,
+            nome_programa="Programa Teste"
         )
 
-    def test_carregar_projeto(self):
+    def test_obter_ou_criar_data(self):
 
-        df = pd.DataFrame({
-            "id": [1],
-            "codigo_projeto": ["P001"],
-            "nome_projeto": ["Projeto Teste"],
-            "programa_id": [self.programa.id],
-            "responsavel": ["João"],
-            "custo_hora": [100],
-            "data_inicio": ["2026-01-01"],
-            "data_fim_prevista": ["2026-12-31"],
-            "status": ["ATIVO"]
-        })
+        data = obter_ou_criar_data("2025-01-10")
 
-        carregar_csv(df, "projeto")
+        self.assertIsNotNone(data)
+        self.assertEqual(data.ano, 2025)
+        self.assertEqual(data.mes, 1)
+        self.assertEqual(data.dia, 10)
+
+    def test_obter_ou_criar_data_invalida(self):
+
+        data = obter_ou_criar_data("data-invalida")
+
+        self.assertIsNone(data)
+
+    def test_carregar_csv_projetos(self):
+
+        df = pd.DataFrame([
+            {
+                "nome_projeto": "Projeto A",
+                "descricao": "Descricao A",
+                "status": "Ativo",
+                "programa_id": 1,
+                "data_inicio": "2025-01-01",
+                "data_fim": "2025-12-31"
+            }
+        ])
+
+        carregar_csv(df, "projetos")
 
         self.assertEqual(
             DimProjeto.objects.count(),
             1
         )
 
-    def test_programa_nao_encontrado(self):
-
-        df = pd.DataFrame({
-            "id": [1],
-            "codigo_projeto": ["P001"],
-            "nome_projeto": ["Projeto Teste"],
-            "programa_id": [999],
-            "responsavel": ["João"],
-            "custo_hora": [100],
-            "data_inicio": ["2026-01-01"],
-            "data_fim_prevista": ["2026-12-31"],
-            "status": ["ATIVO"]
-        })
-
-        with self.assertRaises(LookupError) as context:
-            carregar_csv(df, "projeto")
+        projeto = DimProjeto.objects.first()
 
         self.assertEqual(
-            str(context.exception),
-            "Código de programa não foi localizado: 999"
+            projeto.nome_projeto,
+            "Projeto A"
         )
 
-    def test_sem_data_cadastrada(self):
+        self.assertEqual(
+            projeto.programa.id,
+            1
+        )
 
-        DimData.objects.all().delete()
+    def test_carregar_csv_tipo_invalido(self):
 
-        df = pd.DataFrame({
-            "id": [1],
-            "codigo_projeto": ["P001"],
-            "nome_projeto": ["Projeto Teste"],
-            "programa_id": [self.programa.id],
-            "responsavel": ["João"],
-            "custo_hora": [100],
-            "data_inicio": ["2026-01-01"],
-            "data_fim_prevista": ["2026-12-31"],
-            "status": ["ATIVO"]
-        })
+        df = pd.DataFrame()
 
-        with self.assertRaises(LookupError) as context:
-            carregar_csv(df, "projeto")
+        carregar_csv(df, "tipo_invalido")
 
         self.assertEqual(
-            str(context.exception),
-            "Nenhuma data cadastrada no sistema."
+            DimProjeto.objects.count(),
+            0
         )

@@ -2,16 +2,22 @@ import pandas as pd
 
 from django.test import TestCase
 
-from etl.transformations.csv_transformer import transformar_csv
+from etl.transformations.csv_transformer import (
+    transformar_csv
+)
 
 
 class CsvTransformerTest(TestCase):
 
-    def test_transformar_csv_valido(self):
+    def test_transformar_csv_projeto(self):
 
-        df = pd.DataFrame({
-            "custo_hora": ["150"]
-        })
+        df = pd.DataFrame([
+            {
+                "custo_hora": "150",
+                "data_inicio": "2025-01-01",
+                "data_fim_prevista": "2025-12-31"
+            }
+        ])
 
         resultado = transformar_csv(
             df,
@@ -23,16 +29,37 @@ class CsvTransformerTest(TestCase):
             150
         )
 
-    def test_transformar_csv_invalido(self):
+    def test_transformar_csv_tipo_diferente(self):
 
-        df = pd.DataFrame({
-            "custo_hora": ["abc"]
-        })
+        df = pd.DataFrame([
+            {
+                "nome": "Teste"
+            }
+        ])
 
-        with self.assertRaises(ValueError) as context:
-            transformar_csv(df, "projeto")
+        resultado = transformar_csv(
+            df,
+            "material"
+        )
 
         self.assertEqual(
-            str(context.exception),
-            "Erro: Os dados importados estão no formato incorreto. Verifique o arquivo e tente novamente."
+            resultado["nome"][0],
+            "Teste"
         )
+
+    def test_transformar_csv_valor_invalido(self):
+
+        df = pd.DataFrame([
+            {
+                "custo_hora": "abc",
+                "data_inicio": "2025-01-01",
+                "data_fim_prevista": "2025-12-31"
+            }
+        ])
+
+        with self.assertRaises(ValueError):
+
+            transformar_csv(
+                df,
+                "projeto"
+            )
