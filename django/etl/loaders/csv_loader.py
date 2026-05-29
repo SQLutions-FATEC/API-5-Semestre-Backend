@@ -58,7 +58,6 @@ def carregar_projetos(df):
 
         DimProjeto.objects.create(
             nome_projeto=row["nome_projeto"],
-            descricao=row["descricao"],
             status=row["status"],
             programa=programa,
             data_inicio=data_inicio,
