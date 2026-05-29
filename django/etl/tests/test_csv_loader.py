@@ -18,9 +18,17 @@ class CsvLoaderTest(TestCase):
 
     def setUp(self):
 
+        data_inicio = DimData.objects.create(
+            data="2025-01-01",
+            ano=2025,
+            mes=1,
+            dia=1
+        )
+
         self.programa = DimPrograma.objects.create(
             id=1,
-            nome_programa="Programa Teste"
+            nome_programa="Programa Teste",
+            data_inicio=data_inicio
         )
 
     def test_obter_ou_criar_data(self):

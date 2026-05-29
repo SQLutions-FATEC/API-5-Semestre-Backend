@@ -1,17 +1,15 @@
 import os
 import pandas as pd
 
-LIMITE_MB = 5
-LIMITE_BYTES = LIMITE_MB * 1024 * 1024
-
+LIMITE_BYTES = 5 * 1024 * 1024
 
 def extrair_csv(arquivo):
+    tamanho = arquivo.size if hasattr(arquivo, "size") else os.path.getsize(arquivo)
 
-    if os.path.getsize(arquivo) > LIMITE_BYTES:
+    if tamanho > LIMITE_BYTES:
+        raise ValueError("Arquivo muito grande")
 
-        raise ValueError(
-            f"Arquivo maior que {LIMITE_MB}MB. Verifique o arquivo e tente novamente."
-        )
+    return pd.read_csv(arquivo)
 
     try:
 
