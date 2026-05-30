@@ -67,7 +67,6 @@ def carregar_projetos(df):
             custo_hora=row["custo_hora"],
             data_inicio=data_inicio,
             data_fim_prevista=data_fim,
-            status=row["status"],
             lead_time_dias=row.get("lead_time_dias", 0),
             is_atrasado=row.get("is_atrasado", False)
         )
