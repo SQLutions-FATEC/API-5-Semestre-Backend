@@ -20,9 +20,6 @@ def transformar_csv(df, tipo_csv):
             if "custo_estimado" in df.columns:
                 df["custo_estimado"] = pd.to_numeric(df["custo_estimado"])
 
-        elif tipo_csv == "fornecedor":
-            pass
-
         return df
 
     except ValueError:
