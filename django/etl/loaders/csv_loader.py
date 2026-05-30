@@ -7,8 +7,7 @@ from api.models import (
     DimMaterial,
     DimFornecedor
 )
-from django.etl.transformations.transformers import standardize_strings
-
+from etl.transformations.transformers import standardize_strings
 
 def carregar_csv(df, tipo):
 
