@@ -7,6 +7,7 @@ from api.models import (
     DimMaterial,
     DimFornecedor
 )
+from django.etl.transformations.transformers import standardize_strings
 
 
 def carregar_csv(df, tipo):
@@ -43,7 +44,7 @@ def obter_ou_criar_data(data_str):
 
 
 def carregar_projetos(df):
-
+    df = standardize_strings(df, ['status', 'categoria', 'prioridade', 'cidade', 'estado', 'nome', 'responsavel'])
     for _, row in df.iterrows():
 
         programa = DimPrograma.objects.get(
@@ -57,6 +58,7 @@ def carregar_projetos(df):
         data_fim = obter_ou_criar_data(
             row["data_fim_prevista"]
         )
+  
 
         DimProjeto.objects.create(
             codigo_projeto=row["codigo_projeto"],
@@ -75,6 +77,7 @@ def carregar_projetos(df):
 
 def carregar_materiais(df):
 
+    df = standardize_strings(df, ['status', 'categoria', 'prioridade', 'cidade', 'estado', 'nome', 'responsavel'])
     for _, row in df.iterrows():
 
         DimMaterial.objects.create(
@@ -90,6 +93,7 @@ def carregar_materiais(df):
 
 def carregar_fornecedores(df):
 
+    df = standardize_strings(df, ['status', 'categoria', 'prioridade', 'cidade', 'estado', 'nome', 'responsavel'])
     for _, row in df.iterrows():
 
         DimFornecedor.objects.create(
