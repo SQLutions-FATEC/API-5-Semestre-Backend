@@ -31,6 +31,21 @@ class ImportacaoApiTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test_upload_csv_invalido(self):
+
+        arquivo = SimpleUploadedFile(
+            "teste.csv",
+            b"conteudo invalido",
+            content_type="text/csv"
+        )
+
+    response = self.client.post(
+        "/api/importar_dados/",
+        {"file": arquivo}
+    )
+
+    self.assertEqual(response.status_code, 400)
+
 def test_upload_csv(self):
 
     csv_content = """codigo_material,descricao,categoria,fabricante,custo_estimado,status

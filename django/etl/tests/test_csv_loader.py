@@ -4,7 +4,9 @@ from django.test import TestCase
 from api.models import (
     DimPrograma,
     DimProjeto,
-    DimData
+    DimData,
+    DimMaterial,
+    DimFornecedor
 )
 
 from etl.loaders.csv_loader import (
@@ -86,10 +88,53 @@ class CsvLoaderTest(TestCase):
             self.programa.id
         )
 
-        def test_carregar_csv_tipo_invalido(self):
+    def test_carregar_csv_tipo_invalido(self):
 
-            df = pd.DataFrame()
+        df = pd.DataFrame()
 
-            carregar_csv(df, "tipo_invalido")
+        carregar_csv(df, "tipo_invalido")
 
-            self.assertEqual(DimProjeto.objects.count(), 0)
+        self.assertEqual(
+            DimProjeto.objects.count(),
+            0
+        )
+
+    def test_carregar_csv_material(self):
+
+        df = pd.DataFrame([
+            {
+                "codigo_material": "MAT001",
+                "descricao": "Material Teste",
+                "categoria": "ELETRONICO",
+                "fabricante": "Intel",
+                "custo_estimado": 100.0,
+                "status": "ATIVO"
+            }
+        ])
+
+        carregar_csv(df, "material")
+
+        self.assertEqual(
+            DimMaterial.objects.count(),
+            1
+        )
+
+    def test_carregar_csv_fornecedor(self):
+
+        df = pd.DataFrame([
+            {
+                "codigo_fornecedor": "FOR001",
+                "razao_social": "Fornecedor Teste",
+                "cidade": "São Paulo",
+                "estado": "SP",
+                "categoria": "ELETRONICO",
+                "status": "ATIVO"
+            }
+        ])
+
+        carregar_csv(df, "fornecedor")
+
+        self.assertEqual(
+            DimFornecedor.objects.count(),
+            1
+        )
