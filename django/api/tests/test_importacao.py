@@ -31,24 +31,23 @@ class ImportacaoApiTest(TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_upload_csv(self):
+def test_upload_csv(self):
 
-        csv_content = ( """nome_projeto,descricao,status,programa_id,data_inicio,data_fim
-Projeto A,Descricao A,Ativo,1,2025-01-01,2025-12-31"""
-        )
+    csv_content = """codigo_material,descricao,categoria,fabricante,custo_estimado,status
+MAT001,Parafuso,Fixacao,Tramontina,10.50,Ativo"""
 
-        arquivo = SimpleUploadedFile(
-            "teste.csv",
-            csv_content.encode("utf-8"),
-            content_type="text/csv"
-        )
+    arquivo = SimpleUploadedFile(
+        "teste.csv",
+        csv_content.encode("utf-8"),
+        content_type="text/csv"
+    )
 
-        response = self.client.post(
-            "/api/importar_dados/",
-            {"file": arquivo}
-        )
+    response = self.client.post(
+        "/api/importar_dados/",
+        {"file": arquivo}
+    )
 
-        self.assertIn(
-            response.status_code,
-            [200, 400]
-        )
+    self.assertEqual(
+        response.status_code,
+        200
+    )

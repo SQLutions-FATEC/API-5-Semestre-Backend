@@ -56,28 +56,40 @@ class CsvLoaderTest(TestCase):
 
         df = pd.DataFrame([
             {
+                "codigo_projeto": "PRJ001",
                 "nome_projeto": "Projeto A",
-                "descricao": "Descricao A",
-                "status": "Ativo",
+                "status": "ATIVO",
                 "programa_id": self.programa.id,
+                "responsavel": "João",
+                "custo_hora": 100,
                 "data_inicio": "2025-01-01",
-                "data_fim": "2025-12-31"
+                "data_fim_prevista": "2025-12-31"
             }
         ])
 
-        carregar_csv(df, "projetos")
+        carregar_csv(df, "projeto")
 
-        self.assertEqual(DimProjeto.objects.count(), 1)
+        self.assertEqual(
+            DimProjeto.objects.count(),
+            1
+        )
 
         projeto = DimProjeto.objects.first()
 
-        self.assertEqual(projeto.nome_projeto, "Projeto A")
-        self.assertEqual(projeto.programa.id, self.programa.id)
+        self.assertEqual(
+            projeto.nome_projeto,
+            "Projeto A"
+        )
 
-    def test_carregar_csv_tipo_invalido(self):
+        self.assertEqual(
+            projeto.programa.id,
+            self.programa.id
+        )
 
-        df = pd.DataFrame()
+        def test_carregar_csv_tipo_invalido(self):
 
-        carregar_csv(df, "tipo_invalido")
+            df = pd.DataFrame()
 
-        self.assertEqual(DimProjeto.objects.count(), 0)
+            carregar_csv(df, "tipo_invalido")
+
+            self.assertEqual(DimProjeto.objects.count(), 0)

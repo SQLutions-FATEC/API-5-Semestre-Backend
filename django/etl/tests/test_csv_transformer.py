@@ -33,7 +33,7 @@ class CsvTransformerTest(TestCase):
 
         df = pd.DataFrame([
             {
-                "nome": "Teste"
+                "custo_estimado": "150.50"
             }
         ])
 
@@ -43,8 +43,8 @@ class CsvTransformerTest(TestCase):
         )
 
         self.assertEqual(
-            resultado["nome"][0],
-            "Teste"
+            resultado["custo_estimado"][0],
+            150.50
         )
 
     def test_transformar_csv_valor_invalido(self):
