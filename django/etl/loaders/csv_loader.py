@@ -7,7 +7,7 @@ from api.models import (
     DimMaterial,
     DimFornecedor
 )
-from etl.transformations.transformers import standardize_strings
+from etl.transformations.transformers import standardize_strings, calculate_project_metrics
 
 def carregar_csv(df, tipo):
 
@@ -27,7 +27,7 @@ def obter_ou_criar_data(data_str):
         return None
 
     try:
-        data = datetime.strptime(str(data_str), "%Y-%m-%d")
+        data = datetime.strptime(str(data_str)[:10], "%Y-%m-%d")
 
         data_obj, _ = DimData.objects.get_or_create(
             ano=data.year,
@@ -43,7 +43,7 @@ def obter_ou_criar_data(data_str):
 
 
 def carregar_projetos(df):
-    df = standardize_strings(df, ['status', 'categoria', 'prioridade', 'cidade', 'estado', 'nome', 'responsavel'])
+    df = calculate_project_metrics(df)
     for _, row in df.iterrows():
 
         programa = DimPrograma.objects.get(
