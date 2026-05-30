@@ -21,6 +21,16 @@ def transformar_csv(df, tipo_csv):
                 df["data_fim_prevista"]
             ).dt.date
 
+        elif tipo_csv == "material":
+
+            df["custo_estimado"] = pd.to_numeric(
+                df["custo_estimado"]
+            )
+
+        elif tipo_csv == "fornecedor":
+
+            pass
+
         return df
 
     except ValueError:
