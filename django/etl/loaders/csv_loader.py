@@ -27,11 +27,7 @@ def obter_ou_criar_data(data_str):
         return None
 
     try:
-
-        data = datetime.strptime(
-            str(data_str),
-            "%Y-%m-%d"
-        )
+        data = datetime.strptime(str(data_str), "%Y-%m-%d")
 
         data_obj, _ = DimData.objects.get_or_create(
             ano=data.year,
@@ -42,9 +38,7 @@ def obter_ou_criar_data(data_str):
         return data_obj
 
     except Exception as e:
-
         print(f"Erro ao processar data {data_str}: {e}")
-
         return None
 
 
