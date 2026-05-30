@@ -21,3 +21,4 @@ python-dotenv==1.2.2
 six==1.17.0
 sqlparse==0.5.5
 toposort==1.10
+django-prometheus==2.4.1
