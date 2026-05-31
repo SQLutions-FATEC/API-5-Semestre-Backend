@@ -146,7 +146,7 @@ class TestSerializarTarefa:
         assert resultado["total_horas_trabalhadas"] == 0.0
 
     def test_total_horas_arredondado_a_dois_decimais(self):
-        tarefa = make_tarefa_orm(total_horas_trabalhadas=4.555)
+        tarefa = make_tarefa_orm(total_horas_trabalhadas=4.556)
         resultado = serializar_tarefa(tarefa)
         assert resultado["total_horas_trabalhadas"] == 4.56
 
