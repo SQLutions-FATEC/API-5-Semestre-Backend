@@ -62,7 +62,7 @@ jobs:
         run: |
           cd django
           # Testa os dois apps (api e etl) e gera o report combinado
-          coverage run --source='api,etl' manage.py test
+          coverage run --source='api,etl' -m pytest
           coverage report -m
           coverage xml -o coverage.xml
           
