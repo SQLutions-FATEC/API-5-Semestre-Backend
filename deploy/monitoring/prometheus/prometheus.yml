@@ -13,4 +13,6 @@ scrape_configs:
 
   - job_name: 'mysql-metrics'
     static_configs:
-      - targets: ['mysql-exporter:9104']
+      - targets: 
+          - 'mysql-exporter:9104'
+          - 'mysql-exporter-prod:9104'
