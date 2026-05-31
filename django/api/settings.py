@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django_prometheus',
     'django_seed',
     'corsheaders',
+    'rest_framework',
     'api',
     'etl',
 ]
