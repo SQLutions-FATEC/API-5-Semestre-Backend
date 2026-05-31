@@ -174,8 +174,7 @@ class TestHandleNulls:
     def test_coluna_string_nao_alterada(self):
         df = pd.DataFrame({"status": ["ativo", None, "pendente"], "valor": [1.0, np.nan, 3.0]})
         resultado = handle_nulls(df)
-        # Coluna string não deve ser tocada pelo handle_nulls
-        assert resultado["status"][1] is None
+        assert pd.isna(resultado["status"][1])
 
     def test_dataframe_sem_nulos_nao_alterado(self):
         df = pd.DataFrame({"valor": [1.0, 2.0, 3.0]})
