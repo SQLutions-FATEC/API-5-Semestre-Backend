@@ -8,6 +8,8 @@ from .solicitacoesLista import listagem_solicitacoes
 from .programas import programa_api, busca_projetos, projeto_sem_filtro
 from .gastos import detalhamento_gastos_projeto_api
 from .sobras import otimizacao_sobras_api
+from .fornecedores_list import listagem_fornecedores
+from .fornecedores import fornecedor_api, fornecedor_pedidos_api
 
 __all__ = [
     'projeto_dashboard_api',
@@ -23,5 +25,8 @@ __all__ = [
     'busca_projetos',
     'detalhamento_gastos_projeto_api',
     'projeto_sem_filtro',
-    'otimizacao_sobras_api'
+    'otimizacao_sobras_api',
+    'listagem_fornecedores',
+    'fornecedor_api',
+    'fornecedor_pedidos_api'
 ]
