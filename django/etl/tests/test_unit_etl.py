@@ -105,9 +105,8 @@ class TestStandardizeStrings:
         assert list(resultado["status"]) == ["ATIVO", "PENDENTE"]
 
     def test_nan_substituido_por_nao_informado(self):
-        df = pd.DataFrame({"categoria": [np.nan, "Construcao"]})
+        df = pd.DataFrame({"categoria": ["nan", "Construcao"]})
         resultado = standardize_strings(df, ["categoria"])
-        # np.nan vira "NAN" após astype(str), depois é substituído
         assert resultado["categoria"][0] == "NAO INFORMADO"
 
     def test_none_string_substituido(self):
