@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
+from .views.importacao import importar_dados_api
 from .views import (
     projeto_dashboard_api, 
     projeto_alertas_api, 
@@ -43,6 +44,7 @@ urlpatterns = [
     path('api/empenhos-programa/', empenhos_programa, name='empenhos-programa'),
     path('api/<str:programa_cod>/projetos/', projeto_sem_filtro, name='projeto-sem-filtro'),
     path('api/programas/busca/', programa_api, name='programa-projetos'),
+    path('api/importar_dados/', importar_dados_api, name='importar-dados'),
      path(
         'api/projetos/tarefas/<str:codigo_projeto>',
         projeto_tarefas_timesheet_api,

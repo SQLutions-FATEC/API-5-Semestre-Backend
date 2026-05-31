@@ -1,8 +1,6 @@
-import pytest
 import pandas as pd
 from etl.transformations.transformers import calculate_project_metrics
 
-@pytest.mark.django_db
 def test_calculate_project_metrics_logic():
     """
     Testa a lógica de cálculo de lead time e a flag de atraso.
