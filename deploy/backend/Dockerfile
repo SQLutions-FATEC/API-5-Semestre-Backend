@@ -13,7 +13,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Copia e instala as dependências puramente no venv
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN apt-get update && apt-get install -y pkg-config default-libmysqlclient-dev build-essential \
+    && pip install --upgrade pip && pip install -r requirements.txt
 
 # ==========================================
 # EXECUÇÃO
@@ -28,8 +29,15 @@ COPY --from=builder /opt/venv /opt/venv
 # Ativa o venv na imagem final
 ENV PATH="/opt/venv/bin:$PATH"
 
+# Instala a biblioteca de runtime do MySQL
+RUN apt-get update && apt-get install -y default-libmysqlclient-dev && rm -rf /var/lib/apt/lists/*
+
 # Copia o código da sua aplicação
 COPY . .
+
+# ---> ADICIONE ESTA LINHA <---
+# Garante que as pastas existam antes do Nginx tentar acessá-las
+RUN mkdir -p /app/staticfiles /app/media
 
 # Dá permissão de execução ao entrypoint
 RUN chmod +x entrypoint.sh

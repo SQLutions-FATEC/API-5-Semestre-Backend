@@ -122,6 +122,7 @@ class ProgramaApiFilterTest(TestCase):
         self.assertEqual(len(data['programas']), 1)
         self.assertEqual(data['programas'][0]['codigo_programa'], 'PROG20')
 
+
 class BuscaProjetosViewTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -137,7 +138,7 @@ class BuscaProjetosViewTest(TestCase):
             data_fim_prevista=self.data,
             status='Ativo',
         )
-        
+
         self.programa_outro = DimPrograma.objects.create(
             codigo_programa='PROG11',
             nome_programa='Programa 11',
@@ -183,33 +184,33 @@ class BuscaProjetosViewTest(TestCase):
         response = self.client.get('/api/PROG10/projetos/busca/?q=alpha')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['codigo_projeto'], 'PRJ10')
         self.assertEqual(data[0]['nome_projeto'], 'Projeto Alpha')
         self.assertEqual(data[0]['status'], 'Ativo')
         self.assertEqual(data[0]['responsavel'], 'Resp 10')
-        
+
     def test_busca_projetos_case_insensitive_codigo(self):
         response = self.client.get('/api/PROG10/projetos/busca/?q=prj11')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['codigo_projeto'], 'PRJ11')
-        
+
     def test_busca_projetos_sem_termo(self):
         response = self.client.get('/api/PROG10/projetos/busca/')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 2)
-        
+
     def test_busca_projetos_limita_ao_programa(self):
         response = self.client.get('/api/PROG11/projetos/busca/?q=alpha')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['codigo_projeto'], 'PRJ33')
 
@@ -229,7 +230,7 @@ class ProjetoSemFiltroViewTest(TestCase):
             data_fim_prevista=self.data,
             status='Ativo',
         )
-        
+
         self.programa_outro = DimPrograma.objects.create(
             codigo_programa='PROG11',
             nome_programa='Programa 11',
@@ -275,7 +276,7 @@ class ProjetoSemFiltroViewTest(TestCase):
         response = self.client.get('/api/PROG10/projetos/')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]['codigo_projeto'], 'PRJ10')
         self.assertEqual(data[0]['nome_projeto'], 'Projeto Alpha')
@@ -286,7 +287,7 @@ class ProjetoSemFiltroViewTest(TestCase):
         response = self.client.get('/api/PROG10/projetos/')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 2)
         self.assertEqual(data[1]['codigo_projeto'], 'PRJ11')
         self.assertEqual(data[1]['nome_projeto'], 'Projeto Beta')
@@ -297,7 +298,7 @@ class ProjetoSemFiltroViewTest(TestCase):
         response = self.client.get('/api/PROG11/projetos/')
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        
+
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]['codigo_projeto'], 'PRJ33')
         self.assertEqual(data[0]['nome_projeto'], 'Projeto Alpha Dois')

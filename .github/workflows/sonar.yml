@@ -15,16 +15,15 @@ jobs:
     
     # 1. Cria um banco de dados temporário no GitHub para os testes rodarem
     services:
-      postgres:
-        image: postgres:15
+      mysql:
+        image: mysql:8.4
         env:
-          POSTGRES_DB: api_db
-          POSTGRES_USER: api_user
-          POSTGRES_PASSWORD: senha_padrao
+          MYSQL_DATABASE: api_db
+          MYSQL_ROOT_PASSWORD: senha_root_padrao
         ports:
-          - 5432:5432
+          - 3306:3306
         options: >-
-          --health-cmd pg_isready
+          --health-cmd="mysqladmin ping -h localhost"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -44,23 +43,26 @@ jobs:
       # --- 2. INSTALL DEPENDENCIES ---
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config default-libmysqlclient-dev build-essential
           python -m pip install --upgrade pip
           # Installs standard Django deps, plus coverage and ETL deps (pandas)
           pip install -r django/requirements.txt
-          pip install coverage pandas
+          python -m pip install coverage pandas pytest pytest-django
 
       # --- 3. RUN TESTS & GENERATE XML ---
       - name: Run tests and generate coverage report
         env:
-          DB_HOST: localhost
-          POSTGRES_DB: api_db
-          POSTGRES_USER: api_user
-          POSTGRES_PASSWORD: senha_padrao
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          MYSQL_DATABASE: api_db
+          MYSQL_USER: root
+          MYSQL_PASSWORD: senha_root_padrao
           DJANGO_SECRET_KEY: 'test-secret-key-for-github-actions'
         run: |
           cd django
           # Testa os dois apps (api e etl) e gera o report combinado
-          coverage run --source='api,etl' manage.py test
+          coverage run --source='api,etl' -m pytest
           coverage report -m
           coverage xml -o coverage.xml
           
