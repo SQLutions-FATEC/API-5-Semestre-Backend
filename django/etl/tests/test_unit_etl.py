@@ -9,14 +9,14 @@ Cobertura por módulo:
         - remove_accents
         - standardize_strings
         - handle_nulls
-        - calculate_project_metrics 
+        - calculate_project_metrics
 
     etl/validators/integrity.py          ← MÉDIA PRIORIDADE
         - validate
 
-    etl/loaders/loader.py                ← BAIXA PRIORIDADE 
-        - get_date_cache  
-        - filter_valid_ids 
+    etl/loaders/loader.py                ← BAIXA PRIORIDADE
+        - get_date_cache
+        - filter_valid_ids
 
     etl/extractors/extractors.py         ← NÃO TESTADO AQUI
         Classes só declaram csv_file — sem lógica própria.
@@ -38,10 +38,10 @@ from etl.transformations.transformers import (
 )
 from etl.validators.integrity import validate
 
-
 # ===========================================================================
 # remove_accents
 # ===========================================================================
+
 
 class TestRemoveAccents:
     """
@@ -76,6 +76,7 @@ class TestRemoveAccents:
 # ===========================================================================
 # standardize_strings
 # ===========================================================================
+
 
 class TestStandardizeStrings:
     """
@@ -132,10 +133,12 @@ class TestStandardizeStrings:
         assert list(resultado["status"]) == ["ATIVO"]
 
     def test_multiplas_colunas_padronizadas(self):
-        df = pd.DataFrame({
-            "status": ["em andamento"],
-            "prioridade": ["crítica"],
-        })
+        df = pd.DataFrame(
+            {
+                "status": ["em andamento"],
+                "prioridade": ["crítica"],
+            }
+        )
         resultado = standardize_strings(df, ["status", "prioridade"])
         assert resultado["status"][0] == "EM ANDAMENTO"
         assert resultado["prioridade"][0] == "CRITICA"
@@ -153,6 +156,7 @@ class TestStandardizeStrings:
 # handle_nulls
 # ===========================================================================
 
+
 class TestHandleNulls:
     """
     Regra: preenche NaN em colunas numéricas com 0.
@@ -165,13 +169,17 @@ class TestHandleNulls:
         assert resultado["valor"][1] == 0.0
 
     def test_inteiro_nan_substituido_por_zero(self):
-        df = pd.DataFrame({"quantidade": pd.array([1, pd.NA, 3], dtype=pd.Int64Dtype())})
+        df = pd.DataFrame(
+            {"quantidade": pd.array([1, pd.NA, 3], dtype=pd.Int64Dtype())}
+        )
         resultado = handle_nulls(df)
         # Após fillna(0), não deve haver NaN
         assert resultado["quantidade"].isna().sum() == 0
 
     def test_coluna_string_nao_alterada(self):
-        df = pd.DataFrame({"status": ["ativo", None, "pendente"], "valor": [1.0, np.nan, 3.0]})
+        df = pd.DataFrame(
+            {"status": ["ativo", None, "pendente"], "valor": [1.0, np.nan, 3.0]}
+        )
         resultado = handle_nulls(df)
         assert pd.isna(resultado["status"][1])
 
@@ -190,6 +198,7 @@ class TestHandleNulls:
 # calculate_project_metrics  (complementa test_transformers.py)
 # ===========================================================================
 
+
 class TestCalculateProjectMetrics:
     """
     Os casos básicos já estão em test_transformers.py:
@@ -200,11 +209,13 @@ class TestCalculateProjectMetrics:
     """
 
     def _make_df(self, data_inicio, data_fim, status):
-        return pd.DataFrame({
-            "data_inicio": [data_inicio],
-            "data_fim_prevista": [data_fim],
-            "status": [status],
-        })
+        return pd.DataFrame(
+            {
+                "data_inicio": [data_inicio],
+                "data_fim_prevista": [data_fim],
+                "status": [status],
+            }
+        )
 
     def test_dataframe_vazio_retorna_vazio(self):
         df = pd.DataFrame(columns=["data_inicio", "data_fim_prevista", "status"])
@@ -241,21 +252,25 @@ class TestCalculateProjectMetrics:
 
     def test_data_nula_nao_marca_is_atrasado_como_true(self):
         # fillna(False) ao final garante que NaT não vira True
-        df = pd.DataFrame({
-            "data_inicio": [pd.NaT],
-            "data_fim_prevista": [pd.NaT],
-            "status": ["EM ANDAMENTO"],
-        })
+        df = pd.DataFrame(
+            {
+                "data_inicio": [pd.NaT],
+                "data_fim_prevista": [pd.NaT],
+                "status": ["EM ANDAMENTO"],
+            }
+        )
         resultado = calculate_project_metrics(df)
         assert resultado.loc[0, "is_atrasado"] == False
 
     def test_coluna_status_ausente_usa_fallback(self):
         # Sem coluna 'status', a regra de fallback é usada:
         # is_atrasado = data_fim_prevista < hoje
-        df = pd.DataFrame({
-            "data_inicio": ["2020-01-01"],
-            "data_fim_prevista": ["2020-06-01"],
-        })
+        df = pd.DataFrame(
+            {
+                "data_inicio": ["2020-01-01"],
+                "data_fim_prevista": ["2020-06-01"],
+            }
+        )
         resultado = calculate_project_metrics(df)
         # Data passada sem status → is_atrasado deve ser True (fallback)
         assert resultado.loc[0, "is_atrasado"] == True
@@ -269,6 +284,7 @@ class TestCalculateProjectMetrics:
 # ===========================================================================
 # validate  (integrity.py)
 # ===========================================================================
+
 
 class TestValidate:
     """
@@ -314,6 +330,7 @@ class TestValidate:
 # Funções auxiliares do loader (get_date_cache e filter_valid_ids)
 # ===========================================================================
 
+
 class TestGetDateCacheLogicaDeParsing:
     """
     get_date_cache não pode ser testada plenamente sem banco (ela chama
@@ -325,6 +342,7 @@ class TestGetDateCacheLogicaDeParsing:
     def _parse_date_str(self, date_str: str) -> date:
         """Replica: clean_date = str(date_str)[:10]; dt_obj = datetime.strptime(...)"""
         from datetime import datetime
+
         clean_date = str(date_str)[:10]
         return datetime.strptime(clean_date, "%Y-%m-%d").date()
 
@@ -385,9 +403,11 @@ class TestFilterValidIds:
         assert len(resultado) == 0
 
     def test_filtragem_nao_altera_outras_colunas(self):
-        df = pd.DataFrame({
-            "programa_id": [1, 2, 99],
-            "nome": ["Alpha", "Beta", "Invalido"],
-        })
+        df = pd.DataFrame(
+            {
+                "programa_id": [1, 2, 99],
+                "nome": ["Alpha", "Beta", "Invalido"],
+            }
+        )
         resultado = self._filtrar(df, {1, 2}, "programa_id")
         assert list(resultado["nome"]) == ["Alpha", "Beta"]

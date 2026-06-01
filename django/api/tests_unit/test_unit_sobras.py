@@ -17,10 +17,10 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fórmulas replicadas da view
 # ---------------------------------------------------------------------------
+
 
 def calcular_economia_potencial(
     quantidade_solicitada: int,
@@ -55,14 +55,18 @@ def agrupar_sobras_por_material(sobras: list[dict]) -> dict:
                 "total_disponivel": 0,
                 "detalhes": [],
             }
-        sobras_por_material[mat_cod]["total_disponivel"] += sobra["quantidade_disponivel"]
-        sobras_por_material[mat_cod]["detalhes"].append({
-            "projeto_origem_codigo": sobra["projeto_codigo"],
-            "projeto_origem_nome": sobra["projeto_nome"],
-            "quantidade_disponivel": sobra["quantidade_disponivel"],
-            "status_projeto_origem": sobra["projeto_status"],
-            "localizacao_fisica": sobra["localizacao"],
-        })
+        sobras_por_material[mat_cod]["total_disponivel"] += sobra[
+            "quantidade_disponivel"
+        ]
+        sobras_por_material[mat_cod]["detalhes"].append(
+            {
+                "projeto_origem_codigo": sobra["projeto_codigo"],
+                "projeto_origem_nome": sobra["projeto_nome"],
+                "quantidade_disponivel": sobra["quantidade_disponivel"],
+                "status_projeto_origem": sobra["projeto_status"],
+                "localizacao_fisica": sobra["localizacao"],
+            }
+        )
         valor_total += float(sobra["valor_total"])
 
     return sobras_por_material, valor_total
@@ -71,6 +75,7 @@ def agrupar_sobras_por_material(sobras: list[dict]) -> dict:
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
+
 
 def make_sobra(
     mat_cod="MAT1",
@@ -95,6 +100,7 @@ def make_sobra(
 # ===========================================================================
 # calcular_economia_potencial
 # ===========================================================================
+
 
 class TestCalcularEconomiaPotencial:
     """
@@ -178,6 +184,7 @@ class TestCalcularEconomiaPotencial:
 # agrupar_sobras_por_material
 # ===========================================================================
 
+
 class TestAgruparSobrasPorMaterial:
     """
     Regras validadas:
@@ -209,10 +216,12 @@ class TestAgruparSobrasPorMaterial:
     def test_mesmo_material_em_projetos_diferentes_acumula_disponivel(self):
         # MAT1 em PRJ101 (50 un) e em PRJ102 (30 un) → total = 80
         entrada = [
-            make_sobra(mat_cod="MAT1", quantidade_disponivel=50,
-                       projeto_codigo="PRJ101"),
-            make_sobra(mat_cod="MAT1", quantidade_disponivel=30,
-                       projeto_codigo="PRJ102"),
+            make_sobra(
+                mat_cod="MAT1", quantidade_disponivel=50, projeto_codigo="PRJ101"
+            ),
+            make_sobra(
+                mat_cod="MAT1", quantidade_disponivel=30, projeto_codigo="PRJ102"
+            ),
         ]
         resultado, _ = agrupar_sobras_por_material(entrada)
 
@@ -239,14 +248,16 @@ class TestAgruparSobrasPorMaterial:
         assert valor_total == 1500.0
 
     def test_estrutura_de_detalhe_tem_todos_os_campos(self):
-        entrada = [make_sobra(
-            mat_cod="MAT1",
-            quantidade_disponivel=50,
-            projeto_codigo="PRJ101",
-            projeto_nome="Proj Sobra",
-            projeto_status="CONCLUIDO",
-            localizacao="Almoxarifado",
-        )]
+        entrada = [
+            make_sobra(
+                mat_cod="MAT1",
+                quantidade_disponivel=50,
+                projeto_codigo="PRJ101",
+                projeto_nome="Proj Sobra",
+                projeto_status="CONCLUIDO",
+                localizacao="Almoxarifado",
+            )
+        ]
         resultado, _ = agrupar_sobras_por_material(entrada)
         detalhe = resultado["MAT1"]["detalhes"][0]
 

@@ -25,7 +25,7 @@ class TestImportarDadosAPI:
     def test_retorna_erro_quando_nenhum_arquivo_e_enviado(self):
         # Arrange: Cria um POST request sem ficheiros
         request = self.factory.post('/api/importar/')
-        
+
         # Act
         response = importar_dados_api(request)
         data = json.loads(response.content)
@@ -37,12 +37,10 @@ class TestImportarDadosAPI:
     def test_retorna_erro_quando_extensao_nao_e_csv(self):
         # Arrange: Cria um ficheiro de texto comum (.txt) simulado
         arquivo_invalido = SimpleUploadedFile(
-            "documento.txt",
-            b"conteudo ficticio",
-            content_type="text/plain"
+            "documento.txt", b"conteudo ficticio", content_type="text/plain"
         )
         request = self.factory.post('/api/importar/', {"file": arquivo_invalido})
-        
+
         # Act
         response = importar_dados_api(request)
         data = json.loads(response.content)
@@ -71,9 +69,7 @@ class TestImportarDadosAPI:
         mock_transformar.return_value = df_transformado_ficticio
 
         arquivo_valido = SimpleUploadedFile(
-            "dados.csv",
-            b"coluna1,coluna2\nvalor1,valor2",
-            content_type="text/csv"
+            "dados.csv", b"coluna1,coluna2\nvalor1,valor2", content_type="text/csv"
         )
         request = self.factory.post('/api/importar/', {"file": arquivo_valido})
 
@@ -89,7 +85,9 @@ class TestImportarDadosAPI:
         mock_extrair.assert_called_once()
         mock_validar.assert_called_once_with(df_ficticio)
         mock_transformar.assert_called_once_with(df_ficticio, tipo_csv_ficticio)
-        mock_carregar.assert_called_once_with(df_transformado_ficticio, tipo_csv_ficticio)
+        mock_carregar.assert_called_once_with(
+            df_transformado_ficticio, tipo_csv_ficticio
+        )
 
     @patch("api.views.importacao.extrair_csv")
     def test_retorna_erro_quando_ocorrer_value_error_no_etl(self, mock_extrair):
@@ -99,9 +97,7 @@ class TestImportarDadosAPI:
         mock_extrair.side_effect = ValueError(mensagem_erro_simulada)
 
         arquivo_valido = SimpleUploadedFile(
-            "dados_corrompidos.csv",
-            b"lixo,lixo",
-            content_type="text/csv"
+            "dados_corrompidos.csv", b"lixo,lixo", content_type="text/csv"
         )
         request = self.factory.post('/api/importar/', {"file": arquivo_valido})
 

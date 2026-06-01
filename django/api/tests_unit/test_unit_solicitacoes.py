@@ -25,10 +25,10 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fórmulas replicadas de solicitacoesLista.py
 # ---------------------------------------------------------------------------
+
 
 def serializar_solicitacao(sol, data_sol, pedido_vinculado) -> dict:
     """
@@ -52,7 +52,9 @@ def serializar_solicitacao(sol, data_sol, pedido_vinculado) -> dict:
         "numero_pedido": numero_pedido,
         "nome_material": sol.material.descricao,
         "data_solicitacao": data_sol.isoformat() if data_sol else None,
-        "valor_total_estimado": float(sol.valor_total_estimado) if sol.valor_total_estimado else 0.0,
+        "valor_total_estimado": (
+            float(sol.valor_total_estimado) if sol.valor_total_estimado else 0.0
+        ),
         "status": sol.status,
     }
 
@@ -60,6 +62,7 @@ def serializar_solicitacao(sol, data_sol, pedido_vinculado) -> dict:
 # ---------------------------------------------------------------------------
 # Fórmulas replicadas de solicitacoesStats.py
 # ---------------------------------------------------------------------------
+
 
 def calcular_dias_desde_criacao(hoje: date, data_criacao) -> int:
     """
@@ -99,6 +102,7 @@ def make_pedido(numero="PED10"):
 # ===========================================================================
 # serializar_solicitacao  (solicitacoesLista.py)
 # ===========================================================================
+
 
 class TestSerializarSolicitacao:
     """
@@ -165,7 +169,9 @@ class TestSerializarSolicitacao:
             valor_total_estimado=Decimal("750.00"),
             status="Pendente",
         )
-        resultado = serializar_solicitacao(sol, date(2024, 5, 10), pedido_vinculado=None)
+        resultado = serializar_solicitacao(
+            sol, date(2024, 5, 10), pedido_vinculado=None
+        )
         assert resultado["numero_pedido"] is None
         assert resultado["valor_total_estimado"] == 750.0
         assert resultado["nome_material"] == "Placa Mãe"
@@ -179,6 +185,7 @@ class TestSerializarSolicitacao:
 # ===========================================================================
 # calcular_dias_desde_criacao  (solicitacoesStats.py)
 # ===========================================================================
+
 
 class TestCalcularDiasDesideCriacao:
     """

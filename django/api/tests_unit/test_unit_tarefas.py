@@ -13,10 +13,10 @@ Duas lógicas testadas de forma isolada:
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fórmulas replicadas da view
 # ---------------------------------------------------------------------------
+
 
 def serializar_tarefa(tarefa: dict) -> dict:
     """
@@ -41,7 +41,9 @@ def serializar_tarefa(tarefa: dict) -> dict:
         "responsavel": tarefa["responsavel"],
         "estimativa": tarefa["estimativa"],
         "status": tarefa["status"],
-        "total_horas_trabalhadas": round(float(tarefa["total_horas_trabalhadas"] or 0.0), 2),
+        "total_horas_trabalhadas": round(
+            float(tarefa["total_horas_trabalhadas"] or 0.0), 2
+        ),
     }
 
 
@@ -59,8 +61,9 @@ def montar_evolucao_horas(evolucao_qs: list[dict]) -> dict:
     .values().annotate() do ORM e retorna o dict {data_str: horas}.
     """
     return {
-        f"{item['data__ano']:04d}-{item['data__mes']:02d}-{item['data__dia']:02d}":
-            round(float(item["total_horas"] or 0.0), 2)
+        f"{item['data__ano']:04d}-{item['data__mes']:02d}-{item['data__dia']:02d}": round(
+            float(item["total_horas"] or 0.0), 2
+        )
         for item in evolucao_qs
     }
 
@@ -68,6 +71,7 @@ def montar_evolucao_horas(evolucao_qs: list[dict]) -> dict:
 # ---------------------------------------------------------------------------
 # Helpers — fábricas de dicts que simulam retorno do ORM
 # ---------------------------------------------------------------------------
+
 
 def make_tarefa_orm(
     codigo_tarefa="TS01",
@@ -89,7 +93,9 @@ def make_tarefa_orm(
 
 
 def make_evolucao_item(
-    ano=2024, mes=1, dia=1,
+    ano=2024,
+    mes=1,
+    dia=1,
     total_horas=2.25,
 ):
     """Simula um item retornado por .values().annotate() na queryset de evolução."""
@@ -104,6 +110,7 @@ def make_evolucao_item(
 # ===========================================================================
 # serializar_tarefa
 # ===========================================================================
+
 
 class TestSerializarTarefa:
     """
@@ -192,6 +199,7 @@ class TestSerializarTarefa:
 # ===========================================================================
 # montar_evolucao_horas
 # ===========================================================================
+
 
 class TestMontarEvolucaoHoras:
     """

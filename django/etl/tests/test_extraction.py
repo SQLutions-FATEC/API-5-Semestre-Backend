@@ -3,10 +3,15 @@ import pandas as pd
 from django.test import TestCase
 from django.core.management import call_command
 from api.models import (
-    DimPrograma, DimProjeto, DimTarefa, FatoCompra, 
-    DimLocalizacao, FatoEstoqueSaldo
+    DimPrograma,
+    DimProjeto,
+    DimTarefa,
+    FatoCompra,
+    DimLocalizacao,
+    FatoEstoqueSaldo,
 )
 from etl.extractors.base import CSV_BASE_PATH
+
 
 class ETLIntegrationTest(TestCase):
     """
@@ -18,9 +23,13 @@ class ETLIntegrationTest(TestCase):
         Verifica se os arquivos CSV existem antes de rodar o comando.
         """
         self.required_files = [
-            'programas.csv', 'projetos.csv', 'tarefas_projeto.csv', 
-            'pedidos_compra.csv', 'estoque_materiais_projeto.csv',
-            'materiais.csv', 'solicitacoes_compra.csv'
+            'programas.csv',
+            'projetos.csv',
+            'tarefas_projeto.csv',
+            'pedidos_compra.csv',
+            'estoque_materiais_projeto.csv',
+            'materiais.csv',
+            'solicitacoes_compra.csv',
         ]
         for f in self.required_files:
             path = os.path.join(CSV_BASE_PATH, f)
@@ -48,12 +57,14 @@ class ETLIntegrationTest(TestCase):
 
         # 5. Validação das Transformações
         projeto = DimProjeto.objects.first()
-        self.assertIsNotNone(projeto, "O banco deveria ter pelo menos um projeto carregado.")
-        
-        #garante que o status ficou tudo em maiúsculo (standardize_strings)
+        self.assertIsNotNone(
+            projeto, "O banco deveria ter pelo menos um projeto carregado."
+        )
+
+        # garante que o status ficou tudo em maiúsculo (standardize_strings)
         self.assertEqual(projeto.status, projeto.status.upper())
-        
-        #garante que o cálculo de métricas rodou corretamente (calculate_project_metrics)
+
+        # garante que o cálculo de métricas rodou corretamente (calculate_project_metrics)
         self.assertGreaterEqual(projeto.lead_time_dias, 0)
 
     def test_etl_command_idempotency(self):
@@ -62,9 +73,11 @@ class ETLIntegrationTest(TestCase):
         """
         call_command('run_etl')
         count_first_run = FatoEstoqueSaldo.objects.count()
-        self.assertGreater(count_first_run, 0, "A tabela não deveria estar vazia após a carga.")
-        
-        call_command('run_etl') # deve apagar os dados antigos e carregar de novo
+        self.assertGreater(
+            count_first_run, 0, "A tabela não deveria estar vazia após a carga."
+        )
+
+        call_command('run_etl')  # deve apagar os dados antigos e carregar de novo
         self.assertEqual(FatoEstoqueSaldo.objects.count(), count_first_run)
 
     def test_seed_db_command(self):
