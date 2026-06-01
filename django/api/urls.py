@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.urls import path, include
 from django.urls import path
 from .views.importacao import importar_dados_api
 from .views import (
@@ -37,6 +38,7 @@ from .views import (
 )
 
 urlpatterns = [
+    path('', include('django_prometheus.urls')),
     path('api/<str:programa_cod>/projetos/busca/', busca_projetos, name='busca-projetos-programa'),
     path('api/projetos/<str:codigo_projeto>/', projeto_dashboard_api, name='projeto-detalhe'),
     path('api/projetos/<str:codigo_projeto>/compras/', compras_projeto_api, name='compras_projeto'),
@@ -86,5 +88,5 @@ urlpatterns = [
          name='fornecedor-pedidos'),
     path('api/fornecedores/', 
          listagem_fornecedores, 
-         name='api-listagem-fornecedores'),
+         name='api-listagem-fornecedores'),        
 ]
