@@ -1,9 +1,13 @@
 name: Backend CI
 
 on:
-  push:
+  pull_request:
     branches:
-      - 127-DevOps--Backend-CI
+      - main
+      - develop-1
+      - develop-2
+      - develop-3
+    types: [opened, synchronize, reopened]
 
 jobs:
   commit-build:
