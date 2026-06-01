@@ -7,10 +7,10 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Função replicada da view para teste isolado
 # ---------------------------------------------------------------------------
+
 
 def serializar_pedido(pedido) -> dict:
     """
@@ -42,6 +42,7 @@ def serializar_pedido(pedido) -> dict:
 # Helper
 # ---------------------------------------------------------------------------
 
+
 def make_pedido(
     numero_pedido="PED-01",
     material_descricao="Material X",
@@ -68,6 +69,7 @@ def make_pedido(
 # ===========================================================================
 # serializar_pedido
 # ===========================================================================
+
 
 class TestSerializarPedido:
     """
@@ -140,6 +142,7 @@ class TestSerializarPedido:
 # Fallback do aggregate — padrão `or 0.0`
 # ===========================================================================
 
+
 class TestFallbackAggregateSemDados:
     """
     A view usa:
@@ -167,6 +170,7 @@ class TestFallbackAggregateSemDados:
     def test_float_do_total_nulo_e_serializavel_para_json(self):
         # float(0.0) deve ser serializável sem erro no JsonResponse
         import json
+
         gasto_total = None or 0.0
         payload = {"gasto_total_consolidado": float(gasto_total)}
         # Não deve lançar TypeError ou ValueError

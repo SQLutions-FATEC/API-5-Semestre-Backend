@@ -10,6 +10,7 @@ import pytest
 # As fórmulas replicadas da view para teste isolado
 # ---------------------------------------------------------------------------
 
+
 def calcular_custo_total(
     total_horas: float,
     custo_hora: Decimal,
@@ -32,6 +33,7 @@ def calcular_custo_mao_de_obra(total_horas: float, custo_hora: Decimal) -> Decim
 # ===========================================================================
 # calcular_custo_mao_de_obra
 # ===========================================================================
+
 
 class TestCalcularCustoMaoDeObra:
     """
@@ -68,6 +70,7 @@ class TestCalcularCustoMaoDeObra:
 # calcular_custo_total
 # ===========================================================================
 
+
 class TestCalcularCustoTotal:
     """
     Regra: custo_total = (total_horas * custo_hora) + total_materiais
@@ -101,13 +104,16 @@ class TestCalcularCustoTotal:
 
     def test_valores_grandes_sem_perda_de_precisao(self):
         # R$10.000/h * 1000h + R$500.000 = R$10.500.000
-        resultado = calcular_custo_total(1000.0, Decimal("10000.00"), Decimal("500000.00"))
+        resultado = calcular_custo_total(
+            1000.0, Decimal("10000.00"), Decimal("500000.00")
+        )
         assert resultado == Decimal("10500000.00")
 
 
 # ===========================================================================
 # Lógica de fallback para valores None do ORM
 # ===========================================================================
+
 
 class TestFallbackValoresNulos:
     """
@@ -140,7 +146,9 @@ class TestFallbackValoresNulos:
         # Decimal('0.00') é false? Não — Decimal('0') é false, Decimal('0.00') também
         # Esse teste documenta que o padrão `or` tem um edge case com zero real
         resultado = valor_orm or Decimal("0.00")
-        assert resultado == Decimal("0.00")  # passa, mas por razão incorreta se valor fosse 0
+        assert resultado == Decimal(
+            "0.00"
+        )  # passa, mas por razão incorreta se valor fosse 0
 
     def test_custo_total_com_fallbacks_aplicados_nao_causa_erro(self):
         # Simula o caminho completo da view quando não há dados

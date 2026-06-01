@@ -19,14 +19,14 @@ from api.views.utils import (
     obter_projeto,
     formatar_data_dim,
     _normaliza_texto,
-    _dim_data_para_date
+    _dim_data_para_date,
 )
 from api.models import DimProjeto
-
 
 # ===========================================================================
 # obter_projeto
 # ===========================================================================
+
 
 class TestObterProjeto:
     """
@@ -39,18 +39,20 @@ class TestObterProjeto:
         # Configura o mock para retornar um projeto simulado
         mock_projeto = MagicMock()
         mock_get_object_or_404.return_value = mock_projeto
-        
+
         resultado = obter_projeto("PRJ-001")
-        
+
         # Verifica se o Django orm shortcut foi chamado com os argumentos exatos
-        mock_get_object_or_404.assert_called_once_with(DimProjeto, codigo_projeto="PRJ-001")
+        mock_get_object_or_404.assert_called_once_with(
+            DimProjeto, codigo_projeto="PRJ-001"
+        )
         assert resultado == mock_projeto
 
     @patch("api.views.utils.get_object_or_404")
     def test_levanta_404_quando_nao_encontrado(self, mock_get_object_or_404):
         # Simula o comportamento do Django levantando erro de "não encontrado"
         mock_get_object_or_404.side_effect = Http404()
-        
+
         with pytest.raises(Http404):
             obter_projeto("PRJ-999")
 
@@ -59,10 +61,11 @@ class TestObterProjeto:
 # formatar_data_dim
 # ===========================================================================
 
+
 class TestFormatarDataDim:
     """
     Valida a formatação de um objeto com atributos de data (ano, mes, dia)
-    para a string padrão YYYY-MM-DD, lidando adequadamente com Nones e 
+    para a string padrão YYYY-MM-DD, lidando adequadamente com Nones e
     objetos que não possuam os atributos requeridos.
     """
 
@@ -91,6 +94,7 @@ class TestFormatarDataDim:
 # _normaliza_texto
 # ===========================================================================
 
+
 class TestNormalizaTexto:
     """
     Garante que o texto é convertido para minúsculas, tem espaços aparados
@@ -118,9 +122,10 @@ class TestNormalizaTexto:
 # _dim_data_para_date
 # ===========================================================================
 
+
 class TestDimDataParaDate:
     """
-    Testa a conversão de um objeto de dimensão temporal para um objeto 
+    Testa a conversão de um objeto de dimensão temporal para um objeto
     datetime.date nativo do Python, com fallback protetivo contra falhas.
     """
 

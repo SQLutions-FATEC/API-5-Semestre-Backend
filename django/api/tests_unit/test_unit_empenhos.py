@@ -7,10 +7,10 @@ from decimal import Decimal
 from unittest.mock import MagicMock
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Fórmulas replicadas das views para teste isolado
 # ---------------------------------------------------------------------------
+
 
 def calcular_valor_empenho(quantidade_empenhada, custo_estimado):
     """
@@ -42,13 +42,15 @@ def agrupar_empenhos_por_data(itens: list[dict]) -> list[dict]:
 
         custo_item = float(item["total_custo"] or 0.0)
         custo_por_tempo_dict[data_str]["total_custo"] += custo_item
-        custo_por_tempo_dict[data_str]["materiais"].append({
-            "codigo_material": item["codigo_material"],
-            "descricao": item["descricao"],
-            "custo_unitario": float(item["custo_unitario"] or 0.0),
-            "quantidade": item["quantidade_total"] or 0,
-            "total_custo": custo_item,
-        })
+        custo_por_tempo_dict[data_str]["materiais"].append(
+            {
+                "codigo_material": item["codigo_material"],
+                "descricao": item["descricao"],
+                "custo_unitario": float(item["custo_unitario"] or 0.0),
+                "quantidade": item["quantidade_total"] or 0,
+                "total_custo": custo_item,
+            }
+        )
 
     return list(custo_por_tempo_dict.values())
 
@@ -57,8 +59,11 @@ def agrupar_empenhos_por_data(itens: list[dict]) -> list[dict]:
 # Helper
 # ---------------------------------------------------------------------------
 
+
 def item_empenho(
-    ano=2024, mes=2, dia=1,
+    ano=2024,
+    mes=2,
+    dia=1,
     codigo_material="MAT01",
     descricao="Cimento",
     custo_unitario=35.50,
@@ -67,7 +72,9 @@ def item_empenho(
 ):
     """Fábrica de dicts que simula o retorno do .values().annotate() do ORM."""
     return {
-        "ano": ano, "mes": mes, "dia": dia,
+        "ano": ano,
+        "mes": mes,
+        "dia": dia,
         "codigo_material": codigo_material,
         "descricao": descricao,
         "custo_unitario": custo_unitario,
@@ -79,6 +86,7 @@ def item_empenho(
 # ===========================================================================
 # calcular_valor_empenho
 # ===========================================================================
+
 
 class TestCalcularValorEmpenho:
     """
@@ -115,8 +123,8 @@ class TestCalcularValorEmpenho:
     def test_acumulacao_de_multiplos_empenhos(self):
         # Simula a soma total da view: empenho_total = sum de todos os valores
         valores = [
-            calcular_valor_empenho(10, Decimal("35.50")),   # MAT01: 355.00
-            calcular_valor_empenho(5,  Decimal("120.00")),  # MAT02: 600.00
+            calcular_valor_empenho(10, Decimal("35.50")),  # MAT01: 355.00
+            calcular_valor_empenho(5, Decimal("120.00")),  # MAT02: 600.00
             calcular_valor_empenho(1000, Decimal("1.50")),  # MAT03: 1500.00
         ]
         # Cenário exato de test_empenho_success_with_data: empenho_total = 2455.00
@@ -126,6 +134,7 @@ class TestCalcularValorEmpenho:
 # ===========================================================================
 # agrupar_empenhos_por_data
 # ===========================================================================
+
 
 class TestAgruparEmpenhosPorData:
     """
@@ -146,9 +155,10 @@ class TestAgruparEmpenhosPorData:
     def test_datas_diferentes_geram_entradas_separadas(self):
         # Cenário de test_empenho_success_with_data: fev e mar são separados
         entrada = [
-            item_empenho(ano=2024, mes=2, dia=1,  total_custo=955.00),
-            item_empenho(ano=2024, mes=3, dia=15, total_custo=1500.00,
-                         codigo_material="MAT03"),
+            item_empenho(ano=2024, mes=2, dia=1, total_custo=955.00),
+            item_empenho(
+                ano=2024, mes=3, dia=15, total_custo=1500.00, codigo_material="MAT03"
+            ),
         ]
         resultado = agrupar_empenhos_por_data(entrada)
         assert len(resultado) == 2
@@ -157,10 +167,12 @@ class TestAgruparEmpenhosPorData:
         # Dois materiais no mesmo dia: 355 + 600 = 955
         # (cenário exato de tempo['2024-02-01']['total_custo'] == 955.00)
         entrada = [
-            item_empenho(ano=2024, mes=2, dia=1, codigo_material="MAT01",
-                         total_custo=355.00),
-            item_empenho(ano=2024, mes=2, dia=1, codigo_material="MAT02",
-                         total_custo=600.00),
+            item_empenho(
+                ano=2024, mes=2, dia=1, codigo_material="MAT01", total_custo=355.00
+            ),
+            item_empenho(
+                ano=2024, mes=2, dia=1, codigo_material="MAT02", total_custo=600.00
+            ),
         ]
         resultado = agrupar_empenhos_por_data(entrada)
         assert len(resultado) == 1
@@ -200,14 +212,18 @@ class TestAgruparEmpenhosPorData:
         assert agrupar_empenhos_por_data([]) == []
 
     def test_estrutura_completa_de_um_item(self):
-        entrada = [item_empenho(
-            ano=2024, mes=3, dia=15,
-            codigo_material="MAT03",
-            descricao="Tijolo",
-            custo_unitario=1.50,
-            quantidade_total=1000,
-            total_custo=1500.00,
-        )]
+        entrada = [
+            item_empenho(
+                ano=2024,
+                mes=3,
+                dia=15,
+                codigo_material="MAT03",
+                descricao="Tijolo",
+                custo_unitario=1.50,
+                quantidade_total=1000,
+                total_custo=1500.00,
+            )
+        ]
         resultado = agrupar_empenhos_por_data(entrada)
         entry = resultado[0]
 
@@ -226,7 +242,7 @@ class TestAgruparEmpenhosPorData:
         # A view ordena no ORM antes de iterar — a função de agrupamento
         # não reordena, apenas agrupa. A ordem de entrada deve ser preservada.
         entrada = [
-            item_empenho(ano=2024, mes=2, dia=1,  codigo_material="MAT01"),
+            item_empenho(ano=2024, mes=2, dia=1, codigo_material="MAT01"),
             item_empenho(ano=2024, mes=3, dia=15, codigo_material="MAT03"),
         ]
         resultado = agrupar_empenhos_por_data(entrada)

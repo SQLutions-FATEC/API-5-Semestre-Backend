@@ -20,8 +20,6 @@ def extrair_csv(arquivo):
         )
 
     if df.empty:
-        raise ValueError(
-            "Arquivo CSV vazio. Verifique o arquivo e tente novamente."
-        )
+        raise ValueError("Arquivo CSV vazio. Verifique o arquivo e tente novamente.")
 
     return df

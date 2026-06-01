@@ -28,5 +28,5 @@ __all__ = [
     'otimizacao_sobras_api',
     'listagem_fornecedores',
     'fornecedor_api',
-    'fornecedor_pedidos_api'
+    'fornecedor_pedidos_api',
 ]

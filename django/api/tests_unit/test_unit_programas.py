@@ -8,7 +8,7 @@ projeto_sem_filtro) que fazem essencialmente:
     3. Serializar objetos em dicts
 
 Nenhuma dessas etapas contém lógica de negócio própria — são operações
-de infraestrutura (ORM) e serialização simples. 
+de infraestrutura (ORM) e serialização simples.
 
 O que será testado aqui:
 
@@ -21,10 +21,10 @@ O que será testado aqui:
 from unittest.mock import MagicMock
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Funções replicadas das views
 # ---------------------------------------------------------------------------
+
 
 def serializar_programa(programa) -> dict:
     """
@@ -76,6 +76,7 @@ def normalizar_parametro_busca(q_raw: str) -> str:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def make_programa(
     codigo="PROG10",
     nome="Programa Alpha",
@@ -109,6 +110,7 @@ def make_projeto(
 # ===========================================================================
 # serializar_programa
 # ===========================================================================
+
 
 class TestSerializarPrograma:
     """
@@ -170,6 +172,7 @@ class TestSerializarPrograma:
 # serializar_projeto
 # ===========================================================================
 
+
 class TestSerializarProjeto:
 
     def test_todos_os_campos_presentes(self):
@@ -206,6 +209,7 @@ class TestSerializarProjeto:
 # ===========================================================================
 # normalizar_parametro_busca
 # ===========================================================================
+
 
 class TestNormalizarParametroBusca:
     """

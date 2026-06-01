@@ -13,29 +13,19 @@ class ImportacaoApiTest(TestCase):
 
     def test_upload_arquivo_invalido(self):
         arquivo = SimpleUploadedFile(
-            "teste.txt",
-            b"arquivo invalido",
-            content_type="text/plain"
+            "teste.txt", b"arquivo invalido", content_type="text/plain"
         )
 
-        response = self.client.post(
-            "/api/importar_dados/",
-            {"file": arquivo}
-        )
+        response = self.client.post("/api/importar_dados/", {"file": arquivo})
 
         self.assertEqual(response.status_code, 400)
 
     def test_upload_csv_invalido(self):
         arquivo = SimpleUploadedFile(
-            "teste.csv",
-            b"conteudo invalido",
-            content_type="text/csv"
+            "teste.csv", b"conteudo invalido", content_type="text/csv"
         )
 
-        response = self.client.post(
-            "/api/importar_dados/",
-            {"file": arquivo}
-        )
+        response = self.client.post("/api/importar_dados/", {"file": arquivo})
 
         self.assertEqual(response.status_code, 400)
 
@@ -44,14 +34,9 @@ class ImportacaoApiTest(TestCase):
 MAT001,Parafuso,Fixacao,Tramontina,10.50,Ativo"""
 
         arquivo = SimpleUploadedFile(
-            "teste.csv",
-            csv_content.encode("utf-8"),
-            content_type="text/csv"
+            "teste.csv", csv_content.encode("utf-8"), content_type="text/csv"
         )
 
-        response = self.client.post(
-            "/api/importar_dados/",
-            {"file": arquivo}
-        )
+        response = self.client.post("/api/importar_dados/", {"file": arquivo})
 
         self.assertEqual(response.status_code, 200)
