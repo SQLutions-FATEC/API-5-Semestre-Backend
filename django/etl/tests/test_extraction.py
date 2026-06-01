@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import pytest
 from django.test import TestCase
 from django.core.management import call_command
 from api.models import (

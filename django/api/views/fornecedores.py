@@ -8,6 +8,19 @@ from .utils import _dim_data_para_date, _normaliza_texto
 
 
 @require_GET
+def fornecedor_api(request, id_fornecedor):
+    fornecedor = get_object_or_404(DimFornecedor, codigo_fornecedor=id_fornecedor)
+
+    return JsonResponse({
+        "id_fornecedor": fornecedor.pk,
+        "codigo_fornecedor": fornecedor.codigo_fornecedor,
+        "cidade": fornecedor.cidade,
+        "estado": fornecedor.estado,
+        "categoria": fornecedor.categoria,
+        "status": fornecedor.status,
+    })
+
+@require_GET
 def fornecedor_pedidos_api(request, id_fornecedor):
     fornecedor = get_object_or_404(DimFornecedor, codigo_fornecedor=id_fornecedor)
 
