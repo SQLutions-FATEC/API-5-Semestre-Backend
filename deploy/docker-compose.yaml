@@ -79,7 +79,8 @@ services:
     container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # 🔍 CORRIGIDO: Mudado de prometheus.yml para prometheus.yaml (para bater com a sua pasta)
+      - ./monitoring/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
       - prometheusdata:/prometheus
     ports:
       - "9090:9090"
@@ -93,8 +94,9 @@ services:
     restart: unless-stopped
     volumes:
       - grafanadata:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
-      - ./monitoring/grafana/dashboards_json:/var/lib/grafana/dashboards
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      # 🔍 CORRIGIDO: mudado para dashboards_models para ler seus arquivos reais!
+      - ./monitoring/grafana/dashboards_models:/var/lib/grafana/dashboards
     ports:
       - "3001:3000"
     depends_on:

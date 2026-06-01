@@ -5,16 +5,9 @@
       "spec": {
         "builtIn": true,
         "enable": true,
-        "hide": false,
-        "iconColor": "#e0752d",
-        "legacyOptions": {
-          "limit": 100,
-          "showIn": 0,
-          "tags": [
-            "pmm_annotation"
-          ]
-        },
-        "name": "PMM Annotations",
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
         "query": {
           "group": "grafana",
           "kind": "DataQuery",
@@ -25,7 +18,7 @@
     }
   ],
   "cursorSync": "Crosshair",
-  "description": "Dashboard from Percona Monitoring and Management project. ",
+  "description": "MySQL Metric Dashboards for project Synthesi",
   "editable": true,
   "elements": {
     "panel-10": {
@@ -41,7 +34,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -49,9 +42,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "max_over_time(mysql_global_status_threads_connected{instance=\"$host\"}[$interval]) or\nmax_over_time(mysql_global_status_threads_connected{instance=\"$host\"}[5m])",
+                      "expr": "sum(max_over_time(mysql_global_status_threads_connected{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Peak Threads Connected",
                       "metric": "",
@@ -68,7 +61,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -76,9 +69,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "max_over_time(mysql_global_status_threads_running{instance=\"$host\"}[$interval]) or\nmax_over_time(mysql_global_status_threads_running{instance=\"$host\"}[5m])",
+                      "expr": "sum(max_over_time(mysql_global_status_threads_running{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Peak Threads Running",
                       "metric": "",
@@ -95,14 +88,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "avg_over_time(mysql_global_status_threads_running{instance=\"$host\"}[$interval]) or \navg_over_time(mysql_global_status_threads_running{instance=\"$host\"}[5m])",
+                      "expr": "sum(avg_over_time(mysql_global_status_threads_running{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Avg Threads Running",
                       "step": 20
@@ -237,120 +230,6 @@
                       }
                     }
                   ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Peak Threads Running"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#E24D42",
-                        "mode": "fixed"
-                      }
-                    },
-                    {
-                      "id": "custom.lineWidth",
-                      "value": 0
-                    },
-                    {
-                      "id": "custom.pointSize",
-                      "value": 4
-                    },
-                    {
-                      "id": "custom.showPoints",
-                      "value": "always"
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Peak Threads Connected"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#1F78C1",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Avg Threads Running"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#EAB839",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Peak Threads Running"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#E24D42",
-                        "mode": "fixed"
-                      }
-                    },
-                    {
-                      "id": "custom.lineWidth",
-                      "value": 0
-                    },
-                    {
-                      "id": "custom.pointSize",
-                      "value": 4
-                    },
-                    {
-                      "id": "custom.showPoints",
-                      "value": "always"
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Peak Threads Connected"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#1F78C1",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Avg Threads Running"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#EAB839",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
                 }
               ]
             },
@@ -359,10 +238,10 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
-                  "lastNotNull",
                   "max",
                   "min"
                 ],
@@ -394,7 +273,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -402,9 +281,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_thread_cache_size{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_thread_cache_size{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Thread Cache Size",
                       "metric": "",
@@ -421,7 +300,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -429,9 +308,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_threads_cached{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_status_threads_cached{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Threads Cached",
                       "metric": "",
@@ -448,7 +327,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -456,9 +335,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_threads_created{instance=\"$host\"}[$interval]) or irate(mysql_global_status_threads_created{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_threads_created{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Threads Created",
                       "metric": "",
@@ -554,30 +433,6 @@
                       "value": 0
                     }
                   ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Threads Created"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.fillOpacity",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Threads Created"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.fillOpacity",
-                      "value": 0
-                    }
-                  ]
                 }
               ]
             },
@@ -586,6 +441,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -620,7 +476,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -628,11 +484,11 @@
                       "calculatedInterval": "10m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_uptime{instance=\"$host\"}",
+                      "expr": "mysql_global_status_uptime{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "5m",
+                      "interval": "1m",
                       "intervalFactor": 1,
-                      "legendFormat": "",
+                      "legendFormat": "{{instance}}",
                       "metric": "",
                       "step": 300
                     },
@@ -643,16 +499,16 @@
               }
             ],
             "queryOptions": {
-              "interval": "$interval",
+              "interval": "1m",
               "maxDataPoints": 100
             },
             "transformations": []
           }
         },
-        "description": "**MySQL Uptime**\n\nThe amount of time since the last restart of the MySQL server process.",
+        "description": "**Uptime**\n\nThe amount of time since the last restart of the MySQL server process.",
         "id": 12,
         "links": [],
-        "title": "MySQL Uptime",
+        "title": "Uptime",
         "vizConfig": {
           "group": "stat",
           "kind": "VizConfig",
@@ -683,13 +539,18 @@
             },
             "options": {
               "colorMode": "value",
+              "fieldOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ]
+              },
               "graphMode": "none",
               "justifyMode": "auto",
               "orientation": "horizontal",
               "percentChangeColorMode": "standard",
               "reduceOptions": {
                 "calcs": [
-                  "lastNotNull"
+                  "mean"
                 ],
                 "fields": "",
                 "values": false
@@ -716,7 +577,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -724,11 +585,11 @@
                       "calculatedInterval": "10m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_queries{instance=\"$host\"}[$interval]) or irate(mysql_global_status_queries{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_queries{job=~\"$job\", instance=~\"$instance\"}[$__interval])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
-                      "legendFormat": "",
+                      "legendFormat": "{{instance}}",
                       "metric": "",
                       "step": 20
                     },
@@ -739,7 +600,7 @@
               }
             ],
             "queryOptions": {
-              "interval": "$interval",
+              "interval": "1m",
               "maxDataPoints": 100
             },
             "transformations": []
@@ -761,10 +622,6 @@
           "spec": {
             "fieldConfig": {
               "defaults": {
-                "color": {
-                  "fixedColor": "rgb(31, 120, 193)",
-                  "mode": "fixed"
-                },
                 "decimals": 2,
                 "thresholds": {
                   "mode": "absolute",
@@ -788,14 +645,19 @@
               "overrides": []
             },
             "options": {
-              "colorMode": "none",
+              "colorMode": "value",
+              "fieldOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ]
+              },
               "graphMode": "area",
               "justifyMode": "auto",
               "orientation": "horizontal",
               "percentChangeColorMode": "standard",
               "reduceOptions": {
                 "calcs": [
-                  "lastNotNull"
+                  "mean"
                 ],
                 "fields": "",
                 "values": false
@@ -822,7 +684,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -830,9 +692,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "topk(5, rate(mysql_global_status_commands_total{instance=\"$host\"}[$interval])>0) or topk(5, irate(mysql_global_status_commands_total{instance=\"$host\"}[5m])>0)",
+                      "expr": "topk(5, rate(mysql_global_status_commands_total{job=~\"$job\", instance=~\"$instance\"}[$__interval])>0)",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Com_{{ command }}",
                       "metric": "",
@@ -862,550 +724,12 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-2": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "clamp_max(((avg by (mode) ( (clamp_max(rate(node_cpu_seconds_total{instance=\"$host\",mode!=\"idle\"}[$interval]),1)) or (clamp_max(irate(node_cpu_seconds_total{instance=\"$host\",mode!=\"idle\"}[5m]),1)) ))*100 or (avg_over_time(node_cpu_seconds_total_average{instance=~\"$host\", mode!=\"total\", mode!=\"idle\"}[$interval]) or avg_over_time(node_cpu_seconds_total_average{instance=~\"$host\", mode!=\"total\", mode!=\"idle\"}[5m]))),100)",
-                      "format": "time_series",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "{{ mode }}",
-                      "metric": "",
-                      "step": 20
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": true,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "expr": "clamp_max(max by () (sum  by (cpu) ( (clamp_max(rate(node_cpu_seconds_total{instance=\"$host\",mode!=\"idle\",mode!=\"iowait\"}[$interval]),1)) or (clamp_max(irate(node_cpu_seconds_total{instance=\"$host\",mode!=\"idle\",mode!=\"iowait\"}[5m]),1)) ))*100,100)",
-                      "format": "time_series",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Max Core Utilization",
-                      "step": 20
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "expr": "node_load1{instance=\"$host\"}",
-                      "format": "time_series",
-                      "intervalFactor": 2,
-                      "legendFormat": "Load 1m"
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "C"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 2,
-        "links": [],
-        "title": "CPU Usage / Load",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 60,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "decimals": 1,
-                "max": 100,
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "percent"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Load 1m"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#58140C",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Max Core Utilization"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#bf1b00",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "iowait"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#e24d42",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "nice"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#1f78c1",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "softirq"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#806eb7",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "system"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#eab839",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "user"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#508642",
-                        "mode": "fixed"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Max Core Utilization"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.lineWidth",
-                      "value": 0
-                    },
-                    {
-                      "id": "custom.pointSize",
-                      "value": 4
-                    },
-                    {
-                      "id": "custom.showPoints",
-                      "value": "always"
-                    },
-                    {
-                      "id": "custom.stacking",
-                      "value": {
-                        "group": "A",
-                        "mode": "none"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Load 1m"
-                  },
-                  "properties": [
-                    {
-                      "id": "color",
-                      "value": {
-                        "fixedColor": "#58140C",
-                        "mode": "fixed"
-                      }
-                    },
-                    {
-                      "id": "custom.fillOpacity",
-                      "value": 20
-                    },
-                    {
-                      "id": "custom.stacking",
-                      "value": {
-                        "group": "A",
-                        "mode": "none"
-                      }
-                    },
-                    {
-                      "id": "unit",
-                      "value": "none"
-                    },
-                    {
-                      "id": "custom.axisPlacement",
-                      "value": "right"
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsZero",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsNull",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean"
-                ],
-                "displayMode": "list",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-21": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "sum(rate(node_network_receive_bytes_total{instance=\"$host\", device!=\"lo\"}[$interval])) or sum(irate(node_network_receive_bytes_total{instance=\"$host\", device!=\"lo\"}[5m])) or sum(max_over_time(rdsosmetrics_network_rx{instance=\"$host\"}[$interval])) or sum(max_over_time(rdsosmetrics_network_rx{instance=\"$host\"}[5m])) ",
-                      "format": "time_series",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Inbound",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "sum(rate(node_network_transmit_bytes_total{instance=\"$host\", device!=\"lo\"}[$interval])) or sum(irate(node_network_transmit_bytes_total{instance=\"$host\", device!=\"lo\"}[5m])) or\nsum(max_over_time(rdsosmetrics_network_tx{instance=\"$host\"}[$interval])) or sum(max_over_time(rdsosmetrics_network_tx{instance=\"$host\"}[5m]))",
-                      "format": "time_series",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Outbound",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 21,
-        "links": [],
-        "title": "Network Traffic",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
               "defaults": {},
               "overrides": []
             },
-            "options": {}
+            "options": {
+              "dataLinks": []
+            }
           },
           "version": ""
         }
@@ -1424,7 +748,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1432,8 +756,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_created_tmp_tables{instance=\"$host\"}[$interval]) or irate(mysql_global_status_created_tmp_tables{instance=\"$host\"}[5m])",
-                      "interval": "$interval",
+                      "expr": "sum(rate(mysql_global_status_created_tmp_tables{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Created Tmp Tables",
                       "metric": "",
@@ -1450,7 +774,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1458,8 +782,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_created_tmp_disk_tables{instance=\"$host\"}[$interval]) or irate(mysql_global_status_created_tmp_disk_tables{instance=\"$host\"}[5m])",
-                      "interval": "$interval",
+                      "expr": "sum(rate(mysql_global_status_created_tmp_disk_tables{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Created Tmp Disk Tables",
                       "metric": "",
@@ -1476,7 +800,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1484,8 +808,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_created_tmp_files{instance=\"$host\"}[$interval]) or irate(mysql_global_status_created_tmp_files{instance=\"$host\"}[5m])",
-                      "interval": "$interval",
+                      "expr": "sum(rate(mysql_global_status_created_tmp_files{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Created Tmp Files",
                       "metric": "",
@@ -1571,6 +895,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -1605,7 +930,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1613,8 +938,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_handlers_total{instance=\"$host\", handler=~\"commit|rollback|savepoint.*|prepare\"}[$interval]) or irate(mysql_global_status_handlers_total{instance=\"$host\", handler=~\"commit|rollback|savepoint.*|prepare\"}[5m])",
-                      "interval": "$interval",
+                      "expr": "rate(mysql_global_status_handlers_total{instance=~\"$host\", handler=~\"commit|rollback|savepoint.*|prepare\"}[$__interval]) or irate(mysql_global_status_handlers_total{instance=~\"$host\", handler=~\"commit|rollback|savepoint.*|prepare\"}[5m])",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "{{ handler }}",
                       "metric": "",
@@ -1639,106 +964,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsZero",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -1755,7 +988,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1763,9 +996,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_sort_rows{instance=\"$host\"}[$interval]) or irate(mysql_global_status_sort_rows{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_sort_rows{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Sort Rows",
                       "metric": "",
@@ -1782,7 +1015,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1790,9 +1023,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_sort_range{instance=\"$host\"}[$interval]) or irate(mysql_global_status_sort_range{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_sort_range{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Sort Range",
                       "metric": "",
@@ -1809,7 +1042,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1817,9 +1050,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_sort_merge_passes{instance=\"$host\"}[$interval]) or irate(mysql_global_status_sort_merge_passes{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_sort_merge_passes{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Sort Merge Passes",
                       "metric": "",
@@ -1836,7 +1069,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -1844,9 +1077,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_sort_scan{instance=\"$host\"}[$interval]) or irate(mysql_global_status_sort_scan{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_sort_scan{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Sort Scan",
                       "metric": "",
@@ -1953,6 +1186,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -1960,161 +1194,6 @@
                   "min"
                 ],
                 "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-31": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "rate(node_vmstat_pgpgin{instance=\"$host\"}[$interval]) * 1024 or irate(node_vmstat_pgpgin{instance=\"$host\"}[5m]) * 1024",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Page In",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "rate(node_vmstat_pgpgout{instance=\"$host\"}[$interval]) * 1024 or irate(node_vmstat_pgpgout{instance=\"$host\"}[5m]) * 1024",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Page Out",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 31,
-        "links": [],
-        "title": "I/O Activity",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "Bps"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean"
-                ],
-                "displayMode": "list",
                 "placement": "bottom",
                 "showLegend": true
               },
@@ -2142,7 +1221,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2150,9 +1229,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_select_full_join{instance=\"$host\"}[$interval]) or irate(mysql_global_status_select_full_join{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_select_full_join{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Select Full Join",
                       "metric": "",
@@ -2169,7 +1248,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2177,9 +1256,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_select_full_range_join{instance=\"$host\"}[$interval]) or irate(mysql_global_status_select_full_range_join{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_select_full_range_join{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Select Full Range Join",
                       "metric": "",
@@ -2196,7 +1275,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2204,9 +1283,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_select_range{instance=\"$host\"}[$interval]) or irate(mysql_global_status_select_range{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_select_range{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Select Range",
                       "metric": "",
@@ -2223,7 +1302,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2231,9 +1310,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_select_range_check{instance=\"$host\"}[$interval]) or irate(mysql_global_status_select_range_check{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_select_range_check{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Select Range Check",
                       "metric": "",
@@ -2250,7 +1329,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2258,9 +1337,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_select_scan{instance=\"$host\"}[$interval]) or irate(mysql_global_status_select_scan{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_select_scan{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Select Scan",
                       "metric": "",
@@ -2367,6 +1446,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -2401,7 +1481,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2409,9 +1489,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_table_locks_immediate{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_locks_immediate{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_table_locks_immediate{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Table Locks Immediate",
                       "metric": "",
@@ -2428,7 +1508,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -2436,9 +1516,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_table_locks_waited{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_locks_waited{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_table_locks_waited{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Table Locks Waited",
                       "metric": "",
@@ -2463,760 +1543,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-36": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2m",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "sum((rate(node_disk_read_time_seconds_total{device!~\"dm-.+\", instance=\"$host\"}[$interval]) / rate(node_disk_reads_completed_total{device!~\"dm-.+\", instance=\"$host\"}[$interval])) or (irate(node_disk_read_time_seconds_total{device!~\"dm-.+\", instance=\"$host\"}[5m]) / irate(node_disk_reads_completed_total{device!~\"dm-.+\", instance=\"$host\"}[5m]))\nor avg_over_time(aws_rds_read_latency_average{instance=\"$host\"}[$interval]) or avg_over_time(aws_rds_read_latency_average{instance=\"$host\"}[5m]))",
-                      "format": "time_series",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Read",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2m",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "sum((rate(node_disk_write_time_seconds_total{device!~\"dm-.+\", instance=\"$host\"}[$interval]) / rate(node_disk_writes_completed_total{device!~\"dm-.+\", instance=\"$host\"}[$interval])) or (irate(node_disk_write_time_seconds_total{device!~\"dm-.+\", instance=\"$host\"}[5m]) / irate(node_disk_writes_completed_total{device!~\"dm-.+\", instance=\"$host\"}[5m])) or \navg_over_time(aws_rds_write_latency_average{instance=\"$host\"}[$interval]) or avg_over_time(aws_rds_write_latency_average{instance=\"$host\"}[5m]))",
-                      "format": "time_series",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Write",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 36,
-        "links": [],
-        "title": "Disk Latency",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
               "defaults": {},
               "overrides": []
             },
-            "options": {}
+            "options": {
+              "dataLinks": []
+            }
           },
           "version": ""
-        }
-      }
-    },
-    "panel-37": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "node_memory_MemTotal_bytes{instance=\"$host\"} - (node_memory_MemFree_bytes{instance=\"$host\"} + node_memory_Buffers{instance=\"$host\"} + node_memory_Cached{instance=\"$host\"})",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Used",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "node_memory_MemFree_bytes{instance=\"$host\"}",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Free",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "node_memory_Buffers{instance=\"$host\"}",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Buffers",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "D"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "node_memory_Cached{instance=\"$host\"}",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Cached",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "E"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 37,
-        "links": [],
-        "title": "Memory Distribution",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 60,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "bytes"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean"
-                ],
-                "displayMode": "list",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-38": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "rate(node_vmstat_pswpin{instance=\"$host\"}[$interval]) * 4096 or irate(node_vmstat_pswpin{instance=\"$host\"}[5m]) * 4096",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Swap In (Reads)",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2s",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "rate(node_vmstat_pswpout{instance=\"$host\"}[$interval]) * 4096 or irate(node_vmstat_pswpout{instance=\"$host\"}[5m]) * 4096",
-                      "interval": "$interval",
-                      "intervalFactor": 1,
-                      "legendFormat": "Swap Out (Writes)",
-                      "metric": "",
-                      "step": 20,
-                      "target": ""
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 38,
-        "links": [],
-        "title": "Swap Activity",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "options": {}
-          },
-          "version": ""
-        }
-      }
-    },
-    "panel-381": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2m",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "increase(mysql_global_status_bytes_received{instance=\"$host\"}[1h])",
-                      "format": "time_series",
-                      "interval": "1h",
-                      "intervalFactor": 1,
-                      "legendFormat": "Received",
-                      "metric": "",
-                      "step": 3600
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2m",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "increase(mysql_global_status_bytes_sent{instance=\"$host\"}[1h])",
-                      "format": "time_series",
-                      "interval": "1h",
-                      "intervalFactor": 1,
-                      "legendFormat": "Sent",
-                      "metric": "",
-                      "step": 3600
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "B"
-                }
-              }
-            ],
-            "queryOptions": {
-              "timeFrom": "24h"
-            },
-            "transformations": []
-          }
-        },
-        "description": "**MySQL Network Usage Hourly**\n\nHere we can see how much network traffic is generated by MySQL per hour. You can use the bar graph to compare data sent by MySQL and data received by MySQL.",
-        "id": 381,
-        "links": [],
-        "title": "MySQL Network Usage Hourly",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 100,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "bytes"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-39": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "2m",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "topk(5, increase(mysql_global_status_commands_total{instance=\"$host\"}[1h])>0)",
-                      "format": "time_series",
-                      "interval": "1h",
-                      "intervalFactor": 1,
-                      "legendFormat": "Com_{{ command }}",
-                      "metric": "",
-                      "step": 3600
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {
-              "timeFrom": "24h"
-            },
-            "transformations": []
-          }
-        },
-        "description": "**Top Command Counters Hourly**\n\nThe Com_{{xxx}} statement counter variables indicate the number of times each xxx statement has been executed. There is one status variable for each type of statement. For example, Com_delete and Com_update count [``DELETE``](https://dev.mysql.com/doc/refman/5.7/en/delete.html) and [``UPDATE``](https://dev.mysql.com/doc/refman/5.7/en/update.html) statements, respectively. Com_delete_multi and Com_update_multi are similar but apply to [``DELETE``](https://dev.mysql.com/doc/refman/5.7/en/delete.html) and [``UPDATE``](https://dev.mysql.com/doc/refman/5.7/en/update.html) statements that use multiple-table syntax.",
-        "id": 39,
-        "links": [
-          {
-            "title": "Server Status Variables (Com_xxx)",
-            "url": "https://dev.mysql.com/doc/refman/5.7/en/server-status-variables.html#statvar_Com_xxx"
-          }
-        ],
-        "title": "Top Command Counters Hourly",
-        "vizConfig": {
-          "group": "timeseries",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 100,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
-            }
-          },
-          "version": "13.0.1+security-01"
         }
       }
     },
@@ -3233,7 +1567,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3241,8 +1575,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_info_schema_threads{instance=\"$host\"}",
-                      "interval": "$interval",
+                      "expr": "mysql_info_schema_threads{job=~\"$job\", instance=~\"$instance\"}",
+                      "format": "time_series",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "{{ state }}",
                       "metric": "",
@@ -3267,105 +1602,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 0,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsZero",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -3382,7 +1626,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3390,8 +1634,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_open_files{instance=\"$host\"}",
-                      "interval": "$interval",
+                      "expr": "mysql_global_status_open_files{job=~\"$job\", instance=~\"$instance\"}",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Open Files",
                       "metric": "",
@@ -3408,7 +1652,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3416,8 +1660,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_open_files_limit{instance=\"$host\"}",
-                      "interval": "$interval",
+                      "expr": "mysql_global_variables_open_files_limit{job=~\"$job\", instance=~\"$instance\"}",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Open Files Limit",
                       "metric": "",
@@ -3434,13 +1678,13 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_status_innodb_num_open_files{instance=\"$host\"}",
-                      "interval": "$interval",
+                      "expr": "mysql_global_status_innodb_num_open_files{job=~\"$job\", instance=~\"$instance\"}",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "InnoDB Open Files",
                       "step": 20
@@ -3464,85 +1708,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -3559,7 +1732,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3567,9 +1740,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_open_tables{instance=\"$host\"}",
+                      "expr": "mysql_global_status_open_tables{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Open Tables",
                       "metric": "",
@@ -3586,7 +1759,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3594,9 +1767,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_table_open_cache{instance=\"$host\"}",
+                      "expr": "mysql_global_variables_table_open_cache{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Table Open Cache",
                       "metric": "",
@@ -3626,85 +1799,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -3721,7 +1823,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3729,8 +1831,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_opened_files{instance=\"$host\"}[$interval]) or irate(mysql_global_status_opened_files{instance=\"$host\"}[5m])",
-                      "interval": "$interval",
+                      "expr": "rate(mysql_global_status_opened_files{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_opened_files{job=~\"$job\", instance=~\"$instance\"}[5m])",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Openings",
                       "metric": "",
@@ -3755,85 +1857,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -3850,7 +1881,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -3858,9 +1889,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_opened_tables{instance=\"$host\"}[$interval]) or irate(mysql_global_status_opened_tables{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_opened_tables{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_opened_tables{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Openings",
                       "metric": "",
@@ -3877,14 +1908,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "rate(mysql_global_status_table_open_cache_hits{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_table_open_cache_hits{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_table_open_cache_hits{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Hits",
                       "step": 20
@@ -3900,14 +1931,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "rate(mysql_global_status_table_open_cache_misses{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_open_cache_misses{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_table_open_cache_misses{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_table_open_cache_misses{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Misses",
                       "step": 20
@@ -3923,14 +1954,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "rate(mysql_global_status_table_open_cache_overflows{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_open_cache_overflows{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_table_open_cache_overflows{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_table_open_cache_overflows{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Misses due to Overflows",
                       "step": 20
@@ -3946,14 +1977,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "(rate(mysql_global_status_table_open_cache_hits{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance=\"$host\"}[5m]))/((rate(mysql_global_status_table_open_cache_hits{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_open_cache_hits{instance=\"$host\"}[5m]))+(rate(mysql_global_status_table_open_cache_misses{instance=\"$host\"}[$interval]) or irate(mysql_global_status_table_open_cache_misses{instance=\"$host\"}[5m])))",
+                      "expr": "(rate(mysql_global_status_table_open_cache_hits{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_table_open_cache_hits{job=~\"$job\", instance=~\"$instance\"}[5m]))/((rate(mysql_global_status_table_open_cache_hits{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_table_open_cache_hits{job=~\"$job\", instance=~\"$instance\"}[5m]))+(rate(mysql_global_status_table_open_cache_misses{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_table_open_cache_misses{job=~\"$job\", instance=~\"$instance\"}[5m])))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Table Open Cache Hit Ratio",
                       "step": 20
@@ -3982,102 +2013,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Table Open Cache Hit Ratio"
-                  },
-                  "properties": [
-                    {
-                      "id": "unit",
-                      "value": "percentunit"
-                    },
-                    {
-                      "id": "custom.axisPlacement",
-                      "value": "right"
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -4094,7 +2037,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4102,9 +2045,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_qcache_hits{instance=\"$host\"}[$interval]) or irate(mysql_global_status_qcache_hits{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_qcache_hits{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_qcache_hits{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Hits",
                       "metric": "",
@@ -4121,7 +2064,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4129,9 +2072,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_qcache_inserts{instance=\"$host\"}[$interval]) or irate(mysql_global_status_qcache_inserts{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_qcache_inserts{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_qcache_inserts{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Inserts",
                       "metric": "",
@@ -4148,7 +2091,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4156,9 +2099,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_qcache_not_cached{instance=\"$host\"}[$interval]) or irate(mysql_global_status_qcache_not_cached{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_qcache_not_cached{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_qcache_not_cached{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Not Cached",
                       "metric": "",
@@ -4175,7 +2118,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4183,9 +2126,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_qcache_lowmem_prunes{instance=\"$host\"}[$interval]) or irate(mysql_global_status_qcache_lowmem_prunes{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_qcache_lowmem_prunes{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_qcache_lowmem_prunes{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Prunes",
                       "metric": "",
@@ -4202,7 +2145,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4210,9 +2153,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_qcache_queries_in_cache{instance=\"$host\"}",
+                      "expr": "mysql_global_status_qcache_queries_in_cache{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Queries in Cache",
                       "metric": "",
@@ -4237,85 +2180,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -4332,7 +2204,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4340,9 +2212,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_qcache_free_memory{instance=\"$host\"}",
+                      "expr": "mysql_global_status_qcache_free_memory{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Free Memory",
                       "metric": "",
@@ -4359,7 +2231,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4367,9 +2239,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_query_cache_size{instance=\"$host\"}",
+                      "expr": "mysql_global_variables_query_cache_size{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Query Cache Size",
                       "metric": "",
@@ -4394,85 +2266,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "bytes"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -4489,7 +2290,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4497,9 +2298,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_aborted_connects{instance=\"$host\"}[$interval]) or irate(mysql_global_status_aborted_connects{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_aborted_connects{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Aborted Connects (attempts)",
                       "metric": "",
@@ -4516,7 +2317,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4524,9 +2325,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_aborted_clients{instance=\"$host\"}[$interval]) or irate(mysql_global_status_aborted_clients{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_aborted_clients{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Aborted Clients (timeout)",
                       "metric": "",
@@ -4552,85 +2353,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -4647,7 +2377,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4655,9 +2385,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_slow_queries{instance=\"$host\"}[$interval]) or irate(mysql_global_status_slow_queries{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_slow_queries{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Slow Queries",
                       "metric": "",
@@ -4743,6 +2473,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -4777,7 +2508,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -4785,8 +2516,8 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "topk(5, avg_over_time(mysql_info_schema_threads{instance=\"$host\"}[1h]))",
-                      "interval": "1h",
+                      "expr": "topk(5, avg_over_time(mysql_info_schema_threads{job=~\"$job\", instance=~\"$instance\"}[1h]))",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "{{ state }}",
                       "metric": "",
@@ -4813,105 +2544,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "bars",
-                  "fillOpacity": 100,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsZero",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -4928,36 +2568,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "node_memory_MemTotal_bytes{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_status_innodb_page_size{job=~\"$job\", instance=~\"$instance\"} * on (instance) mysql_global_status_buffer_pool_pages{job=~\"$job\", instance=~\"$instance\", state=\"data\"})",
                       "format": "time_series",
-                      "intervalFactor": 2,
-                      "legendFormat": "System Memory",
-                      "step": 4
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "G"
-                }
-              },
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "expr": "mysql_global_status_innodb_page_size{instance=\"$host\"} * on (instance) mysql_global_status_buffer_pool_pages{instance=\"$host\",state=\"data\"}",
-                      "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "InnoDB Buffer Pool Data",
                       "step": 20
@@ -4973,14 +2591,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_variables_innodb_log_buffer_size{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_innodb_log_buffer_size{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "InnoDB Log Buffer Size",
                       "step": 20
@@ -4996,14 +2614,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_variables_innodb_additional_mem_pool_size{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_innodb_additional_mem_pool_size{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 2,
                       "legendFormat": "InnoDB Additional Memory Pool Size",
                       "step": 40
@@ -5019,14 +2637,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_status_innodb_mem_dictionary{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_status_innodb_mem_dictionary{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "InnoDB Dictionary Size",
                       "step": 20
@@ -5042,14 +2660,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_variables_key_buffer_size{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_key_buffer_size{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Key Buffer Size",
                       "step": 20
@@ -5065,14 +2683,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_variables_query_cache_size{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_query_cache_size{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Query Cache Size",
                       "step": 20
@@ -5088,14 +2706,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_status_innodb_mem_adaptive_hash{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_status_innodb_mem_adaptive_hash{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Adaptive Hash Index Size",
                       "step": 20
@@ -5111,14 +2729,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "mysql_global_variables_tokudb_cache_size{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_tokudb_cache_size{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "TokuDB Cache Size",
                       "step": 20
@@ -5147,145 +2765,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 60,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "bytes"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "System Memory"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.fillOpacity",
-                      "value": 0
-                    },
-                    {
-                      "id": "custom.stacking",
-                      "value": {
-                        "group": "A",
-                        "mode": "none"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsZero",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsNull",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -5302,7 +2789,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -5310,11 +2797,11 @@
                       "calculatedInterval": "10m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_innodb_buffer_pool_size{instance=\"$host\"}",
+                      "expr": "mysql_global_variables_innodb_buffer_pool_size{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "5m",
+                      "interval": "1m",
                       "intervalFactor": 1,
-                      "legendFormat": "",
+                      "legendFormat": "{{instance}}",
                       "metric": "",
                       "step": 300
                     },
@@ -5325,7 +2812,7 @@
               }
             ],
             "queryOptions": {
-              "interval": "$interval",
+              "interval": "1m",
               "maxDataPoints": 100
             },
             "transformations": []
@@ -5340,7 +2827,7 @@
             "url": "https://www.percona.com/blog/2015/06/02/80-ram-tune-innodb_buffer_pool_size/"
           }
         ],
-        "title": "InnoDB Buffer Pool Size",
+        "title": "InnoDB Buffer Pool",
         "vizConfig": {
           "group": "stat",
           "kind": "VizConfig",
@@ -5370,116 +2857,19 @@
               "overrides": []
             },
             "options": {
-              "colorMode": "none",
+              "colorMode": "value",
+              "fieldOptions": {
+                "calcs": [
+                  "lastNotNull"
+                ]
+              },
               "graphMode": "none",
               "justifyMode": "auto",
               "orientation": "horizontal",
               "percentChangeColorMode": "standard",
               "reduceOptions": {
                 "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "textMode": "auto",
-              "wideLayout": true
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-52": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "afnqryjbbwcu8e"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "calculatedInterval": "10m",
-                      "datasourceErrors": {},
-                      "errors": {},
-                      "expr": "(mysql_global_variables_innodb_buffer_pool_size{instance=\"$host\"} * 100) / on (instance) node_memory_MemTotal_bytes{instance=\"$host\"}",
-                      "format": "time_series",
-                      "interval": "5m",
-                      "intervalFactor": 1,
-                      "legendFormat": "",
-                      "metric": "",
-                      "step": 300
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {
-              "interval": "$interval",
-              "maxDataPoints": 100
-            },
-            "transformations": []
-          }
-        },
-        "description": "**InnoDB Buffer Pool Size % of Total RAM**\n\nInnoDB maintains a storage area called the buffer pool for caching data and indexes in memory.  Knowing how the InnoDB buffer pool works, and taking advantage of it to keep frequently accessed data in memory, is one of the most important aspects of MySQL tuning. The goal is to keep the working set in memory. In most cases, this should be between 60%-90% of available memory on a dedicated database host, but depends on many factors.",
-        "id": 52,
-        "links": [
-          {
-            "targetBlank": true,
-            "title": "Tuning the InnoDB Buffer Pool Size",
-            "url": "https://www.percona.com/blog/2015/06/02/80-ram-tune-innodb_buffer_pool_size/"
-          }
-        ],
-        "title": "Buffer Pool Size of Total RAM",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "decimals": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "rgba(245, 54, 54, 0.9)",
-                      "value": 0
-                    },
-                    {
-                      "color": "rgba(237, 129, 40, 0.89)",
-                      "value": 40
-                    },
-                    {
-                      "color": "rgba(50, 172, 45, 0.97)",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "percent"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "value",
-              "graphMode": "area",
-              "justifyMode": "auto",
-              "orientation": "horizontal",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
+                  "mean"
                 ],
                 "fields": "",
                 "values": false
@@ -5506,7 +2896,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -5514,11 +2904,11 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_questions{instance=\"$host\"}[$interval]) or irate(mysql_global_status_questions{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_questions{job=~\"$job\", instance=~\"$instance\"}[$__interval])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
-                      "legendFormat": "Questions",
+                      "legendFormat": "{{instance}}",
                       "metric": "",
                       "step": 20
                     },
@@ -5608,6 +2998,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -5642,7 +3033,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -5650,9 +3041,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_open_table_definitions{instance=\"$host\"}",
+                      "expr": "mysql_global_status_open_table_definitions{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Open Table Definitions",
                       "metric": "",
@@ -5669,7 +3060,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -5677,9 +3068,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_table_definition_cache{instance=\"$host\"}",
+                      "expr": "mysql_global_variables_table_definition_cache{job=~\"$job\", instance=~\"$instance\"}",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Table Definitions Cache Size",
                       "metric": "",
@@ -5696,14 +3087,14 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
                     "spec": {
-                      "expr": "rate(mysql_global_status_opened_table_definitions{instance=\"$host\"}[$interval]) or irate(mysql_global_status_opened_table_definitions{instance=\"$host\"}[5m])",
+                      "expr": "rate(mysql_global_status_opened_table_definitions{job=~\"$job\", instance=~\"$instance\"}[$__interval]) or irate(mysql_global_status_opened_table_definitions{job=~\"$job\", instance=~\"$instance\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Opened Table Definitions",
                       "step": 20
@@ -5732,98 +3123,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Opened Table Definitions"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.axisPlacement",
-                      "value": "right"
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -5840,7 +3147,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -5848,9 +3155,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_handlers_total{instance=\"$host\", handler!~\"commit|rollback|savepoint.*|prepare\"}[$interval]) or irate(mysql_global_status_handlers_total{instance=\"$host\", handler!~\"commit|rollback|savepoint.*|prepare\"}[5m])",
+                      "expr": "rate(mysql_global_status_handlers_total{instance=~\"$host\", handler!~\"commit|rollback|savepoint.*|prepare\"}[$__interval]) or irate(mysql_global_status_handlers_total{instance=~\"$host\", handler!~\"commit|rollback|savepoint.*|prepare\"}[5m])",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "{{ handler }}",
                       "metric": "",
@@ -5875,106 +3182,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 20,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "none"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": [
-                {
-                  "matcher": {
-                    "id": "byValue",
-                    "options": {
-                      "op": "gte",
-                      "reducer": "allIsZero",
-                      "value": 0
-                    }
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.hideFrom",
-                      "value": {
-                        "legend": true,
-                        "tooltip": true,
-                        "viz": false
-                      }
-                    }
-                  ]
-                }
-              ]
+              "defaults": {},
+              "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "right",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -5991,7 +3206,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -5999,9 +3214,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_bytes_received{instance=\"$host\"}[$interval]) or irate(mysql_global_status_bytes_received{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_bytes_received{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Inbound",
                       "metric": "",
@@ -6018,7 +3233,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -6026,9 +3241,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "rate(mysql_global_status_bytes_sent{instance=\"$host\"}[$interval]) or irate(mysql_global_status_bytes_sent{instance=\"$host\"}[5m])",
+                      "expr": "sum(rate(mysql_global_status_bytes_sent{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Outbound",
                       "metric": "",
@@ -6053,85 +3268,14 @@
           "kind": "VizConfig",
           "spec": {
             "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "palette-classic"
-                },
-                "custom": {
-                  "axisBorderShow": false,
-                  "axisCenteredZero": false,
-                  "axisColorMode": "text",
-                  "axisLabel": "",
-                  "axisPlacement": "auto",
-                  "barAlignment": 0,
-                  "barWidthFactor": 0.6,
-                  "drawStyle": "line",
-                  "fillOpacity": 60,
-                  "gradientMode": "none",
-                  "hideFrom": {
-                    "legend": false,
-                    "tooltip": false,
-                    "viz": false
-                  },
-                  "insertNulls": false,
-                  "lineInterpolation": "linear",
-                  "lineWidth": 2,
-                  "pointSize": 5,
-                  "scaleDistribution": {
-                    "type": "linear"
-                  },
-                  "showPoints": "never",
-                  "showValues": false,
-                  "spanNulls": false,
-                  "stacking": {
-                    "group": "A",
-                    "mode": "normal"
-                  },
-                  "thresholdsStyle": {
-                    "mode": "off"
-                  }
-                },
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "Bps"
-              },
+              "defaults": {},
               "overrides": []
             },
             "options": {
-              "annotations": {
-                "clustering": -1,
-                "multiLane": false
-              },
-              "legend": {
-                "calcs": [
-                  "mean",
-                  "max",
-                  "min"
-                ],
-                "displayMode": "table",
-                "placement": "bottom",
-                "showLegend": true
-              },
-              "tooltip": {
-                "hideZeros": false,
-                "mode": "multi",
-                "sort": "none"
-              }
+              "dataLinks": []
             }
           },
-          "version": "13.0.1+security-01"
+          "version": ""
         }
       }
     },
@@ -6148,7 +3292,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -6156,9 +3300,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "max(max_over_time(mysql_global_status_threads_connected{instance=\"$host\"}[$interval])  or mysql_global_status_threads_connected{instance=\"$host\"} )",
+                      "expr": "sum(max_over_time(mysql_global_status_threads_connected{job=~\"$job\", instance=~\"$instance\"}[$__interval]))",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Connections",
                       "metric": "",
@@ -6175,7 +3319,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -6183,9 +3327,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_status_max_used_connections{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_status_max_used_connections{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Max Used Connections",
                       "metric": "",
@@ -6203,7 +3347,7 @@
                   "hidden": false,
                   "query": {
                     "datasource": {
-                      "name": "afnqryjbbwcu8e"
+                      "name": "$datasource"
                     },
                     "group": "prometheus",
                     "kind": "DataQuery",
@@ -6211,9 +3355,9 @@
                       "calculatedInterval": "2m",
                       "datasourceErrors": {},
                       "errors": {},
-                      "expr": "mysql_global_variables_max_connections{instance=\"$host\"}",
+                      "expr": "sum(mysql_global_variables_max_connections{job=~\"$job\", instance=~\"$instance\"})",
                       "format": "time_series",
-                      "interval": "$interval",
+                      "interval": "1m",
                       "intervalFactor": 1,
                       "legendFormat": "Max Connections",
                       "metric": "",
@@ -6311,30 +3455,6 @@
                       "value": 0
                     }
                   ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Max Connections"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.fillOpacity",
-                      "value": 0
-                    }
-                  ]
-                },
-                {
-                  "matcher": {
-                    "id": "byName",
-                    "options": "Max Connections"
-                  },
-                  "properties": [
-                    {
-                      "id": "custom.fillOpacity",
-                      "value": 0
-                    }
-                  ]
                 }
               ]
             },
@@ -6343,6 +3463,7 @@
                 "clustering": -1,
                 "multiLane": false
               },
+              "dataLinks": [],
               "legend": {
                 "calcs": [
                   "mean",
@@ -6384,8 +3505,8 @@
                         "kind": "ElementReference",
                         "name": "panel-12"
                       },
-                      "height": 4,
-                      "width": 6,
+                      "height": 3,
+                      "width": 8,
                       "x": 0,
                       "y": 0
                     }
@@ -6397,9 +3518,9 @@
                         "kind": "ElementReference",
                         "name": "panel-13"
                       },
-                      "height": 4,
-                      "width": 6,
-                      "x": 6,
+                      "height": 3,
+                      "width": 8,
+                      "x": 8,
                       "y": 0
                     }
                   },
@@ -6410,22 +3531,9 @@
                         "kind": "ElementReference",
                         "name": "panel-51"
                       },
-                      "height": 4,
-                      "width": 6,
-                      "x": 12,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-52"
-                      },
-                      "height": 4,
-                      "width": 6,
-                      "x": 18,
+                      "height": 3,
+                      "width": 8,
+                      "x": 16,
                       "y": 0
                     }
                   }
@@ -6651,21 +3759,8 @@
                         "name": "panel-9"
                       },
                       "height": 7,
-                      "width": 12,
+                      "width": 24,
                       "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-381"
-                      },
-                      "height": 7,
-                      "width": 12,
-                      "x": 12,
                       "y": 0
                     }
                   }
@@ -6728,7 +3823,7 @@
                     "spec": {
                       "element": {
                         "kind": "ElementReference",
-                        "name": "panel-39"
+                        "name": "panel-8"
                       },
                       "height": 7,
                       "width": 24,
@@ -6741,7 +3836,7 @@
                     "spec": {
                       "element": {
                         "kind": "ElementReference",
-                        "name": "panel-8"
+                        "name": "panel-28"
                       },
                       "height": 7,
                       "width": 24,
@@ -6754,7 +3849,7 @@
                     "spec": {
                       "element": {
                         "kind": "ElementReference",
-                        "name": "panel-28"
+                        "name": "panel-40"
                       },
                       "height": 7,
                       "width": 24,
@@ -6767,25 +3862,12 @@
                     "spec": {
                       "element": {
                         "kind": "ElementReference",
-                        "name": "panel-40"
-                      },
-                      "height": 7,
-                      "width": 24,
-                      "x": 0,
-                      "y": 28
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
                         "name": "panel-49"
                       },
                       "height": 7,
                       "width": 24,
                       "x": 0,
-                      "y": 35
+                      "y": 28
                     }
                   }
                 ]
@@ -6940,219 +4022,17 @@
             },
             "title": "MySQL Table Definition Cache"
           }
-        },
-        {
-          "kind": "RowsLayoutRow",
-          "spec": {
-            "collapse": false,
-            "layout": {
-              "kind": "GridLayout",
-              "spec": {
-                "items": [
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-31"
-                      },
-                      "height": 7,
-                      "width": 8,
-                      "x": 0,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-37"
-                      },
-                      "height": 7,
-                      "width": 8,
-                      "x": 8,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-2"
-                      },
-                      "height": 7,
-                      "width": 8,
-                      "x": 16,
-                      "y": 0
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-36"
-                      },
-                      "height": 7,
-                      "width": 8,
-                      "x": 0,
-                      "y": 7
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-21"
-                      },
-                      "height": 7,
-                      "width": 8,
-                      "x": 8,
-                      "y": 7
-                    }
-                  },
-                  {
-                    "kind": "GridLayoutItem",
-                    "spec": {
-                      "element": {
-                        "kind": "ElementReference",
-                        "name": "panel-38"
-                      },
-                      "height": 7,
-                      "width": 8,
-                      "x": 16,
-                      "y": 7
-                    }
-                  }
-                ]
-              }
-            },
-            "title": "System Charts"
-          }
         }
       ]
     }
   },
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "dashboard",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "QAN"
-      ],
-      "targetBlank": false,
-      "title": "Query Analytics",
-      "tooltip": "",
-      "type": "link",
-      "url": "/graph/dashboard/db/_pmm-query-analytics"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "OS"
-      ],
-      "targetBlank": false,
-      "title": "OS",
-      "tooltip": "",
-      "type": "dashboards"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "MySQL"
-      ],
-      "targetBlank": false,
-      "title": "MySQL",
-      "tooltip": "",
-      "type": "dashboards"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "MongoDB"
-      ],
-      "targetBlank": false,
-      "title": "MongoDB",
-      "tooltip": "",
-      "type": "dashboards"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "HA"
-      ],
-      "targetBlank": false,
-      "title": "HA",
-      "tooltip": "",
-      "type": "dashboards"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "Cloud"
-      ],
-      "targetBlank": false,
-      "title": "Cloud",
-      "tooltip": "",
-      "type": "dashboards"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "Insight"
-      ],
-      "targetBlank": false,
-      "title": "Insight",
-      "tooltip": "",
-      "type": "dashboards"
-    },
-    {
-      "asDropdown": true,
-      "icon": "",
-      "includeVars": true,
-      "keepTime": true,
-      "tags": [
-        "PMM"
-      ],
-      "targetBlank": false,
-      "title": "PMM",
-      "tooltip": "",
-      "type": "dashboards"
-    }
-  ],
+  "links": [],
   "liveNow": false,
   "preload": false,
-  "tags": [
-    "Percona",
-    "MySQL"
-  ],
+  "tags": [],
   "timeSettings": {
-    "autoRefresh": "1m",
+    "autoRefresh": "10s",
     "autoRefreshIntervals": [
-      "5s",
       "10s",
       "30s",
       "1m",
@@ -7164,65 +4044,29 @@
       "1d"
     ],
     "fiscalYearStartMonth": 0,
-    "from": "now-12h",
+    "from": "now-1h",
     "hideTimepicker": false,
     "timezone": "browser",
     "to": "now"
   },
-  "title": "Synthesi - MySQL Overview",
+  "title": "Synthesi - Backend MySQL",
   "variables": [
     {
-      "kind": "IntervalVariable",
+      "kind": "DatasourceVariable",
       "spec": {
-        "auto": true,
-        "auto_count": 200,
-        "auto_min": "1s",
+        "allowCustomValue": true,
         "current": {
-          "text": "1s",
-          "value": "1s"
+          "text": "Prometheus",
+          "value": "PBFA97CFB590B2093"
         },
         "hide": "dontHide",
-        "label": "Interval",
-        "name": "interval",
-        "options": [
-          {
-            "selected": true,
-            "text": "1s",
-            "value": "1s"
-          },
-          {
-            "selected": false,
-            "text": "5s",
-            "value": "5s"
-          },
-          {
-            "selected": false,
-            "text": "1m",
-            "value": "1m"
-          },
-          {
-            "selected": false,
-            "text": "5m",
-            "value": "5m"
-          },
-          {
-            "selected": false,
-            "text": "1h",
-            "value": "1h"
-          },
-          {
-            "selected": false,
-            "text": "6h",
-            "value": "6h"
-          },
-          {
-            "selected": false,
-            "text": "1d",
-            "value": "1d"
-          }
-        ],
-        "query": "1s,5s,1m,5m,1h,6h,1d",
-        "refresh": "onTimeRangeChanged",
+        "includeAll": false,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "pluginId": "prometheus",
+        "refresh": "onDashboardLoad",
+        "regex": "",
         "skipUrlSync": false
       }
     },
@@ -7231,26 +4075,27 @@
       "spec": {
         "allowCustomValue": true,
         "current": {
-          "text": "mysql-exporter:9104",
-          "value": "mysql-exporter:9104"
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
-        "definition": "label_values(mysql_up,instance)",
+        "definition": "label_values(mysql_up, job)",
         "hide": "dontHide",
-        "includeAll": false,
-        "label": "Host",
-        "multi": false,
-        "name": "host",
+        "includeAll": true,
+        "multi": true,
+        "name": "job",
         "options": [],
         "query": {
           "datasource": {
-            "name": "afnqryjbbwcu8e"
+            "name": "$datasource"
           },
           "group": "prometheus",
           "kind": "DataQuery",
           "spec": {
-            "qryType": 1,
-            "query": "label_values(mysql_up,instance)",
-            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+            "__legacyStringValue": "label_values(mysql_up, job)"
           },
           "version": "v0"
         },
@@ -7258,7 +4103,41 @@
         "regex": "",
         "regexApplyTo": "value",
         "skipUrlSync": false,
-        "sort": "alphabeticalAsc"
+        "sort": "disabled"
+      }
+    },
+    {
+      "kind": "QueryVariable",
+      "spec": {
+        "allowCustomValue": true,
+        "current": {
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "definition": "label_values(mysql_up, instance)",
+        "hide": "dontHide",
+        "includeAll": true,
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "datasource": {
+            "name": "$datasource"
+          },
+          "group": "prometheus",
+          "kind": "DataQuery",
+          "spec": {
+            "__legacyStringValue": "label_values(mysql_up, instance)"
+          },
+          "version": "v0"
+        },
+        "refresh": "onDashboardLoad",
+        "regex": "",
+        "regexApplyTo": "value",
+        "skipUrlSync": false,
+        "sort": "disabled"
       }
     }
   ]
