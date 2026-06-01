@@ -34,7 +34,7 @@ class BaseExtractor:
                 f"[{self.__class__.__name__}] Arquivo não encontrado: {caminho}"
             )
             raise
-        except Exception as e:
+        except Exception:
             logger.exception(
                 "[%s] Falha na extração de '%s'",
                 self.__class__.__name__,
