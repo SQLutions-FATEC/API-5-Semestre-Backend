@@ -72,6 +72,7 @@ class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.dim_data_cache = {}
+        self.rng = random.Random()
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -88,6 +89,12 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--clear', action='store_true', help='Clear existing data before seeding'
+        )
+        parser.add_argument(
+            '--seed',
+            type=int,
+            default=None,
+            help='Optional RNG seed for reproducible data generation',
         )
 
     def _clear_database(self):
@@ -122,13 +129,13 @@ class Command(BaseCommand):
         delta = end_dt - start_dt
         if delta.days <= 0:
             return start_dt
-        random_days = random.randrange(delta.days)
+        random_days = self.rng.randrange(delta.days)
         return start_dt + timedelta(days=random_days)
 
     def _create_fornecedores(self, num_fornecedores, fake, categorias_globais):
         global_fornecedores = {c: [] for c in categorias_globais}
         for _ in range(num_fornecedores):
-            cat = random.choice(categorias_globais)
+            cat = self.rng.choice(categorias_globais)
             f = DimFornecedor.objects.create(
                 codigo_fornecedor=uuid.uuid4().hex[:6].upper(),
                 razao_social=fake.company()[:256],
@@ -143,15 +150,15 @@ class Command(BaseCommand):
     def _create_materiais(self, num_materiais, fake, categorias_globais):
         global_materiais = {c: [] for c in categorias_globais}
         for _ in range(num_materiais):
-            cat = random.choice(categorias_globais)
+            cat = self.rng.choice(categorias_globais)
             m = DimMaterial.objects.create(
                 codigo_material=uuid.uuid4().hex[:6].upper(),
-                descricao=f"{random.choice(MATERIAL_TIPOS)} de {cat} - {fake.bothify(text='???-####').upper()}"[
+                descricao=f"{self.rng.choice(MATERIAL_TIPOS)} de {cat} - {fake.bothify(text='???-####').upper()}"[
                     :256
                 ],
                 categoria=cat,
                 fabricante=fake.company()[:256],
-                custo_estimado=round(random.uniform(5.0, 500.0), 2),
+                custo_estimado=round(self.rng.uniform(5.0, 500.0), 2),
                 status=STATUS_ATIVO,
             )
             global_materiais[cat].append(m)
@@ -173,7 +180,7 @@ class Command(BaseCommand):
 
         target_qty = quantidade
         qty_consumed = 0
-        num_empenhos = random.randint(1, 5)
+        num_empenhos = self.rng.randint(1, 5)
 
         for i in range(num_empenhos):
             remain = target_qty - qty_consumed
@@ -184,7 +191,7 @@ class Command(BaseCommand):
                 qty = remain
             else:
                 limit_qty = remain // 2
-                qty = random.randint(1, limit_qty) if limit_qty >= 1 else remain
+                qty = self.rng.randint(1, limit_qty) if limit_qty >= 1 else remain
 
             qty_consumed += qty
 
@@ -215,11 +222,11 @@ class Command(BaseCommand):
         counts,
     ):
         pedido_date = self._random_date(solic_date, proj_end)
-        entrega_prev_date = pedido_date + timedelta(days=random.randint(5, 30))
+        entrega_prev_date = pedido_date + timedelta(days=self.rng.randint(5, 30))
         today = timezone.now().date()
 
         if global_fornecedores[cat]:
-            fornecedor = random.choice(global_fornecedores[cat])
+            fornecedor = self.rng.choice(global_fornecedores[cat])
         else:
             fornecedor = DimFornecedor.objects.create(
                 codigo_fornecedor=uuid.uuid4().hex[:6].upper(),
@@ -232,11 +239,11 @@ class Command(BaseCommand):
             global_fornecedores[cat].append(fornecedor)
 
         if is_concluido:
-            pedido_status = random.choices(
+            pedido_status = self.rng.choices(
                 [PEDIDO_STATUS_ENTREGUE, PEDIDO_STATUS_CANCELADO], weights=[95, 5], k=1
             )[0]
         else:
-            pedido_status = random.choices(
+            pedido_status = self.rng.choices(
                 [
                     PEDIDO_STATUS_ABERTO,
                     PEDIDO_STATUS_CANCELADO,
@@ -283,7 +290,7 @@ class Command(BaseCommand):
         counts,
     ):
         max_batches = max(2, int(duration_ratio / 6))
-        num_batches = random.randint(1, max_batches)
+        num_batches = self.rng.randint(1, max_batches)
         is_planejamento = proj_status == STATUS_PLANEJAMENTO
         is_concluido = proj_status == STATUS_CONCLUIDO
 
@@ -291,7 +298,7 @@ class Command(BaseCommand):
             solic_date = self._random_date(proj_start, proj_end)
 
             if is_planejamento:
-                solicitacao_status = random.choices(
+                solicitacao_status = self.rng.choices(
                     [
                         SOLICITACAO_STATUS_PENDENTE,
                         SOLICITACAO_STATUS_CANCELADA,
@@ -301,7 +308,7 @@ class Command(BaseCommand):
                     k=1,
                 )[0]
             elif is_concluido:
-                solicitacao_status = random.choices(
+                solicitacao_status = self.rng.choices(
                     [
                         SOLICITACAO_STATUS_APROVADA,
                         SOLICITACAO_STATUS_CANCELADA,
@@ -311,7 +318,7 @@ class Command(BaseCommand):
                     k=1,
                 )[0]
             else:
-                solicitacao_status = random.choices(
+                solicitacao_status = self.rng.choices(
                     [
                         SOLICITACAO_STATUS_PENDENTE,
                         SOLICITACAO_STATUS_CANCELADA,
@@ -326,9 +333,9 @@ class Command(BaseCommand):
                 numero_solicitacao=uuid.uuid4().hex[:6].upper(),
                 projeto=projeto,
                 material=material,
-                quantidade=random.randint(1, 1000),
+                quantidade=self.rng.randint(1, 1000),
                 data_solicitacao=self._get_or_create_dim_data(solic_date),
-                prioridade=random.choice(
+                prioridade=self.rng.choice(
                     [
                         PRIORIDADE_BAIXA,
                         PRIORIDADE_MEDIA,
@@ -372,9 +379,9 @@ class Command(BaseCommand):
             1, min(len(categorias_globais), int(duration_ratio / 5))
         )
         min_cats = max(1, max_cats_by_duration // 2)
-        num_cats_to_pick = random.randint(min_cats, max_cats_by_duration)
+        num_cats_to_pick = self.rng.randint(min_cats, max_cats_by_duration)
 
-        picked_cats = random.sample(categorias_globais, num_cats_to_pick)
+        picked_cats = self.rng.sample(categorias_globais, num_cats_to_pick)
 
         for cat in picked_cats:
             if not global_materiais[cat]:
@@ -384,10 +391,10 @@ class Command(BaseCommand):
             min_mats = max(1, max_mats_by_duration // 3)
 
             mats_available = len(global_materiais[cat])
-            num_mat_in_cat = random.randint(
+            num_mat_in_cat = self.rng.randint(
                 min(min_mats, mats_available), min(max_mats_by_duration, mats_available)
             )
-            chosen_mats = random.sample(global_materiais[cat], num_mat_in_cat)
+            chosen_mats = self.rng.sample(global_materiais[cat], num_mat_in_cat)
 
             for material in chosen_mats:
                 self._generate_solicitacoes_material(
@@ -412,21 +419,21 @@ class Command(BaseCommand):
         if t_status == STATUS_CONCLUIDO:
             target_hours = float(tarefa.estimativa)
         else:
-            target_hours = float(tarefa.estimativa) * random.uniform(0.1, 0.9)
+            target_hours = float(tarefa.estimativa) * self.rng.uniform(0.1, 0.9)
 
         team_size = max(1, min(len(project_users), int(target_hours / 40) + 1))
-        task_team = random.sample(project_users, team_size)
+        task_team = self.rng.sample(project_users, team_size)
 
         hours_created = 0.0
         while target_hours - hours_created > 0.01:
             execution_date = self._random_date(task_start, task_end)
             remaining = target_hours - hours_created
 
-            horas = round(min(remaining, random.uniform(2.0, 8.0)), 2)
+            horas = round(min(remaining, self.rng.uniform(2.0, 8.0)), 2)
             hours_created += horas
 
             FatoTarefa.objects.create(
-                usuario=random.choice(task_team),
+                usuario=self.rng.choice(task_team),
                 horas_trabalhadas=horas,
                 tarefa=tarefa,
                 data=self._get_or_create_dim_data(execution_date),
@@ -453,7 +460,7 @@ class Command(BaseCommand):
         ]
 
         for _ in range(scaled_tasks):
-            estimativa_horas = random.randint(2, 40)
+            estimativa_horas = self.rng.randint(2, 40)
             estimativa_dias = (estimativa_horas + 7) // 8
 
             max_start = proj_end - timedelta(days=estimativa_dias)
@@ -464,7 +471,7 @@ class Command(BaseCommand):
             task_end = task_start + timedelta(days=estimativa_dias)
 
             responsavel_tarefa = (
-                random.choice(project_users) if project_users else fake.name()[:256]
+                self.rng.choice(project_users) if project_users else fake.name()[:256]
             )
 
             if is_planejamento:
@@ -472,12 +479,12 @@ class Command(BaseCommand):
             elif is_concluido:
                 t_status = STATUS_CONCLUIDO
             else:
-                t_status = random.choice(status_tarefa_choices)
+                t_status = self.rng.choice(status_tarefa_choices)
 
             tarefa = DimTarefa.objects.create(
                 codigo_tarefa=uuid.uuid4().hex[:6].upper(),
                 projeto=projeto,
-                titulo=f"{random.choice(TAREFA_ACOES)} {random.choice(TAREFA_OBJETOS)} {fake.bothify(text='??-##').upper()}"[
+                titulo=f"{self.rng.choice(TAREFA_ACOES)} {self.rng.choice(TAREFA_OBJETOS)} {fake.bothify(text='??-##').upper()}"[
                     :256
                 ],
                 responsavel=responsavel_tarefa,
@@ -485,8 +492,8 @@ class Command(BaseCommand):
                 data_inicio=self._get_or_create_dim_data(task_start),
                 data_fim_prevista=self._get_or_create_dim_data(task_end),
                 status=t_status,
-                lead_time_dias=random.randint(0, 5),
-                is_atrasado=random.choice([True, False]),
+                lead_time_dias=self.rng.randint(0, 5),
+                is_atrasado=self.rng.choice([True, False]),
             )
             counts['tarefas'] += 1
 
@@ -505,7 +512,7 @@ class Command(BaseCommand):
         global_fornecedores,
         global_materiais,
     ):
-        project_duration_days = random.randint(180, 1095)
+        project_duration_days = self.rng.randint(180, 1095)
         max_start_date = prog_end - timedelta(days=project_duration_days)
 
         if max_start_date <= prog_start:
@@ -521,29 +528,29 @@ class Command(BaseCommand):
 
         project_users = [fake.name()[:256] for _ in range(scaled_users)]
         project_responsavel = (
-            random.choice(project_users) if project_users else fake.name()[:256]
+            self.rng.choice(project_users) if project_users else fake.name()[:256]
         )
 
         today = timezone.now().date()
         if proj_start > today:
             proj_status = STATUS_PLANEJAMENTO
         elif proj_end < today:
-            proj_status = random.choice(
+            proj_status = self.rng.choice(
                 [STATUS_CONCLUIDO, STATUS_EM_ANDAMENTO, STATUS_SUSPENSO]
             )
         else:
-            proj_status = random.choice([STATUS_EM_ANDAMENTO, STATUS_SUSPENSO])
+            proj_status = self.rng.choice([STATUS_EM_ANDAMENTO, STATUS_SUSPENSO])
 
         projeto = DimProjeto.objects.create(
             codigo_projeto=uuid.uuid4().hex[:6].upper(),
             nome_projeto=fake.catch_phrase()[:256],
             programa=programa,
             responsavel=project_responsavel,
-            custo_hora=round(random.uniform(50.0, 300.0), 2),
+            custo_hora=round(self.rng.uniform(50.0, 300.0), 2),
             data_inicio=self._get_or_create_dim_data(proj_start),
             data_fim_prevista=self._get_or_create_dim_data(proj_end),
             status=proj_status,
-            lead_time_dias=random.randint(0, 10),
+            lead_time_dias=self.rng.randint(0, 10),
             is_atrasado=(proj_end < today and proj_status == STATUS_EM_ANDAMENTO),
         )
 
@@ -593,7 +600,7 @@ class Command(BaseCommand):
         global_materiais,
     ):
         prog_start = fake.date_time_between(start_date='-5y', end_date='-1y').date()
-        prog_end = prog_start + timedelta(days=random.randint(1095, 3650))
+        prog_end = prog_start + timedelta(days=self.rng.randint(1095, 3650))
 
         programa = DimPrograma.objects.create(
             codigo_programa=uuid.uuid4().hex[:6].upper(),
@@ -604,7 +611,7 @@ class Command(BaseCommand):
             gerente_tecnico=fake.name()[:256],
             data_inicio=self._get_or_create_dim_data(prog_start),
             data_fim_prevista=self._get_or_create_dim_data(prog_end),
-            status=random.choice([STATUS_EM_ANDAMENTO, STATUS_CONCLUIDO]),
+            status=self.rng.choice([STATUS_EM_ANDAMENTO, STATUS_CONCLUIDO]),
         )
 
         for _ in range(options['projects']):
@@ -624,6 +631,8 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         self.dim_data_cache = {}
+        if options['seed'] is not None:
+            self.rng.seed(options['seed'])
 
         if options['clear']:
             self._clear_database()
