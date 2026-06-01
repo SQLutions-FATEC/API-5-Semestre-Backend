@@ -35,7 +35,9 @@ class BaseExtractor:
             )
             raise
         except Exception as e:
-            logger.error(
-                f"[{self.__class__.__name__}] Falha na extração de '{self.csv_file}': {e}"
+            logger.exception(
+                "[%s] Falha na extração de '%s'",
+                self.__class__.__name__,
+                self.csv_file,
             )
             raise

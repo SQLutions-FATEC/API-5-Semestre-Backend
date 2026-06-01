@@ -586,7 +586,6 @@ class Command(BaseCommand):
 
     def _process_programa(
         self,
-        p_idx,
         options,
         fake,
         categorias_globais,
@@ -650,7 +649,6 @@ class Command(BaseCommand):
 
         for p_idx in range(options['programs']):
             programa = self._process_programa(
-                p_idx,
                 options,
                 fake,
                 categorias_globais,

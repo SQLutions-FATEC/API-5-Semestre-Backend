@@ -154,7 +154,7 @@ class Command(BaseCommand):
                 total_loc,
             )
             self.stdout.write(
-                self.style.SUCCESS(f" -> Localizações sincronizadas com sucesso!")
+                self.style.SUCCESS(" -> Localizações sincronizadas com sucesso!")
             )
 
             self.stdout.write(" -> Carregando saldo de estoque no Data Warehouse...")
@@ -162,7 +162,7 @@ class Command(BaseCommand):
             total_saldo = FatoEstoqueSaldo.objects.count()
             validate("Estoque Saldo", len(df_estoque_transformado), total_saldo)
             self.stdout.write(
-                self.style.SUCCESS(f" -> Estoque Saldo sincronizado com sucesso!")
+                self.style.SUCCESS(" -> Estoque Saldo sincronizado com sucesso!")
             )
 
         except Exception as e:
