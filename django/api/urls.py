@@ -16,7 +16,6 @@ Including another URLconf
 """
 
 from django.urls import path, include
-from django.urls import path
 from .views.importacao import importar_dados_api
 from .views import (
     projeto_dashboard_api,
