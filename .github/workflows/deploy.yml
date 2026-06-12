@@ -3,7 +3,7 @@ name: Deploy Automático
 on:
   push:
     branches:
-      - main
+      - 141-DevOps-switch-from-an-ec2-to-ecs
 
 jobs:
   # -------------------------------------------------------------
