@@ -1,8 +1,5 @@
-cat <<EOF > .my.cnf
 [client]
 user=sqlutions
 password=senha_root_padrao
 host=api-db.czcq244okvg8.sa-east-1.rds.amazonaws.com
 port=3306
-EOF
-

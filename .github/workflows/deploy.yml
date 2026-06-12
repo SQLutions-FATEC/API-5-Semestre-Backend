@@ -111,6 +111,10 @@ jobs:
           docker build -t $ECR_REGISTRY/api-grafana:latest deploy/monitoring/grafana
           docker push $ECR_REGISTRY/api-grafana:latest
 
+          # 5. MySQL Exporter
+          docker build -t $ECR_REGISTRY/api-mysql-exporter:latest deploy/monitoring/mysql-exporter
+          docker push $ECR_REGISTRY/api-mysql-exporter:latest
+
       - name: Atualizar o Serviço no ECS
         run: |
           # Este comando avisa a AWS para baixar as imagens novas e reiniciar os containers sem downtime
