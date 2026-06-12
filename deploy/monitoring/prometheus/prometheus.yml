@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'mysql-metrics'
+    static_configs:
+      - targets: ['mysql-exporter-prod:9104']
+
+  # ADICIONE ESTE BLOCO AQUI
+  - job_name: 'django-metrics'
+    static_configs:
+      - targets: ['django-prod:8000']
+
+
