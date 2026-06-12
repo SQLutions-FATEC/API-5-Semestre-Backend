@@ -1,4 +1,4 @@
-FROM grafana/grafana:latest
+FROM grafana/grafana:12.5.2
 
 # Remove os dashboards padrão
 RUN rm -rf /var/lib/grafana/dashboards/*
