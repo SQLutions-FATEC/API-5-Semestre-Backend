@@ -7,11 +7,10 @@ RUN rm -rf /var/lib/grafana/dashboards/*
 COPY ./provisioning/dashboards /etc/grafana/provisioning/dashboards
 COPY ./provisioning/datasources /etc/grafana/provisioning/datasources
 
-# !!! IMPORTANTE: Copia os arquivos JSON dos dashboards para o local correto
-# Verifique se o seu dashboards.yaml aponta para /var/lib/grafana/dashboards
+# Copia os arquivos JSON dos dashboards para o local correto
 COPY ./dashboards_models/*.json /var/lib/grafana/dashboards/
 
-# Ajuste de permissões
+# Ajuste de permissões (MUDANÇA AQUI: grafana:root)
 USER root
-RUN chown -R grafana:grafana /etc/grafana/provisioning/ /var/lib/grafana/dashboards/
+RUN chown -R grafana:root /etc/grafana/provisioning/ /var/lib/grafana/dashboards/
 USER grafana

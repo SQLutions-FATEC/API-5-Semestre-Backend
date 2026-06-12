@@ -8,11 +8,8 @@ scrape_configs:
 
   - job_name: 'mysql-metrics'
     static_configs:
-      - targets: ['mysql-exporter-prod:9104']
+      - targets: ['localhost:9104'] # <-- CORRIGIDO (era mysql-exporter-prod)
 
-  # ADICIONE ESTE BLOCO AQUI
   - job_name: 'django-metrics'
     static_configs:
-      - targets: ['django-prod:8000']
-
-
+      - targets: ['localhost:8000'] # <-- CORRIGIDO (era django-prod)
