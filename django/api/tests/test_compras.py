@@ -11,6 +11,7 @@ from api.models import (
 )
 
 
+
 class ComprasProjetoViewTest(TestCase):
     fixtures = ['compras_golden.json']
 
