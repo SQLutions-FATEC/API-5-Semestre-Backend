@@ -113,7 +113,7 @@ jobs:
 
       - name: Executar Migrações do Banco (Evolutionary DB)
         working-directory: django
-        run: python manage.py migrate
+        run: python manage.py smart_migrate
 
       - name: Executar Testes e Gerar Coverage
         working-directory: django
