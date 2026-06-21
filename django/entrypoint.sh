@@ -1,18 +1,27 @@
 #!/bin/bash
-set -e
+# Removemos o set -e daqui para termos controle manual do erro
 
-echo "Applying database migrations..."
-python manage.py smart_migrate
+echo "=================================================="
+echo "🛠️ INICIANDO DATABASE MIGRATIONS..."
+echo "=================================================="
 
-if [[ "$RUN_SEED" = "true" ]] || [[ "$RUN_SEED" = "True" ]] || [[ "$RUN_SEED" = "1" ]] || [[ "$RUN_SEED" = "TRUE" ]]; then
-    echo "Checking if database is empty..."
-    if python manage.py shell -c "import sys; from api.models import DimPrograma; sys.exit(1 if DimPrograma.objects.exists() else 0)"; then
-        echo "Database is empty. Running dynamic seed with 2 programs and 5 projects..."
-        python manage.py seed_dynamic --programs=2 --projects=5
-    else
-        echo "Database is not empty. Skipping seed."
-    fi
+# Executa o comando e captura o resultado
+if python manage.py smart_migrate; then
+    echo "✅ SUCESSO: Migrations aplicadas perfeitamente."
+    echo "=================================================="
+else
+    echo "❌ FATAL ERROR: Falha ao aplicar as migrations!"
+    echo "O container não pode subir com o banco desatualizado/quebrado."
+    
+    # Opcional: Se você usa Slack, Discord ou Teams, pode disparar um alerta aqui!
+    # curl -X POST -H 'Content-type: application/json' --data '{"text":"🚨 Erro de Migration na API!"}' SEU_WEBHOOK_URL
+    
+    echo "=================================================="
+    # Força o container a "morrer" informando código de erro para a AWS
+    exit 1
 fi
 
-echo "Starting server..."
+# ... (aqui continua a sua lógica do RUN_SEED) ...
+
+echo "🚀 Iniciando servidor Gunicorn..."
 exec "$@"
