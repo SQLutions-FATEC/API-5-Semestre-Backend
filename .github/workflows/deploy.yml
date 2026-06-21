@@ -3,7 +3,7 @@ name: Deploy Automático
 on:
   push:
     branches:
-      - 144-DevOps-Add-checks-to-the-container-construction
+      - develop-4
 
 jobs:
   # -------------------------------------------------------------
