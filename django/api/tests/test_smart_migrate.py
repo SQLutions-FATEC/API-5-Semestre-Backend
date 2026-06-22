@@ -1,6 +1,7 @@
 from unittest.mock import patch, mock_open, call
 from django.test import TestCase
 from django.core.management import call_command
+from django.core.management.base import CommandError # <-- Adicionado aqui!
 from io import StringIO
 import os
 
@@ -59,15 +60,16 @@ class SmartMigrateCommandTest(TestCase):
         # Simula que o diretório não existe
         mock_exists.return_value = False
 
-        # Executar comando
         out = StringIO()
-        call_command('smart_migrate', stdout=out)
+        
+        # MUDANÇA AQUI: Agora o teste ESPERA que o comando levante um CommandError
+        with self.assertRaises(CommandError) as context:
+            call_command('smart_migrate', stdout=out)
 
-        # Asserções
-        output = out.getvalue()
-        self.assertIn("Diretório não encontrado", output)
+        # Valida se a mensagem do erro contém o texto esperado
+        self.assertIn("Diretório não encontrado", str(context.exception))
 
-        # Verifica que o call_command interno NÃO foi chamado
+        # Verifica que o call_command interno NÃO foi chamado (o script parou antes por causa do erro)
         mock_call_command.assert_not_called()
 
     @patch('api.management.commands.smart_migrate.connection')

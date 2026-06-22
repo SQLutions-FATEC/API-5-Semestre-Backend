@@ -3,7 +3,7 @@ name: Deploy Automático
 on:
   push:
     branches:
-      - develop-4 
+      - develop-4
 
 jobs:
   # -------------------------------------------------------------
@@ -52,10 +52,29 @@ jobs:
           docker build -t $ECR_REGISTRY/api-mysql-exporter:latest deploy/monitoring/mysql-exporter
           docker push $ECR_REGISTRY/api-mysql-exporter:latest
 
-      - name: Atualizar o Serviço no ECS
+      - name: Atualizar o Serviço no ECS e Monitorar Logs
         run: |
-          # Este comando avisa a AWS para baixar as imagens novas e reiniciar os containers sem downtime
+          # 1. Dispara o novo deploy
           aws ecs update-service \
             --cluster meu-cluster-api \
             --service meu-servico-api \
             --force-new-deployment
+
+          echo "Deploy disparado! Acompanhando os logs do container em tempo real..."
+
+          # 2. Inicia o streaming de logs do CloudWatch em SEGUNDO PLANO (note o & no final)
+          # ⚠️ IMPORTANTE: Troque '/ecs/api-backend' pelo nome exato do seu Log Group no CloudWatch
+          aws logs tail /ecs/api-task-def --follow --format short &
+          LOG_PID=$!
+
+          # 3. Trava o pipeline aguardando o ECS terminar a troca dos containers (sucesso ou falha)
+          if aws ecs wait services-stable --cluster meu-cluster-api --services meu-servico-api; then
+            echo "✅ Deploy concluído com sucesso!"
+            kill $LOG_PID # Para de escutar os logs
+            exit 0
+          else
+            echo "❌ O Deploy falhou! O ECS derrubou o container novo e manteve o antigo."
+            echo " Veja os logs acima para identificar o erro nas migrations ou na inicialização."
+            kill $LOG_PID # Para de escutar os logs
+            exit 1
+          fi
