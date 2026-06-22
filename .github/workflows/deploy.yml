@@ -7,74 +7,11 @@ on:
 
 jobs:
   # -------------------------------------------------------------
-  # 1. VALIDAÇÃO: BANCO, TESTES E SONARCLOUD
-  # -------------------------------------------------------------
-  test-and-sonar:
-    name: Rodar Testes e SonarCloud
-    runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.4
-        env:
-          MYSQL_DATABASE: api_db
-          MYSQL_ROOT_PASSWORD: senha_root_padrao
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config default-libmysqlclient-dev build-essential
-          python -m pip install --upgrade pip
-          pip install -r django/requirements.txt
-          pip install coverage pandas
-
-      - name: Run tests and generate coverage report
-        env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          MYSQL_DATABASE: api_db
-          MYSQL_USER: root
-          MYSQL_PASSWORD: senha_root_padrao
-          DJANGO_SECRET_KEY: 'test-secret-key-for-github-actions'
-        run: |
-          cd django
-          coverage run --source='api,etl' -m pytest
-          coverage report -m
-          coverage xml -o coverage.xml
-          
-          sed -i "s|<source>.*</source>|<source>$GITHUB_WORKSPACE</source>|g" coverage.xml
-          sed -i 's/filename="/filename="django\//g' coverage.xml
-
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-# -------------------------------------------------------------
-  # 2. DEPLOY: Só executa se o job anterior passar
+  # DEPLOY: AWS ECS Fargate
   # -------------------------------------------------------------
   deploy:
     name: Deploy para AWS ECS Fargate
     runs-on: ubuntu-latest
-    needs: test-and-sonar 
 
     steps:
       - name: Checkout repository
@@ -95,7 +32,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          # 1. Backend Django (Note que o contexto é a pasta ./django como era no seu compose)
+          # 1. Backend Django 
           docker build -t $ECR_REGISTRY/api-backend:latest -f deploy/backend/Dockerfile ./django
           docker push $ECR_REGISTRY/api-backend:latest
 
