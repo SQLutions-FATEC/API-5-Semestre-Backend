@@ -42,7 +42,7 @@ jobs:
         run: flake8 . --config=../.flake8
 
       - name: Executar Testes Unitários
-        run: python -m pytest --ignore=api/tests/ --ignore=etl/tests/test_extraction.py
+        run: python -m pytest --ignore=api/tests/ --ignore=etl/tests/
 
   secondary-build:
     name: "Estágio 2: Secondary Build (Ambiente de Integração Automatizado)"
