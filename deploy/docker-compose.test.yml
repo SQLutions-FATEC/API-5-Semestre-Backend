@@ -5,7 +5,6 @@
 #   docker compose -f deploy/docker-compose.test.yml down -v
 
 services:
-  # -------------------- Database de Teste --------------------
   mysql-test:
     build:
       context: ./mysql
@@ -24,7 +23,6 @@ services:
       retries: 10
       start_period: 10s
 
-  # -------------------- Backend rodando os testes --------------------
   backend-test:
     build:
       context: ../django
