@@ -45,7 +45,7 @@ jobs:
         run: python -m pytest --ignore=api/tests/ --ignore=etl/tests/
 
   secondary-build:
-    name: "Estágio 2: Secondary Build (Ambiente de Integração Automatizado)"
+    name: "Estágio 2: Secondary Build (Integração Automatizada via Docker)"
     runs-on: ubuntu-latest
     needs: commit-build
     steps:
@@ -66,39 +66,18 @@ jobs:
           NEXT_PUBLIC_API_URL=http://localhost:8000
           EOF
 
-      - name: Automatizar Ambiente de Testes de Integração (Docker Compose)
-        run: |
-          echo "Aguardando o banco de dados iniciar..."
-          for i in {1..30}; do
-            CONTAINER_ID=$(docker compose -f deploy/docker-compose.yaml ps -q custom-mysql)
-            STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_ID" 2>/dev/null || echo "starting")
-            if [ "$STATUS" = "healthy" ]; then
-              echo "Banco de dados pronto!"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "Erro: O banco de dados demorou muito para iniciar."
-          docker compose -f deploy/docker-compose.yaml logs custom-mysql
-          exit 1
+      - name: Executar Testes de Integração (Docker Compose)
+        working-directory: deploy
+        run: docker compose -f docker-compose.test.yml --env-file .env up --build --abort-on-container-exit
 
-      - name: Instalar dependências Python
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r django/requirements.txt
-          pip install pytest pytest-django coverage pandas
+      - name: Encerrar containers de teste (Limpeza)
+        working-directory: deploy
+        if: always() # Garante que os recursos serão limpos mesmo se o passo anterior falhar
+        run: docker compose -f docker-compose.test.yml down -v
 
-      - name: Executar Migrações do Banco (Evolutionary DB)
-        working-directory: django
-        run: python manage.py smart_migrate
-
-      - name: Executar Testes e Gerar Coverage
+      - name: Ajustar caminhos do Coverage para o SonarCloud
         working-directory: django
         run: |
-          coverage run --source='api,etl' -m pytest
-          coverage report -m
-          coverage xml -o coverage.xml
-          
           sed -i "s|<source>.*</source>|<source>$GITHUB_WORKSPACE</source>|g" coverage.xml
           sed -i 's/filename="/filename="django\//g' coverage.xml
 
