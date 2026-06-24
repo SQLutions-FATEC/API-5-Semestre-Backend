@@ -364,111 +364,6 @@
         }
       }
     },
-    "panel-16": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "$datasource"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(irate(django_http_responses_total_by_status_total{status=~\"4.+\",app=~\"^$application$\"}[$__rate_interval]))",
-                      "format": "time_series",
-                      "intervalFactor": 1,
-                      "legendFormat": "",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {
-              "maxDataPoints": 100
-            },
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 16,
-        "links": [],
-        "title": "4XX Responses",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "decimals": 2,
-                "mappings": [
-                  {
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "N/A"
-                      }
-                    },
-                    "type": "special"
-                  }
-                ],
-                "noValue": "0",
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "reqps"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "none",
-              "graphMode": "none",
-              "justifyMode": "auto",
-              "orientation": "horizontal",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "mean"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "text": {
-                "valueSize": 20
-              },
-              "textMode": "auto",
-              "wideLayout": true
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
     "panel-17": {
       "kind": "Panel",
       "spec": {
@@ -922,111 +817,6 @@
         }
       }
     },
-    "panel-23": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "$datasource"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(irate(django_http_responses_total_by_status_total{status=~\"3.+\",app=~\"^$application$\"}[$__rate_interval]))",
-                      "format": "time_series",
-                      "intervalFactor": 1,
-                      "legendFormat": "",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {
-              "maxDataPoints": 100
-            },
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 23,
-        "links": [],
-        "title": "3XX Responses",
-        "vizConfig": {
-          "group": "stat",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "decimals": 2,
-                "mappings": [
-                  {
-                    "options": {
-                      "match": "null",
-                      "result": {
-                        "text": "N/A"
-                      }
-                    },
-                    "type": "special"
-                  }
-                ],
-                "noValue": "0",
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": 0
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                },
-                "unit": "reqps"
-              },
-              "overrides": []
-            },
-            "options": {
-              "colorMode": "none",
-              "graphMode": "none",
-              "justifyMode": "auto",
-              "orientation": "horizontal",
-              "percentChangeColorMode": "standard",
-              "reduceOptions": {
-                "calcs": [
-                  "mean"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "showPercentChange": false,
-              "text": {
-                "valueSize": 20
-              },
-              "textMode": "auto",
-              "wideLayout": true
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
     "panel-25": {
       "kind": "Panel",
       "spec": {
@@ -1126,109 +916,6 @@
               "sizing": "auto",
               "text": {},
               "valueMode": "color"
-            }
-          },
-          "version": "13.0.1+security-01"
-        }
-      }
-    },
-    "panel-31": {
-      "kind": "Panel",
-      "spec": {
-        "data": {
-          "kind": "QueryGroup",
-          "spec": {
-            "queries": [
-              {
-                "kind": "PanelQuery",
-                "spec": {
-                  "hidden": false,
-                  "query": {
-                    "datasource": {
-                      "name": "PBFA97CFB590B2093"
-                    },
-                    "group": "prometheus",
-                    "kind": "DataQuery",
-                    "spec": {
-                      "editorMode": "code",
-                      "expr": "sum(django_cache_get_hits_total{app=~\"^$application$\"}) by (backend) / sum(django_cache_get_total{app=~\"^$application$\"}) by (backend)",
-                      "legendFormat": "__auto",
-                      "range": true
-                    },
-                    "version": "v0"
-                  },
-                  "refId": "A"
-                }
-              }
-            ],
-            "queryOptions": {},
-            "transformations": []
-          }
-        },
-        "description": "",
-        "id": 31,
-        "links": [],
-        "title": "Cache Hit Ratio",
-        "vizConfig": {
-          "group": "gauge",
-          "kind": "VizConfig",
-          "spec": {
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "decimals": 0,
-                "max": 1,
-                "min": 0,
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "red",
-                      "value": 0
-                    },
-                    {
-                      "color": "yellow",
-                      "value": 0.4
-                    },
-                    {
-                      "color": "green",
-                      "value": 0.7
-                    }
-                  ]
-                },
-                "unit": "percentunit"
-              },
-              "overrides": []
-            },
-            "options": {
-              "barShape": "flat",
-              "barWidthFactor": 0.5,
-              "effects": {
-                "barGlow": false,
-                "centerGlow": false,
-                "gradient": false
-              },
-              "endpointMarker": "point",
-              "minVizHeight": 75,
-              "minVizWidth": 75,
-              "orientation": "auto",
-              "reduceOptions": {
-                "calcs": [
-                  "lastNotNull"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "segmentCount": 1,
-              "segmentSpacing": 0.3,
-              "shape": "gauge",
-              "showThresholdLabels": false,
-              "showThresholdMarkers": true,
-              "sizing": "auto",
-              "sparkline": false,
-              "textMode": "auto"
             }
           },
           "version": "13.0.1+security-01"
@@ -1863,8 +1550,8 @@
               "kind": "ElementReference",
               "name": "panel-15"
             },
-            "height": 2,
-            "width": 3,
+            "height": 4,
+            "width": 4,
             "x": 6,
             "y": 0
           }
@@ -1874,11 +1561,11 @@
           "spec": {
             "element": {
               "kind": "ElementReference",
-              "name": "panel-16"
+              "name": "panel-17"
             },
-            "height": 2,
-            "width": 3,
-            "x": 9,
+            "height": 4,
+            "width": 4,
+            "x": 10,
             "y": 0
           }
         },
@@ -1890,8 +1577,8 @@
               "name": "panel-37"
             },
             "height": 4,
-            "width": 3,
-            "x": 12,
+            "width": 5,
+            "x": 14,
             "y": 0
           }
         },
@@ -1903,100 +1590,9 @@
               "name": "panel-38"
             },
             "height": 4,
-            "width": 3,
-            "x": 15,
+            "width": 5,
+            "x": 19,
             "y": 0
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-31"
-            },
-            "height": 4,
-            "width": 6,
-            "x": 18,
-            "y": 0
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-23"
-            },
-            "height": 2,
-            "width": 3,
-            "x": 6,
-            "y": 2
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-17"
-            },
-            "height": 2,
-            "width": 3,
-            "x": 9,
-            "y": 2
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-20"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 0,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-22"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 12,
-            "y": 4
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-4"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 0,
-            "y": 12
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-11"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 12,
-            "y": 12
           }
         },
         {
@@ -2009,6 +1605,71 @@
             "height": 8,
             "width": 12,
             "x": 0,
+            "y": 4
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "element": {
+              "kind": "ElementReference",
+              "name": "panel-4"
+            },
+            "height": 8,
+            "width": 12,
+            "x": 12,
+            "y": 4
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "element": {
+              "kind": "ElementReference",
+              "name": "panel-20"
+            },
+            "height": 8,
+            "width": 12,
+            "x": 0,
+            "y": 12
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "element": {
+              "kind": "ElementReference",
+              "name": "panel-22"
+            },
+            "height": 8,
+            "width": 12,
+            "x": 12,
+            "y": 12
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "element": {
+              "kind": "ElementReference",
+              "name": "panel-35"
+            },
+            "height": 8,
+            "width": 12,
+            "x": 0,
+            "y": 20
+          }
+        },
+        {
+          "kind": "GridLayoutItem",
+          "spec": {
+            "element": {
+              "kind": "ElementReference",
+              "name": "panel-11"
+            },
+            "height": 8,
+            "width": 12,
+            "x": 12,
             "y": 20
           }
         },
@@ -2022,19 +1683,6 @@
             "height": 8,
             "width": 12,
             "x": 12,
-            "y": 20
-          }
-        },
-        {
-          "kind": "GridLayoutItem",
-          "spec": {
-            "element": {
-              "kind": "ElementReference",
-              "name": "panel-35"
-            },
-            "height": 8,
-            "width": 12,
-            "x": 0,
             "y": 28
           }
         },
@@ -2048,7 +1696,7 @@
             "height": 8,
             "width": 12,
             "x": 12,
-            "y": 28
+            "y": 36
           }
         }
       ]
@@ -2143,7 +1791,7 @@
       "spec": {
         "allowCustomValue": true,
         "current": {
-          "text": "1s",
+          "text": "1.0",
           "value": "1.0"
         },
         "description": "Request duration threshold",

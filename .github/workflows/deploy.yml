@@ -3,105 +3,78 @@ name: Deploy Automático
 on:
   push:
     branches:
-      - main
+      - develop-4
 
 jobs:
   # -------------------------------------------------------------
-  # 1. VALIDAÇÃO: BANCO, TESTES E SONARCLOUD
+  # DEPLOY: AWS ECS Fargate
   # -------------------------------------------------------------
-  test-and-sonar:
-    name: Rodar Testes e SonarCloud
+  deploy:
+    name: Deploy para AWS ECS Fargate
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.4
-        env:
-          MYSQL_DATABASE: api_db
-          MYSQL_ROOT_PASSWORD: senha_root_padrao
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Configurar credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          fetch-depth: 0
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: Login no Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config default-libmysqlclient-dev build-essential
-          python -m pip install --upgrade pip
-          pip install -r django/requirements.txt
-          pip install coverage pandas
-
-      - name: Run tests and generate coverage report
+      - name: Build, Tag, e Push das Imagens para o ECR
         env:
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          MYSQL_DATABASE: api_db
-          MYSQL_USER: root
-          MYSQL_PASSWORD: senha_root_padrao
-          DJANGO_SECRET_KEY: 'test-secret-key-for-github-actions'
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          cd django
-          coverage run --source='api,etl' -m pytest
-          coverage report -m
-          coverage xml -o coverage.xml
-          
-          sed -i "s|<source>.*</source>|<source>$GITHUB_WORKSPACE</source>|g" coverage.xml
-          sed -i 's/filename="/filename="django\//g' coverage.xml
+          # 1. Backend Django 
+          docker build -t $ECR_REGISTRY/api-backend:latest -f deploy/backend/Dockerfile ./django
+          docker push $ECR_REGISTRY/api-backend:latest
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          # 2. Nginx
+          docker build -t $ECR_REGISTRY/api-nginx:latest deploy/nginx
+          docker push $ECR_REGISTRY/api-nginx:latest
 
-  # -------------------------------------------------------------
-  # 2. DEPLOY: Só executa se o job anterior passar
-  # -------------------------------------------------------------
-  deploy:
-    name: Atualizar EC2
-    runs-on: ubuntu-latest
-    needs: test-and-sonar 
+          # 3. Prometheus
+          docker build -t $ECR_REGISTRY/api-prometheus:latest deploy/monitoring/prometheus
+          docker push $ECR_REGISTRY/api-prometheus:latest
 
-    steps:
-      - name: Executar comandos via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            # Entra na pasta raiz do projeto na EC2
-            cd /home/ubuntu/API-5-Semestre-Backend
-            
-            # Atualiza a lista de mudanças do GitHub
-            git fetch --all
-            
-            # Força o servidor a espelhar a branch main (evita conflitos)
-            git reset --hard origin/main
-            
-            # Entra na pasta deploy onde criamos o docker-compose de produção
-            cd deploy
-            
-            # Derruba os containers antigos, se existirem
-            docker-compose -f docker-compose.prod.yaml down
-            
-            # Reconstrói a imagem com o código novo e sobe os serviços em background (-d)
-            docker-compose -f docker-compose.prod.yaml up -d --build
-            
-            # Limpa imagens "órfãs" antigas para não lotar o HD da EC2 com o tempo
-            docker image prune -f
+          # 4. Grafana
+          docker build -t $ECR_REGISTRY/api-grafana:latest deploy/monitoring/grafana
+          docker push $ECR_REGISTRY/api-grafana:latest
+
+          # 5. MySQL Exporter
+          docker build -t $ECR_REGISTRY/api-mysql-exporter:latest deploy/monitoring/mysql-exporter
+          docker push $ECR_REGISTRY/api-mysql-exporter:latest
+
+      - name: Atualizar o Serviço no ECS e Monitorar Logs
+        run: |
+          # 1. Dispara o novo deploy
+          aws ecs update-service \
+            --cluster meu-cluster-api \
+            --service meu-servico-api \
+            --force-new-deployment
+
+          echo "Deploy disparado! Acompanhando os logs do container em tempo real..."
+
+          # 2. Inicia o streaming de logs do CloudWatch em SEGUNDO PLANO (note o & no final)
+          # ⚠️ IMPORTANTE: Troque '/ecs/api-backend' pelo nome exato do seu Log Group no CloudWatch
+          aws logs tail /ecs/api-task-def --follow --format short &
+          LOG_PID=$!
+
+          # 3. Trava o pipeline aguardando o ECS terminar a troca dos containers (sucesso ou falha)
+          if aws ecs wait services-stable --cluster meu-cluster-api --services meu-servico-api; then
+            echo "✅ Deploy concluído com sucesso!"
+            kill $LOG_PID # Para de escutar os logs
+            exit 0
+          else
+            echo "❌ O Deploy falhou! O ECS derrubou o container novo e manteve o antigo."
+            echo " Veja os logs acima para identificar o erro nas migrations ou na inicialização."
+            kill $LOG_PID # Para de escutar os logs
+            exit 1
+          fi

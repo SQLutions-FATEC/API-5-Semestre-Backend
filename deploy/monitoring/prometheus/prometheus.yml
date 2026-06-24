@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'mysql-metrics'
+    static_configs:
+      - targets: ['localhost:9104'] # <-- CORRIGIDO (era mysql-exporter-prod)
+
+  - job_name: 'django-metrics'
+    static_configs:
+      - targets: ['localhost:8000'] # <-- CORRIGIDO (era django-prod)
