@@ -75,11 +75,20 @@ jobs:
         if: always() # Garante que os recursos serão limpos mesmo se o passo anterior falhar
         run: docker compose -f docker-compose.test.yml down -v
 
-      - name: Ajustar caminhos do Coverage para o SonarCloud
-        working-directory: django
+      - name: Validate coverage file
         run: |
-          sed -i "s|<source>.*</source>|<source>$GITHUB_WORKSPACE</source>|g" coverage.xml
-          sed -i 's/filename="/filename="django\//g' coverage.xml
+          test -f django/coverage.xml
+          echo "coverage.xml found"  
+
+      - name: Debug coverage
+        run: |
+          echo "workspace: $GITHUB_WORKSPACE"
+          echo ""
+          echo "coverage location:"
+          find . -name coverage.xml
+          echo ""
+          echo "first lines:"
+          sed -n '1,80p' django/coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
